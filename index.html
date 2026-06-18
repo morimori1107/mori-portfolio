@@ -71,6 +71,13 @@ nav a:hover{opacity:1}
 @media(max-width:640px){.cpr{grid-template-columns:1fr}.cpr div{border-right:none;border-bottom:1px solid var(--line)}.cpr div:last-child{border-bottom:none}}
 .stack{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
 .stack span{font-family:"Space Mono",monospace;font-size:.68rem;border:1px solid var(--ink);padding:3px 9px;border-radius:2px}
+
+.proj-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+.proj-actions a{display:inline-block;text-decoration:none;background:var(--ink);color:var(--paper);padding:9px 18px;border-radius:2px;font-size:.78rem;font-weight:700;letter-spacing:.06em;transition:transform .2s}
+.proj-actions a:hover{transform:translateY(-2px)}
+.proj-actions a.alt{background:transparent;color:var(--ink);border:1.5px solid var(--ink)}
+.proj-actions a.sub{background:var(--accent2);color:#fff}
+
 .result{margin-top:14px;padding-left:16px;border-left:3px solid var(--accent);font-size:.88rem;color:#3a352b}
 .skills{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}
 @media(max-width:760px){.skills{grid-template-columns:1fr}}
@@ -121,8 +128,8 @@ footer{text-align:center;font-size:.68rem;letter-spacing:.2em;padding:24px;backg
     <p class="lead">製造業22年・工場長としての現場改善とチーム管理が土台。その課題発見力と改善のサイクルを、いまはAI実装という新しい手段で回しています。動く試作を即日出して、現場と対話しながら磨き込む。それが私のものづくりです。</p>
     <div class="meta">
       <div><span>CAREER</span>製造業 22年 / 工場長</div>
-      <div><span>NOW</span>業務DX / AI実装 / 不動産PropTech</div>
-      <div><span>STYLE</span>まず動くものを、翌朝までに</div>
+      <div><span>NOW</span>業務DX / 原盤発注MVP / 賃貸データ整形</div>
+      <div><span>STYLE</span>現場課題を、動く道具へ</div>
     </div>
   </div>
 </section>
@@ -141,8 +148,8 @@ footer{text-align:center;font-size:.68rem;letter-spacing:.2em;padding:24px;backg
     </div>
     <div class="about-grid" style="margin-top:36px">
       <div>
-        <p>キャリアの大半は製造業です。工場長として22年、生産工程の改善、品質管理、コスト管理、そして複数のチームと人を動かすマネジメントを実践してきました。数字で判断し、ボトルネックを見つけ、カイゼンを回し続ける——これが私の仕事の原点です。</p>
-        <p>その後、不動産賃貸管理の実務で新たなドメイン知識を習得。空室確認、入居条件、物件査定など「現場で本当に確認すべきこと」を体で覚えました。そして近年、生成AIを業務に取り込み、判定メモ生成・公的データ統合・募集文の自動作成などを自分の手で実装しています。</p>
+        <p>キャリアの大半は製造業です。木材プレカット加工の現場で22年以上、CAD・NC加工・検品・工程管理・在庫管理・品質管理に携わり、現在は工場長として現場マネジメントと改善を担っています。数字で判断し、ボトルネックを見つけ、カイゼンを回し続ける——これが私の仕事の原点です。</p>
+        <p>副業では賃貸不動産の実務に入り、物件情報の確認、入力、解約受付、電話取次ぎなど、現場で発生する確認・転記・判断の粒度を学んでいます。現在は、Power Query、GAS、JavaScript、OCR等を使い、製造・不動産の業務課題を自分の手でMVP化しています。</p>
         <p>「要件を完璧に固めてから作る」のではなく、「動く試作を見せ、現場と対話しながら要件を確定させる」。製造業の試作・改善文化と地続きの、現場巻き込み型の開発が私のやり方です。</p>
       </div>
       <div class="creed">
@@ -159,50 +166,66 @@ footer{text-align:center;font-size:.68rem;letter-spacing:.2em;padding:24px;backg
 <section class="sec" id="work">
   <div class="wrap">
     <div class="sec-h"><span class="no">02</span><h2>主なプロジェクト</h2><span class="en">— SELECTED WORK</span></div>
-    <p style="color:var(--muted);font-size:.82rem;margin-bottom:10px">※構成サンプルです。数値・案件名はダミーデータを含みます。実測値に差し替えてご利用ください。</p>
+    <p style="color:var(--muted);font-size:.86rem;margin-bottom:10px">製造現場の改善・在庫管理を主軸に、賃貸不動産の入力・確認業務へ横展開したMVP群です。実データ・顧客名・品番は含まず、公開用サンプルとして構成しています。</p>
+
     <div class="proj">
       <div class="pn mono">01</div>
       <div>
-        <h3>物件判定メモ自動生成アプリ</h3>
-        <div class="role">企画 / 設計 / 実装(個人開発・自走)</div>
+        <h3>原盤発注トリガー判定ツール</h3>
+        <div class="role">製造業ドメイン / 在庫最適化 / JavaScriptデモ</div>
         <div class="cpr">
-          <div><div class="lbl">課題 / ISSUE</div><div class="val">判定メモ作成に毎回30分以上。担当者ごとに観点がばらついていた。</div></div>
-          <div><div class="lbl">打ち手 / ACTION</div><div class="val">物件情報からAIが観点付き判定メモを自動生成するWebアプリを開発。保存先を切替可能に。</div></div>
-          <div><div class="lbl">結果 / RESULT</div><div class="val">メモ作成を約8割短縮(ダミー値)、観点の標準化を実現。</div></div>
+          <div><div class="lbl">課題 / ISSUE</div><div class="val">製品出荷の変動に対し、原盤の発注タイミングが経験判断に寄りやすく、欠品・過剰在庫のリスクがあった。</div></div>
+          <div><div class="lbl">打ち手 / ACTION</div><div class="val">日次使用実績、取り数、原盤マスター、安全在庫、リードタイムから発注候補・必要数・期限を自動判定するMVPを作成。</div></div>
+          <div><div class="lbl">結果 / RESULT</div><div class="val">「そろそろ足りない」を、在庫推移と発注候補として見える化。工場長としての在庫・工程判断をロジック化。</div></div>
         </div>
-        <div class="stack"><span>HTML/JS</span><span>Claude API</span><span>Notion DB</span></div>
-        <div class="result">「観点の標準化」は、工場での作業標準化(SOP)づくりと同じ発想。属人化を仕組みで潰す。</div>
+        <div class="stack"><span>HTML</span><span>JavaScript</span><span>営業日計算</span><span>移動平均</span><span>安全在庫</span><span>マスター駆動</span></div>
+        <div class="result">工場長の知見が最も伝わる主力案件です。トップではこの案件を先頭に置き、「現場改善 × DX」の軸を明確にします。</div>
+        <div class="proj-actions">
+          <a href="demo-order-trigger.html">原盤発注デモを見る</a>
+          <a class="alt" href="works_casestudies.html">ケーススタディを見る</a>
+        </div>
       </div>
     </div>
+
     <div class="proj">
       <div class="pn mono">02</div>
       <div>
-        <h3>公的データ統合・物件リスク可視化</h3>
-        <div class="role">データ統合設計 / 実装</div>
+        <h3>Power Query × Excel 集計・帳票自動生成</h3>
+        <div class="role">製造業ドメイン / 基幹データ自動化 / 設計説明</div>
         <div class="cpr">
-          <div><div class="lbl">課題 / ISSUE</div><div class="val">ハザードマップ・地価・用途地域の確認が分散し、見落としリスクがあった。</div></div>
-          <div><div class="lbl">打ち手 / ACTION</div><div class="val">公的データを物件に自動紐付けし、リスクを一画面に集約。AIが注意点をコメント。</div></div>
-          <div><div class="lbl">結果 / RESULT</div><div class="val">確認漏れの削減と説明資料の作成時間短縮(ダミー値)。</div></div>
+          <div><div class="lbl">課題 / ISSUE</div><div class="val">CSV出力、集計、帳票作成、確認作業が手作業に残り、転記ミスや判断の属人化が発生しやすかった。</div></div>
+          <div><div class="lbl">打ち手 / ACTION</div><div class="val">Power Queryでデータを取り込み・整形し、品番・原盤・取り数などのマスターと結合。日別需要と発注候補を見える化。</div></div>
+          <div><div class="lbl">結果 / RESULT</div><div class="val">Excel作業を「担当者の勘」から「再現できる処理手順」へ移行。設定テーブルを変えれば運用変更できる構成に整理。</div></div>
         </div>
-        <div class="stack"><span>外部データ統合</span><span>ハザードマップ</span><span>Claude API</span></div>
-        <div class="result">「見落としを仕組みで防ぐ」は製造業の品質管理(ポカヨケ)の考え方そのもの。</div>
+        <div class="stack"><span>Power Query</span><span>Excel</span><span>CSV整形</span><span>マスター結合</span><span>在庫・発注管理</span></div>
+        <div class="result">作業標準化、チェックリスト、ポカヨケの考え方を、Excel・データ処理に移植した案件です。</div>
+        <div class="proj-actions">
+          <a class="alt" href="works_casestudies.html#case03">設計説明を見る</a>
+        </div>
       </div>
     </div>
+
     <div class="proj">
       <div class="pn mono">03</div>
       <div>
-        <h3>OCR連携 査定・募集文自動生成</h3>
-        <div class="role">パイプライン設計 / 実装</div>
+        <h3>物件データ整形ツール</h3>
+        <div class="role">賃貸不動産ドメイン / 入力・確認業務の標準化 / JavaScriptデモ</div>
         <div class="cpr">
-          <div><div class="lbl">課題 / ISSUE</div><div class="val">紙・PDF資料の転記が手作業。募集文の品質も担当者依存だった。</div></div>
-          <div><div class="lbl">打ち手 / ACTION</div><div class="val">OCRで読み取り、差分検知と募集コピーをAIが自動生成するパイプラインを構築。</div></div>
-          <div><div class="lbl">結果 / RESULT</div><div class="val">転記工数の削減と募集文の品質均一化(ダミー値)。</div></div>
+          <div><div class="lbl">課題 / ISSUE</div><div class="val">物件データの列名・形式がバラバラで、確認、除外、整形、入力前チェックに手作業の負担があった。</div></div>
+          <div><div class="lbl">打ち手 / ACTION</div><div class="val">ヘッダーマップ、入力除外ルール、列設定、表示・出力設定を持たせ、CSVを読み込んで整形できるデモを作成。</div></div>
+          <div><div class="lbl">結果 / RESULT</div><div class="val">賃貸不動産の現場で発生する確認・転記・整形作業を、設定駆動の画面に落とし込み。副業ドメインの学習成果として提示。</div></div>
         </div>
-        <div class="stack"><span>Google Vision OCR</span><span>Claude API</span><span>差分検知</span></div>
-        <div class="result">ツール選定で詰まった際、外部連携ツールから自己完結型へ即座に方針転換。手段に固執せず目的を取る判断。</div>
+        <div class="stack"><span>HTML</span><span>JavaScript</span><span>CSV</span><span>ヘッダーマップ</span><span>設定駆動UI</span><span>賃貸実務</span></div>
+        <div class="result">主軸は製造ですが、不動産実務とDXをつなぐ補助案件として見せる位置づけです。</div>
+        <div class="proj-actions">
+          <a href="property_formatter_demo.html">物件データ整形デモを見る</a>
+          <a class="sub" href="property-sample-utf8.csv">サンプルCSV UTF-8</a>
+          <a class="sub" href="property-sample-sjis.csv">サンプルCSV Shift-JIS</a>
+        </div>
       </div>
     </div>
-    <p style="margin-top:30px;font-size:.86rem;color:var(--muted);border-top:1px dashed var(--line);padding-top:20px"><b style="color:var(--accent)">開発スタイル：</b> 1つのMVPを5×5〜10回ほど、計20回以上作り直して磨き込むのが常。速攻で動くものを出し、回しながら完成に近づける高速反復が得意分野です。</p>
+
+    <p style="margin-top:30px;font-size:.86rem;color:var(--muted);border-top:1px dashed var(--line);padding-top:20px"><b style="color:var(--accent)">開発スタイル：</b> 要件を最初から固め切るのではなく、まず動くMVPを作り、実データに近いサンプルで確認しながら改善します。製造現場で行ってきた「見える化・標準化・改善」の進め方を、そのまま業務アプリ開発へ展開しています。</p>
   </div>
 </section>
 <section class="sec" id="skills">
@@ -221,19 +244,19 @@ footer{text-align:center;font-size:.68rem;letter-spacing:.2em;padding:24px;backg
       <div class="cell">
         <h4>AI / 実装</h4>
         <ul>
-          <li>Claude API / 生成AI活用 <b>★★★★☆</b></li>
-          <li>HTML / JS フロント <b>★★★★☆</b></li>
-          <li>OCR / データ統合 <b>★★★☆☆</b></li>
+          <li>Power Query / GAS <b>★★★★☆</b></li>
+          <li>HTML / JavaScript <b>★★★★☆</b></li>
+          <li>OCR / CSV・データ整形 <b>★★★☆☆</b></li>
           <li>高速プロトタイピング <b>★★★★★</b></li>
         </ul>
       </div>
       <div class="cell">
         <h4>ドメイン / 進め方</h4>
         <ul>
-          <li>不動産賃貸管理 <b>★★★★☆</b></li>
+          <li>賃貸不動産実務 <b>★★★☆☆</b></li>
           <li>業務課題の言語化 <b>★★★★☆</b></li>
           <li>意思決定の速さ <b>★★★★★</b></li>
-          <li>検証ドリブン開発 <b>★★★★☆</b></li>
+          <li>MVP検証・改善 <b>★★★★☆</b></li>
         </ul>
       </div>
     </div>
@@ -241,24 +264,24 @@ footer{text-align:center;font-size:.68rem;letter-spacing:.2em;padding:24px;backg
 </section>
 <section class="sec" id="career">
   <div class="wrap">
-    <div class="sec-h"><span class="no">04</span><h2>経歴(サンプル)</h2><span class="en">— CAREER</span></div>
+    <div class="sec-h"><span class="no">04</span><h2>経歴</h2><span class="en">— CAREER</span></div>
     <div class="tl">
-      <div class="item big"><div class="yr mono">22年間</div><h4>製造業 / 工場長</h4><p>生産工程の改善、品質・コスト管理、チームマネジメントを統括。数字で判断し、カイゼンを回し続けた現場改善のキャリア。</p></div>
-      <div class="item"><div class="yr mono">現在</div><h4>不動産会社 / 賃貸管理・物件募集</h4><p>物件募集・入居者管理・オーナー対応を担当。業務へのAI導入を自主的に推進。</p></div>
-      <div class="item"><div class="yr mono">2026</div><h4>AI物件管理アプリ MVP開発</h4><p>判定メモ生成・公的データ統合・OCR査定の3つのMVPを企画から実装まで自走で完成。</p></div>
-      <div class="item"><div class="yr mono">NEXT</div><h4>不動産DX / PropTech / 物流DX 領域へ</h4><p>現場改善力 × AI実装力を掛け合わせ、業務改善・プロダクト開発に貢献したい。</p></div>
+      <div class="item big"><div class="yr mono">2004-</div><h4>木材プレカット加工 / CAD・NC加工・工程管理</h4><p>木材加工、検品、CAD・CAMデータ作成、NC加工機の運用、製造工程進捗管理を経験。現場で発生するムダ・不良・在庫課題を改善してきました。</p></div>
+      <div class="item"><div class="yr mono">2024-</div><h4>工場長 / 製造・品質・在庫・人員配置のマネジメント</h4><p>工程管理、品質管理、在庫管理、作業標準化、現場メンバーの管理を担当。端材削減、不良率低減、倉庫スペース削減などの改善を推進。</p></div>
+      <div class="item"><div class="yr mono">現在</div><h4>副業：賃貸不動産実務 / 物件情報入力・解約受付・電話取次ぎ</h4><p>宅建士登録済み。賃貸不動産の現場で、物件情報の確認・入力、解約受付、契約関連の確認補助を経験し、入力・確認業務の自動化テーマを探索。</p></div>
+      <div class="item"><div class="yr mono">NOW</div><h4>現場改善 × IT実装 / 原盤発注・物件データ整形MVP</h4><p>Power Query、GAS、JavaScript、OCRを使い、製造現場と賃貸不動産の業務課題を小さなMVPとして実装・検証しています。</p></div>
     </div>
   </div>
 </section>
 <section class="contact" id="contact">
   <h2 class="mincho">現場が、本当に<br>変わるものを。</h2>
-  <p>不動産DX・PropTech・物流DX領域でのご相談、採用のお問い合わせはこちらから。すぐに動く試作からご一緒できます。</p>
+  <p>製造管理・工程改善・在庫最適化・業務DX領域を中心に、現場課題を整理し、動く試作で改善することを得意としています。</p>
   <a class="btn" href="mailto:your-address@example.com">メールで連絡する</a>
   <div class="links">
-    <a href="#">GitHub</a>・<a href="#">デモ動画</a>・<a href="#">ブログ</a>
+    <a href="works_casestudies.html">Works</a>・<a href="demo-order-trigger.html">原盤発注デモ</a>・<a href="property_formatter_demo.html">物件整形デモ</a>
   </div>
 </section>
-<footer>(c) 2026 MORI — FIELD KAIZEN × AI. ダミーデータを含むサンプルです。</footer>
+<footer>(c) 2026 MORI — FIELD KAIZEN × DX. 公開用サンプル・架空データを含みます。</footer>
 <script>
 const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in')})},{threshold:.12});
 document.querySelectorAll('.sec,.proj,.thesis,.pillars,.creed').forEach((el,i)=>{el.classList.add('rv');el.style.transitionDelay=(i%3)*0.07+'s';io.observe(el)});
