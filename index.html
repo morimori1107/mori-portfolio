@@ -49,9 +49,9 @@ nav a:hover{opacity:1}
 .about-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:48px}
 @media(max-width:760px){.about-grid{grid-template-columns:1fr;gap:28px}}
 .about-grid p{margin-bottom:18px;color:#3a352b}
-.creed{background:var(--accent2);color:var(--paper);padding:30px;border-radius:2px}
-.creed .q{font-family:"Shippori Mincho",serif;font-size:1.2rem;line-height:1.7;margin-bottom:12px}
-.creed .src{font-size:.72rem;letter-spacing:.16em;opacity:.75}
+.creed{background:#1f5e4d;color:#fff;padding:30px;border-radius:2px}
+.creed .q{font-family:"Shippori Mincho",serif;font-size:1.2rem;line-height:1.7;margin-bottom:12px;color:#fff}
+.creed .src{font-size:.72rem;letter-spacing:.16em;color:rgba(255,255,255,.86);opacity:1}
 .pillars{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-top:24px}
 @media(max-width:680px){.pillars{grid-template-columns:1fr}}
 .pillars .p{background:var(--paper);padding:26px}
@@ -77,6 +77,14 @@ nav a:hover{opacity:1}
 .proj-actions a:hover{transform:translateY(-2px)}
 .proj-actions a.alt{background:transparent;color:var(--ink);border:1.5px solid var(--ink)}
 .proj-actions a.sub{background:var(--accent2);color:#fff}
+.inline-demo{margin-top:18px;border:1px solid var(--line);background:#fffdf8;border-radius:4px;overflow:hidden}
+.inline-demo-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;padding:14px 16px;border-bottom:1px solid var(--line);background:var(--paper2)}
+.inline-demo-head b{font-size:.9rem}
+.inline-demo-head p{margin-top:4px;font-size:.78rem;color:var(--muted)}
+.inline-demo-links{display:flex;gap:8px;flex-wrap:wrap}
+.inline-demo-links a{display:inline-block;text-decoration:none;border:1px solid var(--ink);color:var(--ink);background:#fff;padding:6px 10px;font-size:.72rem;font-weight:700;border-radius:2px}
+.inline-demo iframe{width:100%;height:720px;border:0;display:block;background:#fff}
+@media(max-width:760px){.inline-demo-head{flex-direction:column}.inline-demo iframe{height:560px}}
 
 .result{margin-top:14px;padding-left:16px;border-left:3px solid var(--accent);font-size:.88rem;color:#3a352b}
 .skills{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}
@@ -213,6 +221,19 @@ footer{text-align:center;font-size:.68rem;letter-spacing:.2em;padding:24px;backg
           <a href="pq-excel-demo.html">生産管理デモを見る</a>
           <a class="sub" href="pq-sample-input.csv">サンプルCSVを見る</a>
           <a class="alt" href="works_casestudies.html">設計説明を見る</a>
+        </div>
+        <div class="inline-demo">
+          <div class="inline-demo-head">
+            <div>
+              <b>生産管理デモをこのページ内で操作</b>
+              <p>クロス集計・日邸別明細を、公開用サンプルデータで確認できます。</p>
+            </div>
+            <div class="inline-demo-links">
+              <a href="pq-excel-demo.html" target="_blank" rel="noopener">別タブで開く</a>
+              <a href="pq-sample-input.csv" target="_blank" rel="noopener">サンプルCSV</a>
+            </div>
+          </div>
+          <iframe src="pq-excel-demo.html" title="Power Query × Excel 集計デモ" loading="lazy"></iframe>
         </div>
       </div>
     </div>
