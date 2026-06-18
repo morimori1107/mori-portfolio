@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>物件データ整形アプリ v4.4</title>
+<title>物件データ整形アプリ（デモ版）</title>
 <style>
 :root{
   --bg:#f8f7f4;--surface:#fff;--surface2:#f2f0ec;--border:#e0ddd8;--border2:#ccc9c2;
@@ -88,13 +88,15 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
   .shell{display:none!important}
   #printArea{display:block!important;margin:0;padding:0}
   body{background:#fff;font-size:9pt;margin:0;padding:0}
-  .print-area-page{page-break-after:always}
+  .print-area-page{page-break-after:always;overflow:hidden}
   .print-area-page:last-child{page-break-after:auto}
+  /* ★ scaleで縮小する内側ラッパ。transform-originを左上に固定 */
+  .print-scale-wrap{transform-origin:top left}
   .print-table{width:100%;border-collapse:collapse;font-size:8.5pt;table-layout:fixed}
-  .print-table th{background:#eae8e3!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:4pt 5pt;font-size:8pt;border:0.5pt solid #ccc;text-align:left;font-weight:600}
-  .print-table td{padding:3pt 5pt;border:0.5pt solid #ddd;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .print-table th{background:#eae8e3!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:2pt 4pt;font-size:8pt;border:0.4pt solid #ccc;text-align:left;font-weight:600}
+  .print-table td{padding:1.5pt 4pt;border:0.4pt solid #ddd;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .print-table .col-addr{font-size:7.5pt}
-  .print-page-title{font-size:10pt;font-weight:700;margin-bottom:4pt}
+  .print-page-title{font-size:10pt;font-weight:700;margin-bottom:3pt}
 }
 #printArea{display:none}
 </style>
@@ -102,10 +104,9 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-<div style="background:#15130e;color:#f4f0e6;font-family:sans-serif;font-size:13px;padding:10px 16px;text-align:center;letter-spacing:.04em;">PORTFOLIO DEMO ｜ 不動産の物件データ整形を題材にした自作ツールです。地名・データはすべて架空のサンプルです。</div>
 <div class="shell">
 <header>
-  <span class="logo">物件データ整形</span><span class="ver">v4.4</span>
+  <span class="logo">物件データ整形</span><span class="ver">DEMO</span>
   <span style="flex:1"></span>
   <span id="hdrStatus" style="font-size:12px;color:var(--text3)"></span>
 </header>
@@ -244,7 +245,7 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
     </table>
     <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
       <button class="btn btn-outline btn-sm" onclick="addAreaRow()">＋ 追加</button>
-      <span style="font-size:10px;color:var(--text3)">部分一致＝住所に値を含む（千葉県付きでもヒット）/ 除外＝UNKNOWNに</span>
+      <span style="font-size:10px;color:var(--text3)">部分一致＝住所に値を含む（都道府県付きでもヒット）/ 除外＝UNKNOWNに</span>
     </div>
   </div>
 </div>
@@ -322,14 +323,36 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
         </label>
         <label style="font-size:12px;display:flex;align-items:center;gap:7px;cursor:pointer">
           <input type="radio" name="pgMode" value="fit" style="accent-color:var(--accent)">
-          1エリアを必ず1ページに収める（自動縮小）
+          1エリアを必ず1ページに収める（自動縮小／倍率指定）
         </label>
       </div>
 
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
         <label style="font-size:12px;width:150px;color:var(--text2)">1ページあたり件数</label>
         <input type="number" id="printPageRows" min="5" max="200" style="width:70px;border:1px solid var(--border);border-radius:5px;padding:4px 7px">
         <span style="font-size:11px;color:var(--text3)">分割モード時のみ有効</span>
+      </div>
+
+      <!-- 縮小率コントロール（fitモード時のみ表示） -->
+      <div id="scaleControlBox" style="display:none;border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;margin-bottom:12px;background:var(--surface2)">
+        <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:8px">縮小率の制御（1ページ収め）</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <label style="font-size:12px;display:flex;align-items:center;gap:7px;cursor:pointer">
+            <input type="radio" name="scaleMode" value="auto" checked style="accent-color:var(--accent)" onchange="toggleScaleManual();updatePrintPreview()">
+            自動（用紙に収まるよう最適倍率を計算）
+          </label>
+          <label style="font-size:12px;display:flex;align-items:center;gap:7px;cursor:pointer">
+            <input type="radio" name="scaleMode" value="manual" style="accent-color:var(--accent)" onchange="toggleScaleManual();updatePrintPreview()">
+            手動で倍率を指定
+          </label>
+          <div id="scaleManualRow" style="display:none;align-items:center;gap:10px;padding-left:24px">
+            <input type="range" id="scaleSlider" min="40" max="100" value="85" style="flex:1;accent-color:var(--accent)"
+              oninput="document.getElementById('scaleNum').value=this.value;updatePrintPreview()">
+            <input type="number" id="scaleNum" min="40" max="100" value="85" style="width:60px;border:1px solid var(--border);border-radius:5px;padding:3px 6px"
+              oninput="document.getElementById('scaleSlider').value=this.value;updatePrintPreview()">
+            <span style="font-size:11px;color:var(--text3)">%</span>
+          </div>
+        </div>
       </div>
 
       <div id="printSummary" style="font-size:11px;color:var(--text3);background:var(--surface2);border-radius:var(--radius);padding:8px 10px;margin-bottom:14px"></div>
@@ -394,10 +417,10 @@ const DEFAULT_ROW={
   fitToPage:true,      // A4印刷で用紙幅に自動縮小
 };
 const DEFAULT_AREA=[
-  {area:'みなみ',val1:'みなみ市',m1:'contains',val2:'みなみ',m2:'contains',enabled:true},
-  {area:'きた',  val1:'きた市',  m1:'contains',val2:'',      m2:'contains',enabled:true},
-  {area:'あおば区',val1:'あおば区',  m1:'contains',val2:'都賀',  m2:'contains',enabled:true},
-  {area:'みどり区',val1:'みどり区',  m1:'contains',val2:'',      m2:'contains',enabled:true},
+  {area:'北区',  val1:'北区',  m1:'contains',val2:'',m2:'contains',enabled:true},
+  {area:'中央区',val1:'中央区',m1:'contains',val2:'',m2:'contains',enabled:true},
+  {area:'東区',  val1:'東区',  m1:'contains',val2:'',m2:'contains',enabled:true},
+  {area:'西区',  val1:'西区',  m1:'contains',val2:'',m2:'contains',enabled:true},
 ];
 const DEFAULT_HEADER=[
   {raw:'入居可能日',canon:'availableDate',pri:1},{raw:'入居日',canon:'availableDate',pri:2},
@@ -439,7 +462,7 @@ let selectedSheets={},diagLog=[];
 
 function loadSettings(){
   try{
-    const s=localStorage.getItem('propFmtV44')||localStorage.getItem('propFmtV43')||localStorage.getItem('propFmtV42');
+    const s=localStorage.getItem('propFmtDEMO');
     if(s){
       const p=JSON.parse(s);
       // v4.1からのマイグレーション: 旧形式exclValsがあればグループに変換
@@ -888,11 +911,30 @@ function openPrintDialog(){
   // 1ページ件数の既定
   const rc=S.rowConfig||DEFAULT_ROW;
   document.getElementById('printPageRows').value=rc.pageRows||50;
-  // ラジオ変更時もプレビュー更新
-  document.querySelectorAll('input[name="pgMode"]').forEach(r=>r.onchange=updatePrintPreview);
+  // ラジオ変更時もプレビュー更新 + 縮小ボックス表示切替
+  document.querySelectorAll('input[name="pgMode"]').forEach(r=>r.onchange=()=>{toggleScaleBox();updatePrintPreview();});
   document.getElementById('printPageRows').oninput=updatePrintPreview;
   document.getElementById('printModal').style.display='flex';
+  toggleScaleBox();
+  toggleScaleManual();
   updatePrintPreview();
+}
+// fitモード選択時のみ縮小率ボックスを表示
+function toggleScaleBox(){
+  const mode=getPageMode();
+  document.getElementById('scaleControlBox').style.display=(mode==='fit')?'block':'none';
+}
+// 手動倍率行の表示切替
+function toggleScaleManual(){
+  const sm=document.querySelector('input[name="scaleMode"]:checked');
+  document.getElementById('scaleManualRow').style.display=(sm&&sm.value==='manual')?'flex':'none';
+}
+function getScaleMode(){
+  const sm=document.querySelector('input[name="scaleMode"]:checked');
+  return sm?sm.value:'auto';
+}
+function getManualScale(){
+  return Math.max(40,Math.min(100,parseInt(document.getElementById('scaleNum').value)||85))/100;
 }
 function closePrintDialog(){document.getElementById('printModal').style.display='none';}
 
@@ -912,18 +954,55 @@ function updatePrintPreview(){
     document.getElementById('printSummary').innerHTML='エリアが選択されていません。';
     return;
   }
-  let totalPages=0;
+  // ── 1ページに収まるかの推定（行数ベース）──
+  // A4横 使用可能高さ ≒ 190mm。1行の最小実用高さ(縮小後) ≒ 4.2mm相当を基準に試算
+  const rc=S.rowConfig||DEFAULT_ROW;
+  let totalPages=0; let anyOverflow=false;
   const lines=sel.map(a=>{
     const cnt=(processed[a]||[]).length;
-    let pages;
-    if(mode==='fit'){ pages=1; }
-    else { pages=Math.max(1,Math.ceil(cnt/pageRows)); }
+    let pages, note='';
+    if(mode==='fit'){
+      pages=1;
+      // 推定縮小率を計算（自動時）。最小倍率40%で収まらなければ警告
+      const est=estimateFitScale(cnt);
+      if(getScaleMode()==='manual'){
+        const ms=getManualScale();
+        note=`倍率${Math.round(ms*100)}%`;
+        if(est.neededScale<ms-0.001){note+=' ⚠収まらない可能性'; anyOverflow=true;}
+      }else{
+        note=`自動倍率${Math.round(est.scale*100)}%`;
+        if(est.overflow){note+=' ⚠最小倍率でも収まりません（分割推奨）'; anyOverflow=true;}
+      }
+    }else{
+      pages=Math.max(1,Math.ceil(cnt/pageRows));
+    }
     totalPages+=pages;
-    return `${a}: ${cnt}件 → ${pages}ページ${(mode==='fit'&&cnt>pageRows)?'（縮小）':''}`;
+    return `${a}: ${cnt}件 → ${pages}ページ${note?'（'+note+'）':''}`;
   });
+  const warn=anyOverflow?'<div style="color:#c0392b;font-weight:600;margin-bottom:4px">⚠ 一部エリアが1ページに収まらない可能性があります。倍率を下げるか「分割」をご利用ください。</div>':'';
   document.getElementById('printSummary').innerHTML=
+    warn+
     `選択 ${sel.length}エリア / 合計 <b>${totalPages}ページ</b><br>`+
     lines.map(l=>`・${l}`).join('<br>');
+}
+
+// ── fit時の必要縮小率を推定 ──
+// A4横の使用可能領域: 幅285mm × 高さ190mm。
+// 1行の標準高さ(pt)→mm換算で全行の高さを見積もり、収めるための縮小率を返す。
+function estimateFitScale(rowCount){
+  const rc=S.rowConfig||DEFAULT_ROW;
+  const USABLE_H_MM=190;
+  const PT2MM=0.3528;
+  // 標準: ヘッダー行(タイトル含む)約 14mm + 各行(行高pt + padding約3pt + border)
+  const titleMM=8;
+  const headerRowMM=(Math.max(8,rc.headerHeightPt||20))*PT2MM*0.7 + 1;
+  const perRowMM=(Math.max(8,rc.rowHeightPt||16))*PT2MM*0.7 + 1.2; // padding+border込み
+  const contentMM=titleMM+headerRowMM+rowCount*perRowMM;
+  let scale=USABLE_H_MM/contentMM;
+  scale=Math.min(1,scale); // 拡大はしない
+  const MIN=0.40;
+  const overflow=scale<MIN;
+  return {scale:Math.max(MIN,scale), neededScale:scale, overflow, contentMM};
 }
 
 // ── 実際の印刷実行 ──
@@ -934,17 +1013,15 @@ function executePrint(){
   const pageRows=Math.max(1,parseInt(document.getElementById('printPageRows').value)||50);
   buildPrintHTML(sel,mode,pageRows);
   closePrintDialog();
-  // モーダルを閉じてから印刷
-  setTimeout(()=>window.print(),100);
+  setTimeout(()=>window.print(),120);
 }
 
-// ── 印刷HTML生成（エリアごとに改ページ）──
+// ── 印刷HTML生成（エリアごとに改ページ / fitはscaleで確実に1ページ）──
 function buildPrintHTML(areas,mode,pageRows){
   const cols=activeCols();
   const rc=S.rowConfig||DEFAULT_ROW;
   const addrIdx=cols.findIndex(c=>c.canon==='address');
   const USABLE_MM=285; // A4横 使用可能幅
-  const USABLE_H_MM=190; // A4横 使用可能高さ目安
 
   // 列幅(mm)算出
   const rawW=cols.map(c=>{
@@ -956,6 +1033,7 @@ function buildPrintHTML(areas,mode,pageRows){
   const colMM=rawW.map(w=>USABLE_MM*(w/sum));
   const wrapCss=rc.wrapText?'white-space:normal;word-break:break-all;':'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
   const stripe=rc.stripe;
+  const baseRowHpt=rc.rowHeightPt||16;
 
   let html='';
 
@@ -963,52 +1041,51 @@ function buildPrintHTML(areas,mode,pageRows){
     const rows=processed[area]||[];
     if(!rows.length)return;
 
-    // fitモード: 1エリア=1ページ、件数に応じて行高・フォント縮小
-    // splitモード: pageRowsごとに分割（各チャンク1ページ）
     let chunks=[];
-    if(mode==='fit'){
-      chunks=[rows]; // 全件1ページ
-    }else{
-      for(let s=0;s<rows.length;s+=pageRows)chunks.push(rows.slice(s,s+pageRows));
-    }
+    if(mode==='fit'){ chunks=[rows]; }
+    else { for(let s=0;s<rows.length;s+=pageRows)chunks.push(rows.slice(s,s+pageRows)); }
 
     chunks.forEach((chunk,ci)=>{
-      // fitモードで件数が多い場合の縮小スケール
-      let rowHpt=rc.rowHeightPt||16;
-      let baseFs=null;
+      // fitモード: scale倍率を決定（自動 or 手動）
+      let scale=1;
       if(mode==='fit'){
-        // 目安: 1行あたり高さ(mm) = USABLE_H_MM / 件数。pt換算(1mm≒2.83pt)
-        const perRowMM=USABLE_H_MM/(chunk.length+1.5); // +ヘッダー分
-        const fitPt=Math.max(5, Math.min(rowHpt, perRowMM*2.83*0.7));
-        rowHpt=fitPt;
-        baseFs=Math.max(5, Math.min(8.5, fitPt*0.55));
+        if(getScaleMode()==='manual'){
+          scale=getManualScale();
+        }else{
+          scale=estimateFitScale(chunk.length).scale;
+        }
       }
+      // scaleを適用するため、ラッパ幅を 1/scale に拡大してからscaleで縮小
+      // （scaleで縮むぶん、内側を広げて用紙幅いっぱいに使う）
+      const wrapStyle=(mode==='fit'&&scale<1)
+        ? `transform:scale(${scale.toFixed(3)});width:${(100/scale).toFixed(1)}%;`
+        : '';
 
       html+=`<div class="print-area-page">`;
+      html+=`<div class="print-scale-wrap" style="${wrapStyle}">`;
       html+=`<div class="print-page-title">${esc(area)}　`+
         (mode==='fit'
-          ? `全${rows.length}件${rows.length>pageRows?'（1ページ自動縮小）':''}`
+          ? `全${rows.length}件${scale<1?'（'+Math.round(scale*100)+'%縮小）':''}`
           : `${ci*pageRows+1}〜${Math.min((ci+1)*pageRows,rows.length)}件 / 全${rows.length}件`)+
         `</div>`;
       html+=`<table class="print-table"><colgroup>`;
       cols.forEach((c,k)=>{html+=`<col style="width:${colMM[k].toFixed(1)}mm">`;});
       html+=`</colgroup><thead><tr>`;
-      cols.forEach(c=>{html+=`<th style="text-align:${c.align}${baseFs?';font-size:'+(baseFs+0.5).toFixed(1)+'pt':''}">${esc(c.display)}</th>`;});
+      cols.forEach(c=>{html+=`<th style="text-align:${c.align}">${esc(c.display)}</th>`;});
       html+=`</tr></thead><tbody>`;
       chunk.forEach(r=>{
         html+=`<tr>`;
         cols.forEach((c,k)=>{
           const v=r[c.canon]??'';
-          const fs=baseFs!=null?baseFs:Math.max(6,(c.size||11)-2.5);
-          html+=`<td${k===addrIdx?' class="col-addr"':''} style="text-align:${c.align};font-family:'${c.font}';font-size:${fs.toFixed(1)}pt;height:${rowHpt.toFixed(1)}pt;${wrapCss}">${esc(v)}</td>`;
+          const fs=Math.max(6,(c.size||11)-2.5);
+          html+=`<td${k===addrIdx?' class="col-addr"':''} style="text-align:${c.align};font-family:'${c.font}';font-size:${fs.toFixed(1)}pt;height:${baseRowHpt}pt;${wrapCss}">${esc(v)}</td>`;
         });
         html+=`</tr>`;
       });
-      html+=`</tbody></table></div>`;
+      html+=`</tbody></table></div></div>`;
     });
   });
 
-  // ストライプCSS（動的）
   const stripeStyle=stripe
     ? '<style>.print-table tbody tr:nth-child(even) td{background:#f3f1ed!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}</style>'
     : '';
@@ -1357,7 +1434,7 @@ function renderAreaTbl(){
     return`<tr class="drag-row" draggable="true" data-idx="${i}">
       <td><span class="drag-handle">⠿</span></td>
       <td><input type="text" value="${esc(r.area)}" id="aan${i}" style="min-width:60px"></td>
-      <td><input type="text" value="${esc(r.val1||'')}" id="av1${i}" placeholder="例: きた市"></td>
+      <td><input type="text" value="${esc(r.val1||'')}" id="av1${i}" placeholder="例: 中央区"></td>
       <td><select class="match-sel" id="am1${i}">${mo}</select></td>
       <td><input type="text" value="${esc(r.val2||'')}" id="av2${i}" placeholder="任意"></td>
       <td><select class="match-sel" id="am2${i}">${mo2}</select></td>
@@ -1415,14 +1492,14 @@ function removeHeaderRow(i){S.headerMap=readHeaderTbl();S.headerMap.splice(i,1);
 // ═══════════════════════════════════════════════════════════
 function saveAll(){
   syncSettingsFromDOM();
-  try{localStorage.setItem('propFmtV44',JSON.stringify(S));}catch(e){}
+  try{localStorage.setItem('propFmtDEMO',JSON.stringify(S));}catch(e){}
   document.getElementById('hdrStatus').textContent='保存済 '+new Date().toLocaleTimeString('ja-JP');
   setTimeout(()=>document.getElementById('hdrStatus').textContent='',3000);
 }
 function resetAll(){
   if(!confirm('設定を初期値に戻しますか？'))return;
   S=fresh();
-  try{localStorage.removeItem('propFmtV44');localStorage.removeItem('propFmtV43');localStorage.removeItem('propFmtV42');}catch(e){}
+  try{localStorage.removeItem('propFmtDEMO');localStorage.removeItem('propFmtV44');localStorage.removeItem('propFmtV43');localStorage.removeItem('propFmtV42');}catch(e){}
   document.getElementById('hdrStatus').textContent='初期値に戻しました';
   setTimeout(()=>document.getElementById('hdrStatus').textContent='',2500);
 }
