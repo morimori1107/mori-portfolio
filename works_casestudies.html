@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WORKS — 自作ツール ケーススタディ集</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@600;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#15130e;--paper:#f4f0e6;--paper2:#ece6d6;--accent:#b5451f;--accent2:#1f5e4d;--line:#cabfa6;--muted:#6b6354}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font-family:"Zen Kaku Gothic New",sans-serif;line-height:1.8;font-feature-settings:"palt";-webkit-font-smoothing:antialiased}
+.wrap{max-width:980px;margin:0 auto;padding:0 28px}
+.mono{font-family:"Space Mono",monospace}
+.mincho{font-family:"Shippori Mincho",serif}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:1000;opacity:.04;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23n)'/%3E%3C/svg%3E")}
+header{border-bottom:1.5px solid var(--ink);position:sticky;top:0;background:var(--paper);z-index:100}
+.bar{display:flex;justify-content:space-between;align-items:center;padding:14px 28px;max-width:980px;margin:0 auto}
+.brand{font-weight:800;letter-spacing:.16em;font-size:.9rem}
+.brand span{color:var(--accent)}
+.bar a.back{font-size:.74rem;letter-spacing:.1em;color:var(--ink);text-decoration:none;opacity:.7}
+.bar a.back:hover{opacity:1}
+.hero{padding:70px 0 48px}
+.hero .tag{font-size:.7rem;letter-spacing:.3em;color:var(--accent);font-weight:700;margin-bottom:20px}
+.hero h1{font-family:"Shippori Mincho",serif;font-weight:800;font-size:clamp(2rem,5vw,3.4rem);line-height:1.25;margin-bottom:22px}
+.hero p{max-width:640px;color:var(--muted);font-size:1rem}
+.hero .stats{display:flex;gap:30px;margin-top:30px;flex-wrap:wrap}
+.hero .stats div{font-size:.8rem}
+.hero .stats span{display:block;font-family:"Space Mono",monospace;font-size:1.6rem;color:var(--accent);font-weight:700}
+.case{border-top:1.5px solid var(--line);padding:52px 0}
+.case-top{display:flex;align-items:baseline;gap:16px;margin-bottom:8px;flex-wrap:wrap}
+.case-no{font-family:"Space Mono",monospace;font-size:1.1rem;color:var(--accent);font-weight:700}
+.case h2{font-family:"Shippori Mincho",serif;font-size:1.7rem;font-weight:700}
+.badges{display:flex;gap:8px;margin:14px 0 22px;flex-wrap:wrap}
+.badge{font-family:"Space Mono",monospace;font-size:.66rem;letter-spacing:.04em;padding:4px 10px;border-radius:2px;border:1px solid var(--ink)}
+.badge.dom{background:var(--accent2);color:#fff;border-color:var(--accent2)}
+.badge.live{background:var(--accent);color:#fff;border-color:var(--accent)}
+.badge.doc{background:var(--paper2)}
+.cpa{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);margin:18px 0}
+.cpa>div{padding:16px 18px;border-right:1px solid var(--line)}
+.cpa>div:last-child{border-right:none}
+.cpa .lbl{font-size:.62rem;letter-spacing:.18em;color:var(--accent);font-weight:700;margin-bottom:8px}
+.cpa .val{font-size:.85rem;color:#3a352b;line-height:1.65}
+@media(max-width:760px){.cpa{grid-template-columns:1fr}.cpa>div{border-right:none;border-bottom:1px solid var(--line)}.cpa>div:last-child{border-bottom:none}}
+.stack{display:flex;flex-wrap:wrap;gap:7px;margin:16px 0}
+.stack span{font-family:"Space Mono",monospace;font-size:.68rem;border:1px solid var(--ink);padding:3px 9px;border-radius:2px}
+.highlight{background:var(--paper2);border-left:3px solid var(--accent);padding:16px 20px;font-size:.9rem;color:#3a352b;margin:18px 0}
+.highlight b{color:var(--accent)}
+.cta{display:inline-block;margin-top:8px;background:var(--ink);color:var(--paper);text-decoration:none;padding:12px 28px;font-weight:700;font-size:.82rem;letter-spacing:.08em;border-radius:2px;transition:transform .2s}
+.cta:hover{transform:translateY(-2px)}
+.cta.alt{background:none;color:var(--ink);border:1.5px solid var(--ink)}
+.shot{margin:18px 0;border:1px solid var(--line);background:var(--paper2);border-radius:2px;padding:40px 20px;text-align:center;color:var(--muted);font-size:.82rem}
+.shot .ph{font-family:"Space Mono",monospace;font-size:.7rem;letter-spacing:.1em;display:block;margin-top:6px;opacity:.7}
+.diagram{font-family:"Space Mono",monospace;font-size:.78rem;background:var(--ink);color:#e8dcc4;padding:22px;border-radius:2px;margin:16px 0;line-height:1.9;overflow-x:auto}
+.diagram .ar{color:var(--accent)}
+.diagram .n{color:#7fb8a6}
+footer{text-align:center;font-size:.66rem;letter-spacing:.2em;padding:26px;background:var(--ink);color:#7a715d;margin-top:20px}
+.note{font-size:.78rem;color:var(--muted);margin-top:10px}
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <div class="brand">MORI<span>.</span>WORKS</div>
+    <a class="back" href="portfolio.html">← プロフィールに戻る</a>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <div class="tag">SELECTED WORKS — CASE STUDIES</div>
+    <h1>業務課題を、<br>動く道具で解いてきた。</h1>
+    <p>製造・不動産の現場で実際に直面した課題を題材に、自作したツール群です。要件を固めてから作るのではなく、まず動く試作を出し、現場で使いながら磨き込む——製造現場のカイゼンと同じ進め方でつくっています。</p>
+    <div class="stats">
+      <div><span>4</span>自作ツール</div>
+      <div><span>20+</span>1ツールあたりの試作反復</div>
+      <div><span>3</span>開発環境(PQ/VBA・JS・GAS)</div>
+    </div>
+    <p class="note">※掲載のデモ・数値・固有名詞はすべて架空のサンプルです。実データは含みません。</p>
+  </div>
+</section>
+
+<!-- CASE 01 -->
+<section class="case">
+  <div class="wrap">
+    <div class="case-top"><span class="case-no">01</span><h2>原盤発注トリガー判定ツール</h2></div>
+    <div class="badges"><span class="badge dom">製造業ドメイン</span><span class="badge live">ブラウザで試せる</span><span class="badge">在庫最適化</span></div>
+    <div class="cpa">
+      <div><div class="lbl">課題 ISSUE</div><div class="val">製品出荷の変動に対し、原盤(資材)の発注タイミングが担当者の経験頼みで、欠品・過剰在庫のリスクがあった。</div></div>
+      <div><div class="lbl">打ち手 ACTION</div><div class="val">日次の使用実績から、3つの発注判定方式を実装。発注期限・必要数を自動算出し、発注候補をCSV出力。</div></div>
+      <div><div class="lbl">工夫 POINT</div><div class="val">①累計到達 ②移動平均×(リードタイム+安全在庫) ③在庫枯渇予測、を品番ごとに切替可能。マスター駆動で設定を一元管理。</div></div>
+      <div><div class="lbl">成果 RESULT</div><div class="val">発注判断の属人化を解消し、欠品リスクを事前に可視化(※実測値を記入)。</div></div>
+    </div>
+    <div class="stack"><span>HTML</span><span>JavaScript</span><span>営業日計算</span><span>移動平均/安全在庫</span><span>マスター駆動設計</span></div>
+    <div class="highlight"><b>工場長の知見が設計に：</b>「在庫を切らさず、かつ持ちすぎない」発注点の考え方は、製造現場の生産管理そのもの。ドメインを知る人間だからこそ、現場で使える判定ロジックを設計できた。</div>
+    <a class="cta" href="demo_在庫発注判定ツール.html" target="_blank">▶ デモを触ってみる</a>
+  </div>
+</section>
+
+<!-- CASE 02 -->
+<section class="case">
+  <div class="wrap">
+    <div class="case-top"><span class="case-no">02</span><h2>物件データ整形ツール</h2></div>
+    <div class="badges"><span class="badge dom">不動産ドメイン</span><span class="badge live">ブラウザで試せる</span><span class="badge">データ整形</span></div>
+    <div class="cpa">
+      <div><div class="lbl">課題 ISSUE</div><div class="val">物件データの列構成がバラバラで、エリア別の整形・不要行の除外・印刷用整形に手作業の時間がかかっていた。</div></div>
+      <div><div class="lbl">打ち手 ACTION</div><div class="val">列マッピング・除外ルール・印刷レイアウトを設定駆動で定義し、ワンクリックでエリア別に整形・Excel/CSV出力。</div></div>
+      <div><div class="lbl">工夫 POINT</div><div class="val">除外条件をAND/OR・優先度付きで定義可能に。A4印刷の用紙幅自動縮小など、現場の実務要件を反映。</div></div>
+      <div><div class="lbl">成果 RESULT</div><div class="val">整形作業の標準化と時間短縮(※実測値を記入)。担当者による仕上がりのばらつきを解消。</div></div>
+    </div>
+    <div class="stack"><span>HTML</span><span>JavaScript</span><span>SheetJS(xlsx)</span><span>設定駆動UI</span><span>印刷レイアウト制御</span></div>
+    <div class="highlight"><b>不動産実務の粒度：</b>「どの列が要るか」「どの行を除外すべきか」は、賃貸管理の実務を知らないと設計できない。現場で本当に必要な整形だけを、設定として外出しした。</div>
+    <a class="cta" href="demo_物件データ整形ツール.html" target="_blank">▶ デモを触ってみる</a>
+  </div>
+</section>
+
+<!-- CASE 03 -->
+<section class="case">
+  <div class="wrap">
+    <div class="case-top"><span class="case-no">03</span><h2>Power Query × VBA 集計・帳票自動生成</h2></div>
+    <div class="badges"><span class="badge dom">製造業ドメイン</span><span class="badge doc">設計説明(社内ツール)</span><span class="badge">基幹データ自動化</span></div>
+    <div class="cpa">
+      <div><div class="lbl">課題 ISSUE</div><div class="val">基幹システムから出力されるデータの集計・帳票作成が手作業で、工数と転記ミスが発生していた。</div></div>
+      <div><div class="lbl">打ち手 ACTION</div><div class="val">Power Queryでデータを取り込み・整形、VBAで日次リスト・クロス集計・印刷用シートを自動生成する仕組みを構築。</div></div>
+      <div><div class="lbl">工夫 POINT</div><div class="val">抽出ルール・レイアウト・システム設定をテーブルで外出しし、コードを触らず設定変更で運用できる構成に。</div></div>
+      <div><div class="lbl">成果 RESULT</div><div class="val">集計・帳票作成工数の削減と転記ミス防止(※実測値を記入)。現職で自主的に推進中。</div></div>
+    </div>
+    <div class="stack"><span>Power Query(M言語)</span><span>VBA</span><span>Excel</span><span>マスター駆動(ルールテーブル)</span></div>
+    <div class="diagram">
+[ 基幹システム出力 ]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="ar">↓</span> <span class="n">Power Query</span> で取込・整形・結合<br>
+[ 統合データ ]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="ar">↓</span> <span class="n">ルールテーブル</span>(抽出/レイアウト/設定)で制御<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="ar">↓</span> <span class="n">VBA</span> で自動生成<br>
+[ 日次リスト ] [ クロス集計 A/B/C ] [ 印刷用シート ]
+    </div>
+    <div class="shot">スクリーンショット掲載予定<span class="ph">※マスタ実データが写り込まないよう加工して掲載</span></div>
+    <div class="highlight"><b>「設定で動く」設計思想：</b>処理をコードに埋め込まず、ルールをテーブルに外出しした。これは製造現場の「作業標準書(SOP)で誰でも同じ品質を出す」考え方と同じ。属人化を仕組みで防ぐ設計。</div>
+    <p class="note">本ツールは社内業務マスターを含むため、現物の配布は行っていません。設計と画面で内容をご説明します。</p>
+  </div>
+</section>
+
+<!-- CASE 04 -->
+<section class="case">
+  <div class="wrap">
+    <div class="case-top"><span class="case-no">04</span><h2>Google スプレッドシート 集計ツール群(GAS)</h2></div>
+    <div class="badges"><span class="badge doc">設計説明</span><span class="badge">マスター準拠</span><span class="badge">クラウド集計</span></div>
+    <div class="cpa">
+      <div><div class="lbl">課題 ISSUE</div><div class="val">複数人で扱うデータの集計を、クラウド上で共有しながら自動化したいニーズがあった。</div></div>
+      <div><div class="lbl">打ち手 ACTION</div><div class="val">マスター準拠型で、日次別・終別・集計の各処理をGAS(Google Apps Script)で自動化するツール群を構築。</div></div>
+      <div><div class="lbl">工夫 POINT</div><div class="val">マスターを基準にデータの整合性を保ちつつ、複数の集計ビューを自動生成。クラウドで共同編集前提の設計。</div></div>
+      <div><div class="lbl">成果 RESULT</div><div class="val">クラウド上での集計自動化と共有の効率化(※実測値を記入)。</div></div>
+    </div>
+    <div class="stack"><span>Google Apps Script</span><span>スプレッドシート</span><span>マスター準拠設計</span><span>クラウド共同編集</span></div>
+    <div class="shot">スクリーンショット掲載予定<span class="ph">※実データを架空サンプルに置き換えて掲載</span></div>
+    <div class="highlight"><b>同じ発想を別環境でも：</b>Power Query/VBA(オンプレ)、JavaScript(ブラウザ)、GAS(クラウド)。環境が変わっても「業務を自動化する道具をつくる」という軸は一貫している。</div>
+  </div>
+</section>
+
+<footer>(c) 2026 MORI — WORKS / CASE STUDIES. 掲載内容は架空のサンプルを含みます。</footer>
+</body>
+</html>

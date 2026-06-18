@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>原盤発注トリガー判定ツール — v0.2</title>
+<style>
+  :root{
+    --ink:#13261f; --paper:#f4f1e8; --panel:#fbfaf4; --line:#cdc7b4;
+    --accent:#1f6f54; --accent2:#b5651d; --danger:#a8322a; --warn:#c08a1e;
+    --ok:#1f6f54; --muted:#6b6655;
+    --g1:#dff0e6; --g2:#fcefcf; --g3:#f6d9d3;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:
+      radial-gradient(circle at 12% 8%, #ffffff66, transparent 40%),
+      repeating-linear-gradient(135deg,#0000 0 22px,#00000004 22px 23px), var(--paper);
+    color:var(--ink); font-family:"Hiragino Mincho ProN","Yu Mincho",serif; -webkit-font-smoothing:antialiased;}
+  header{padding:24px 30px 16px; border-bottom:2px solid var(--ink); background:linear-gradient(180deg,#fbfaf4,#f4f1e8);}
+  h1{margin:0; font-size:24px; letter-spacing:.06em; font-weight:700}
+  .sub{margin:6px 0 0; color:var(--muted); font-size:13px; letter-spacing:.04em}
+  .badge{display:inline-block; font-family:ui-monospace,monospace; font-size:11px; border:1px solid var(--accent); color:var(--accent); padding:1px 8px; border-radius:10px; margin-left:8px; vertical-align:middle}
+  main{max-width:1320px; margin:0 auto; padding:20px 26px 80px}
+  .grid{display:grid; grid-template-columns:300px 1fr; gap:22px}
+  @media(max-width:900px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:6px; box-shadow:3px 3px 0 #00000010; margin-bottom:18px}
+  .card h2{margin:0; padding:11px 15px; font-size:14px; letter-spacing:.08em; border-bottom:1px solid var(--line); background:#efece0; border-radius:6px 6px 0 0; display:flex; justify-content:space-between; align-items:center}
+  .card .body{padding:14px 15px}
+  label{display:block; font-size:12px; color:var(--muted); margin:10px 0 3px; letter-spacing:.03em}
+  input[type=number],input[type=date],input[type=text],select{width:100%; padding:7px 9px; border:1px solid var(--line); border-radius:4px; background:#fff; font-family:ui-monospace,monospace; font-size:13px; color:var(--ink)}
+  .slider-row{display:flex; align-items:center; gap:10px}
+  .slider-row input[type=range]{flex:1}
+  .slider-row .val{font-family:ui-monospace,monospace; font-size:14px; min-width:46px; text-align:right; font-weight:700; color:var(--accent)}
+  button{font-family:inherit; cursor:pointer}
+  .btn{background:var(--ink); color:#fbfaf4; border:none; padding:9px 16px; border-radius:4px; font-size:13px; letter-spacing:.05em; transition:transform .08s}
+  .btn:hover{transform:translateY(-1px)}
+  .btn.alt{background:var(--accent2)} .btn.ghost{background:transparent; color:var(--ink); border:1px solid var(--line)}
+  .btn.sm{padding:4px 10px; font-size:11px}
+  .toggle{display:flex; border:1px solid var(--ink); border-radius:5px; overflow:hidden; margin-bottom:14px}
+  .toggle button{flex:1; background:#fff; border:none; padding:11px 8px; font-size:13px; letter-spacing:.04em; color:var(--muted)}
+  .toggle button.active{background:var(--ink); color:#fbfaf4; font-weight:700}
+  table{width:100%; border-collapse:collapse; font-size:12.5px}
+  th,td{padding:6px 9px; border-bottom:1px solid #e4e0d2; text-align:right; white-space:nowrap}
+  th{position:sticky; top:0; background:#efece0; text-align:right; font-weight:700; letter-spacing:.03em; border-bottom:2px solid var(--line); z-index:1}
+  th:first-child,td:first-child,td.l,th.l{text-align:left}
+  td.mono,th.mono{font-family:ui-monospace,monospace}
+  .tablewrap{max-height:520px; overflow:auto; border-top:1px solid var(--line)}
+  tr.g1 td:nth-child(1){box-shadow:inset 4px 0 0 var(--ok)}
+  tr.g2 td:nth-child(1){box-shadow:inset 4px 0 0 var(--warn)}
+  tr.g3 td:nth-child(1){box-shadow:inset 4px 0 0 var(--danger)}
+  tr.clickable{cursor:pointer} tr.clickable:hover{background:#f0ede1}
+  .pill{font-family:ui-monospace,monospace; font-size:11px; padding:1px 7px; border-radius:9px; display:inline-block}
+  .pill.ok{background:var(--g1); color:var(--ok)} .pill.warn{background:var(--g2); color:#9a6c10} .pill.danger{background:var(--g3); color:var(--danger)}
+  .stat{display:flex; gap:18px; flex-wrap:wrap; padding:12px 15px}
+  .stat .s{font-size:12px; color:var(--muted); cursor:default}
+  .stat .s.link{cursor:pointer; text-decoration:underline dotted}
+  .stat .s.link:hover b{color:var(--accent)}
+  .stat .s b{display:block; font-family:ui-monospace,monospace; font-size:20px; color:var(--ink); font-weight:700}
+  .note{font-size:11.5px; color:var(--muted); line-height:1.6; padding:10px 15px}
+  .legend{font-size:11px; color:var(--muted); padding:8px 15px; border-top:1px solid var(--line)}
+  .legend span{margin-right:14px} .legend i{display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:4px; vertical-align:middle}
+  .invtable input{width:78px; padding:3px 5px; text-align:right}
+  details{margin:6px 0} summary{cursor:pointer; font-size:12px; color:var(--accent); letter-spacing:.03em}
+  .empty{padding:40px; text-align:center; color:var(--muted); font-size:13px}
+  .tabs{display:flex; border-bottom:1px solid var(--line); flex-wrap:wrap}
+  .tabs button{background:transparent; border:none; padding:10px 16px; font-size:13px; color:var(--muted); border-bottom:2px solid transparent; margin-bottom:-1px}
+  .tabs button.active{color:var(--ink); border-bottom-color:var(--accent); font-weight:700}
+  .flagoff{opacity:.4}
+  .drill{background:#f7f5ec; border-left:3px solid var(--accent)}
+  .drill td{padding:0}
+  .drill .inner{padding:10px 18px 14px}
+  .drill table{font-size:11.5px} .drill th{background:#e8e4d6; font-size:11px}
+  .drill .reached{background:var(--g1); font-weight:700}
+  .modal-bg{position:fixed; inset:0; background:#13261fcc; display:none; align-items:center; justify-content:center; z-index:100; padding:30px}
+  .modal-bg.show{display:flex}
+  .modal{background:var(--paper); border-radius:8px; max-width:760px; width:100%; max-height:85vh; overflow:auto; box-shadow:0 20px 60px #0006}
+  .modal .mh{padding:16px 20px; border-bottom:2px solid var(--ink); display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; background:var(--paper)}
+  .modal .mh h3{margin:0; font-size:17px} .modal .mb{padding:16px 20px}
+  .modal .x{background:none; border:none; font-size:22px; cursor:pointer; color:var(--ink)}
+  .seg{display:inline-flex; border:1px solid var(--line); border-radius:4px; overflow:hidden; margin-left:auto}
+  .seg button{background:#fff; border:none; padding:4px 12px; font-size:11px; color:var(--muted)}
+  .seg button.active{background:var(--ink); color:#fff}
+  .editrow input{padding:3px 5px; font-size:11.5px}
+  .warnbox{background:#fff7e6; border:1px solid var(--warn); color:#8a6310; padding:8px 12px; border-radius:4px; font-size:12px; margin:8px 0}
+  .okbox{background:var(--g1); border:1px solid var(--accent); color:var(--accent); padding:8px 12px; border-radius:4px; font-size:12px; margin:8px 0}
+  .srcbadge{font-size:10px; padding:1px 6px; border-radius:8px; background:#e8e4d6; color:var(--muted); font-family:ui-monospace,monospace}
+</style>
+</head>
+<body>
+<div style="background:#15130e;color:#f4f0e6;font-family:sans-serif;font-size:13px;padding:10px 16px;text-align:center;letter-spacing:.04em;">PORTFOLIO DEMO ｜ 製造業の在庫・発注管理を題材にした自作ツールです。データはすべて架空のサンプルです。</div>
+<header>
+  <h1>原盤発注トリガー判定ツール<span class="badge">v0.2</span></h1>
+  <p class="sub">投入CSV → マスター参照 → 必要原盤数 → 山単位発注判定。2方式切替・在庫/SS差引き・発注根拠ドリルダウン・マスター編集対応。</p>
+</header>
+<main>
+  <div class="toggle" id="methodToggle">
+    <button data-m="stock" class="active">③ 在庫枯渇型（製品出荷→原盤消費→SS割れで発注）</button>
+    <button data-m="cum">① 累計山単位到達</button>
+    <button data-m="avg">② 移動平均×(LT+SS)</button>
+  </div>
+  <div class="grid">
+    <div>
+      <div class="card">
+        <h2>データ投入 <span class="srcbadge" id="masterSrc">v3内蔵</span></h2>
+        <div class="body">
+          <button class="btn ghost" onclick="document.getElementById('csvFile').click()">投入CSVを選択</button>
+          <input type="file" id="csvFile" accept=".csv" hidden>
+          <div class="note" id="csvName" style="padding:6px 0">未選択（サンプル内蔵）</div>
+          <details>
+            <summary>マスターを差し替える（任意・3形式自動判別）</summary>
+            <label>統合マスター xlsx／個別CSV</label>
+            <input type="file" id="mFile" accept=".csv,.xlsx" multiple>
+            <p class="note" style="padding:6px 0">旧v0.77形式・統合v3形式・フラット正本のいずれも自動判別して読み込みます。複数CSV同時選択可。</p>
+          </details>
+          <hr style="border:none;border-top:1px solid var(--line);margin:12px 0">
+          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+            <button class="btn sm" onclick="exportState()">設定をJSON保存</button>
+            <button class="btn sm ghost" onclick="document.getElementById('stateFile').click()">JSON読込</button>
+            <input type="file" id="stateFile" accept=".json" hidden onchange="if(this.files[0])importState(this.files[0])">
+            <button class="btn sm" style="background:var(--danger)" onclick="resetState()">初期化</button>
+          </div>
+          <div class="note" id="saveStatus" style="padding:4px 0;color:var(--accent)">自動保存：在庫・区分・設定はブラウザに保存され次回復元されます</div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>パラメータ（全体一律上書き）</h2>
+        <div class="body">
+          <label>基準日（計算日 / これ以降の到達のみ候補）</label>
+          <input type="date" id="baseDate" value="2026-04-01">
+          <label>LT 上書き <span style="font-size:11px"><input type="checkbox" id="ltOverride"> マスター値を無視し一律</span></label>
+          <div class="slider-row"><input type="range" id="ltSlider" min="0" max="20" value="3" disabled><span class="val" id="ltVal">master</span></div>
+          <label>SS 安全在庫日数 <span style="font-size:11px"><input type="checkbox" id="ssOverride"> 一律上書き</span></label>
+          <div class="slider-row"><input type="range" id="ssSlider" min="0" max="10" value="1" disabled><span class="val" id="ssVal">master</span></div>
+          <label>移動平均の窓（方式②のみ）</label>
+          <div class="slider-row"><input type="range" id="winSlider" min="1" max="7" value="3"><span class="val" id="winVal">3</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>原盤別 現在庫（枚）</h2>
+        <div class="body" style="padding:0">
+          <div style="padding:10px 15px 4px;display:flex;gap:6px;align-items:center">
+            <span style="font-size:12px;color:var(--muted)">一括</span>
+            <input type="number" id="invBulk" value="0" min="0" style="flex:1">
+            <button class="btn sm" onclick="applyInvBulk()">適用</button>
+          </div>
+          <div class="tablewrap" style="max-height:200px"><table class="invtable" id="invTable"><thead><tr><th class="l">原盤ID</th><th>山単位</th><th>在庫</th></tr></thead><tbody></tbody></table></div>
+          <p class="note">在庫枯渇型の起点。内/外で別管理。初期値0。</p>
+        </div>
+      </div>
+      <div class="card">
+        <h2>製品在庫 初期値（枚）</h2>
+        <div class="body">
+          <label>一括設定（全品番に適用）</label>
+          <div class="slider-row">
+            <input type="number" id="prodBulk" value="0" min="0" style="flex:1">
+            <button class="btn sm" onclick="applyProdBulk()">適用</button>
+          </div>
+          <details>
+            <summary>品番ごとに個別設定</summary>
+            <div class="tablewrap" style="max-height:180px"><table class="invtable" id="prodInvTable"><thead><tr><th class="l">品番</th><th>取数</th><th>初期在庫</th></tr></thead><tbody></tbody></table></div>
+          </details>
+          <p class="note">在庫枯渇型で使用。製品在庫が尽きると原盤を1枚開封（取数ぶん補充）します。</p>
+        </div>
+      </div>
+      <button class="btn" style="width:100%" onclick="recompute()">▶ 再計算する</button>
+    </div>
+    <div>
+      <div class="card">
+        <h2>処理サマリー <span style="font-size:11px;font-weight:400;color:var(--muted)">数字クリックで内訳</span></h2>
+        <div class="stat" id="summary"></div>
+        <div class="legend"><span><i style="background:var(--ok)"></i>1山</span><span><i style="background:var(--warn)"></i>2山</span><span><i style="background:var(--danger)"></i>3山以上</span><span style="color:var(--muted)">　行クリックで発注根拠を展開</span>
+          <span class="seg" id="drillMode"><button data-d="acc" class="active">展開式</button><button data-d="modal">別窓式</button></span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="tabs" id="resultTabs">
+          <button data-t="order" class="active">発注候補</button>
+          <button data-t="unreg">確認対象（未登録）</button>
+          <button data-t="master">マスター編集</button>
+        </div>
+        <div id="panel-order"><div class="tablewrap"><table id="orderTable"></table></div></div>
+        <div id="panel-unreg" style="display:none"><div class="tablewrap"><table id="unregTable"></table></div></div>
+        <div id="panel-master" style="display:none">
+          <div style="padding:10px 15px; display:flex; gap:8px; align-items:center; flex-wrap:wrap">
+            <span class="seg" id="masterTab"><button data-mt="board" class="active">原盤</button><button data-mt="item">カット品</button><button data-mt="gaichu">外注</button></span>
+            <input type="text" id="masterSearch" placeholder="検索（ID/品番/材質）" style="width:180px" oninput="renderMaster()">
+            <button class="btn sm" onclick="addMasterRow()">＋行追加</button>
+            <button class="btn sm alt" onclick="exportMasterCSV()">CSV出力</button>
+            <span class="note" style="padding:0">編集は即時反映・再計算されます</span>
+          </div>
+          <div class="tablewrap" style="max-height:460px"><table id="masterTable"></table></div>
+        </div>
+      </div>
+      <button class="btn alt" onclick="exportCSV()">発注候補をCSV出力</button>
+    </div>
+  </div>
+</main>
+<div class="modal-bg" id="modalBg" onclick="if(event.target===this)closeModal()">
+  <div class="modal"><div class="mh"><h3 id="modalTitle"></h3><button class="x" onclick="closeModal()">×</button></div><div class="mb" id="modalBody"></div></div>
+</div>
+<script>
+const V3_MASTER = {"board":[{"genban_id":"PLY-T002-910x1820","name":"合板 2.7mm 3×6","material":"ラワン合板","size":"3×6","yama_tanni":100,"order_unit_yama":1,"lt_days":2,"ss_days":1,"supply_type":"積水支給","valid":true,"note":""},{"genban_id":"PLY-T002-1220x2440","name":"合板 2.7mm 4×8","material":"ラワン合板","size":"4×8","yama_tanni":50,"order_unit_yama":1,"lt_days":2,"ss_days":1,"supply_type":"積水支給","valid":true,"note":""},{"genban_id":"PLY-T002-910x2730","name":"合板 2.7mm 3×9","material":"ラワン合板","size":"3×9","yama_tanni":100,"order_unit_yama":1,"lt_days":2,"ss_days":1,"supply_type":"積水支給","valid":true,"note":""},{"genban_id":"PLY-T004-910x1820","name":"合板 4mm 3×6","material":"ラワン合板","size":"3×6","yama_tanni":350,"order_unit_yama":1,"lt_days":2,"ss_days":1,"supply_type":"積水支給","valid":true,"note":""},{"genban_id":"PLY-T004-1220x2440","name":"合板 4mm 4×8","material":"ラワン合板","size":"4×8","yama_tanni":50,"order_unit_yama":1,"lt_days":2,"ss_days":1,"supply_type":"積水支給","valid":true,"note":""},{"genban_id":"PLY-T009-910x1820","name":"合板 9mm 3×6","material":"針葉樹合板","size":"3×6","yama_tanni":150,"order_unit_yama":1,"lt_days":2,"ss_days":1,"supply_type":"積水支給","valid":true,"note":""},{"genban_id":"PLY-T009-910x3030","name":"合板 9mm 3×10","material":"針葉樹合板","size":"3×10","yama_tanni":150,"order_unit_yama":1,"lt_days":2,"ss_days":1,"supply_type":"積水支給","valid":true,"note":""},{"genban_id":"PLY-T009-1220x2440","name":"合板 9mm 4×8","material":"ラワン合板","size":"4×8","yama_tanni":30,"order_unit_yama":1,"lt_days":2,"ss_days":1,"supply_type":"積水支給","valid":true,"note":""},{"genban_id":"PLY-T012-910x1820","name":"合板 12mm 3×6 針","material":"針葉樹合板","size":"3×6","yama_tanni":125,"order_unit_yama":1,"lt_days":2,"ss_days":1,"supply_type":"積水支給","valid":true,"note":"外注品含む"},{"genban_id":"PLY-T012-910x1820R","name":"合板 12mm 3×6 ラ","material":"ラワン合板","size":"3×6","yama_tanni":125,"order_unit_yama":1,"lt_days":2,"ss_days":1,"supply_type":"積水支給","valid":true,"note":""},{"genban_id":"PLY-T012-910x2730","name":"合板 12mm 3×9","material":"針葉樹合板","size":"3×9","yama_tanni":150,"order_unit_yama":1,"lt_days":2,"ss_days":1,"supply_type":"積水支給","valid":true,"note":""},{"genban_id":"PLY-T012-1220x2440","name":"合板 12mm 4×8 針","material":"針葉樹合板","size":"4×8","yama_tanni":30,"order_unit_yama":1,"lt_days":2,"ss_days":1,"supply_type":"積水支給","valid":true,"note":""},{"genban_id":"PLY-T012-1220x2440R","name":"合板 12mm 4×8 ラ","material":"ラワン合板","size":"4×8","yama_tanni":50,"order_unit_yama":1,"lt_days":2,"ss_days":1,"supply_type":"積水支給","valid":true,"note":""},{"genban_id":"PLY-T012-910x1820C","name":"セメント合板 12mm","material":"セメント合板","size":"3×6","yama_tanni":20,"order_unit_yama":1,"lt_days":2,"ss_days":1,"supply_type":"自社購入","valid":true,"note":""},{"genban_id":"PLY-T015-910x1820","name":"合板 15mm 3×6","material":"針葉樹合板","size":"3×6","yama_tanni":70,"order_unit_yama":1,"lt_days":2,"ss_days":1,"supply_type":"積水支給","valid":true,"note":""},{"genban_id":"PLY-T015-910x2440","name":"合板 15mm 3×8","material":"針葉樹合板","size":"3×8","yama_tanni":70,"order_unit_yama":1,"lt_days":2,"ss_days":1,"supply_type":"積水支給","valid":true,"note":""},{"genban_id":"PLY-T015-1220x1820","name":"合板 15mm 4×6","material":"針葉樹合板","size":"4×6","yama_tanni":70,"order_unit_yama":1,"lt_days":2,"ss_days":1,"supply_type":"積水支給","valid":true,"note":""},{"genban_id":"PLY-T015-1220x2440","name":"合板 15mm 4×8","material":"針葉樹合板","size":"4×8","yama_tanni":70,"order_unit_yama":1,"lt_days":2,"ss_days":1,"supply_type":"積水支給","valid":true,"note":""},{"genban_id":"PLY-T020-910x1820","name":"合板 20mm 3×6","material":"針葉樹合板","size":"3×6","yama_tanni":60,"order_unit_yama":1,"lt_days":2,"ss_days":1,"supply_type":"積水支給","valid":true,"note":""},{"genban_id":"PLY-T020-910x2420","name":"合板 20mm 3×8","material":"針葉樹合板","size":"3×8","yama_tanni":60,"order_unit_yama":1,"lt_days":2,"ss_days":1,"supply_type":"積水支給","valid":true,"note":""},{"genban_id":"PLY-T020-898x2210","name":"合板 20mm 3×8","material":"針葉樹合板","size":"3×8","yama_tanni":60,"order_unit_yama":1,"lt_days":2,"ss_days":1,"supply_type":"積水支給","valid":true,"note":""},{"genban_id":"PLY-T020-1220x2440","name":"合板 20mm 4×8","material":"針葉樹合板","size":"4×8","yama_tanni":60,"order_unit_yama":1,"lt_days":2,"ss_days":1,"supply_type":"積水支給","valid":true,"note":""},{"genban_id":"PLY-T020-1220x2454","name":"合板 20mm 4×9","material":"針葉樹合板","size":"4×9","yama_tanni":60,"order_unit_yama":1,"lt_days":2,"ss_days":1,"supply_type":"積水支給","valid":true,"note":""},{"genban_id":"PLY-T028-910x1820","name":"合板 28mm 3×6","material":"針葉樹合板","size":"3×6","yama_tanni":20,"order_unit_yama":1,"lt_days":2,"ss_days":1,"supply_type":"積水支給","valid":true,"note":""},{"genban_id":"PLY-T055-910x1820","name":"合板 5.5mm 3×6","material":"ラワン合板","size":"3×6","yama_tanni":250,"order_unit_yama":1,"lt_days":2,"ss_days":1,"supply_type":"積水支給","valid":true,"note":""},{"genban_id":"PLY-T055-1220x2440","name":"合板 5.5mm 4×8","material":"ラワン合板","size":"4×8","yama_tanni":50,"order_unit_yama":1,"lt_days":2,"ss_days":1,"supply_type":"積水支給","valid":true,"note":""},{"genban_id":"PLY-T055-910x2730","name":"合板 5.5mm 3×9","material":"ラワン合板","size":"3×9","yama_tanni":100,"order_unit_yama":1,"lt_days":2,"ss_days":1,"supply_type":"積水支給","valid":true,"note":""},{"genban_id":"PLY-T030-030x2720","name":"積層合板 30mm角×9","material":"LVL","size":"30角×9","yama_tanni":240,"order_unit_yama":1,"lt_days":2,"ss_days":1,"supply_type":"積水支給","valid":true,"note":""},{"genban_id":"PLY-T030-043x2720","name":"積層合板 30×43×9","material":"LVL","size":"30×43×9","yama_tanni":240,"order_unit_yama":1,"lt_days":2,"ss_days":1,"supply_type":"積水支給","valid":true,"note":""},{"genban_id":"OSB-T009-910x2430","name":"OSB 9mm 3×8","material":"OSB","size":"3×8","yama_tanni":36,"order_unit_yama":1,"lt_days":2,"ss_days":1,"supply_type":"積水支給","valid":true,"note":"★新規追加 EJM0280/WPA2040/ZPC5420用"},{"genban_id":"OSB-T012-910x2440","name":"OSB 12mm 3×8","material":"OSB","size":"3×8","yama_tanni":100,"order_unit_yama":1,"lt_days":2,"ss_days":1,"supply_type":"積水支給","valid":true,"note":""},{"genban_id":"OSB-T012-1220x2440","name":"OSB 12mm 4×8","material":"OSB","size":"4×8","yama_tanni":30,"order_unit_yama":1,"lt_days":2,"ss_days":1,"supply_type":"積水支給","valid":true,"note":"★主原盤 ZE野地→HLRケコミ→補強板"},{"genban_id":"DL-T125-910x2420","name":"ダイライト 12mm 3×8","material":"ダイライト","size":"3×8","yama_tanni":42,"order_unit_yama":1,"lt_days":2,"ss_days":1,"supply_type":"積水支給","valid":true,"note":""},{"genban_id":"DL-T125-910x2730","name":"ダイライト 12mm 3×9","material":"ダイライト","size":"3×9","yama_tanni":42,"order_unit_yama":1,"lt_days":2,"ss_days":1,"supply_type":"積水支給","valid":true,"note":""},{"genban_id":"DL-T125-910x3030","name":"ダイライト 12mm 3×10","material":"ダイライト","size":"3×10","yama_tanni":42,"order_unit_yama":1,"lt_days":2,"ss_days":1,"supply_type":"積水支給","valid":true,"note":""},{"genban_id":"PB-T009-910x1820","name":"パーチ 9mm","material":"パーチ","size":"3×6","yama_tanni":50,"order_unit_yama":1,"lt_days":2,"ss_days":1,"supply_type":"市場","valid":true,"note":""},{"genban_id":"PB-T018-910x2440","name":"パーチ 18mm 3×8","material":"パーチ","size":"3×8","yama_tanni":50,"order_unit_yama":1,"lt_days":2,"ss_days":1,"supply_type":"市場","valid":true,"note":""},{"genban_id":"PB-T020-898x2128","name":"パーチ 20mm 3×8外注","material":"パーチ","size":"3×8","yama_tanni":50,"order_unit_yama":1,"lt_days":7,"ss_days":2,"supply_type":"外注","valid":true,"note":"外注山単位品 建材屋直送"},{"genban_id":"PB-T020-910x2440","name":"パーチ 20mm 910×2440外注","material":"パーチ","size":"3×8","yama_tanni":50,"order_unit_yama":1,"lt_days":7,"ss_days":2,"supply_type":"外注","valid":true,"note":"外注山単位品 建材屋直送"},{"genban_id":"PB-T020-910x1820","name":"パーチ 20mm 910×1820外注","material":"パーチ","size":"3×6","yama_tanni":50,"order_unit_yama":1,"lt_days":7,"ss_days":2,"supply_type":"外注","valid":true,"note":"外注山単位品 建材屋直送"},{"genban_id":"W-T038-089x3030","name":"木桟 38×89×3030","material":"木桟","size":"2×4","yama_tanni":250,"order_unit_yama":1,"lt_days":2,"ss_days":1,"supply_type":"積水支給","valid":true,"note":""},{"genban_id":"W-T038-178x3030","name":"木桟 38×178×3030","material":"木桟","size":"2×6","yama_tanni":125,"order_unit_yama":1,"lt_days":2,"ss_days":1,"supply_type":"積水支給","valid":true,"note":""},{"genban_id":"KG-T006-950x1830","name":"MDF-K 6mm 3×5","material":"MDF-K","size":"3×5","yama_tanni":50,"order_unit_yama":1,"lt_days":2,"ss_days":1,"supply_type":"積水支給","valid":true,"note":""},{"genban_id":"NB-T012-1000x3030","name":"不燃材 12mm 3×10","material":"不燃材","size":"3×10","yama_tanni":50,"order_unit_yama":1,"lt_days":2,"ss_days":1,"supply_type":"利工支給","valid":true,"note":""},{"genban_id":"NB-T016-1000x3030","name":"不燃材 16mm 3×10","material":"不燃材","size":"3×10","yama_tanni":10,"order_unit_yama":1,"lt_days":2,"ss_days":1,"supply_type":"利工支給","valid":true,"note":""},{"genban_id":"NB-T016-455x3030","name":"外壁 16mm 2×10","material":"外壁","size":"2×10","yama_tanni":20,"order_unit_yama":1,"lt_days":2,"ss_days":1,"supply_type":"利工支給","valid":true,"note":""},{"genban_id":"KY-T012-910x1820","name":"ケイカル板 12mm 3×6","material":"ケイカル版","size":"3×6","yama_tanni":100,"order_unit_yama":1,"lt_days":2,"ss_days":1,"supply_type":"利工支給","valid":true,"note":""},{"genban_id":"KK-T036-1000x1525","name":"ケイカル板 36mm 3×5","material":"ケイカル版","size":"3×5","yama_tanni":20,"order_unit_yama":1,"lt_days":2,"ss_days":1,"supply_type":"利工支給","valid":true,"note":""}],"item":[{"hinban":"ZYU0940","genban_id":"DL-T125-910x2420","material":"ダイライト","torisu":52,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"ZYU1520","genban_id":"DL-T125-910x2420","material":"ダイライト","torisu":20,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"ZYUE300","genban_id":"DL-T125-910x2420","material":"ダイライト","torisu":26,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"ZYUE310","genban_id":"DL-T125-910x2420","material":"ダイライト","torisu":57,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"ZYZ0240","genban_id":"DL-T125-910x2420","material":"ダイライト","torisu":54,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"TYU0790","genban_id":"DL-T125-910x2730","material":"ダイライト","torisu":19,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"TYU0800","genban_id":"DL-T125-910x2730","material":"ダイライト","torisu":21,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"ZYU4370","genban_id":"DL-T125-910x2730","material":"ダイライト","torisu":13,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"ZYU7770","genban_id":"DL-T125-910x2730","material":"ダイライト","torisu":20,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"ZYU8360","genban_id":"DL-T125-910x2730","material":"ダイライト","torisu":15,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"HGGE770","genban_id":"OSB-T012-1220x2440","material":"OSB","torisu":60,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"HGGE780","genban_id":"OSB-T012-1220x2440","material":"OSB","torisu":40,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"HLR0020","genban_id":"OSB-T012-1220x2440","material":"OSB","torisu":15,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"HLR0340","genban_id":"OSB-T012-1220x2440","material":"OSB","torisu":18,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"HLR0570","genban_id":"OSB-T012-1220x2440","material":"OSB","torisu":22,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"HLR0580","genban_id":"OSB-T012-1220x2440","material":"OSB","torisu":15,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"HLR0600","genban_id":"OSB-T012-1220x2440","material":"OSB","torisu":15,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"HLR0630","genban_id":"OSB-T012-1220x2440","material":"OSB","torisu":121,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"HLR0660","genban_id":"OSB-T012-1220x2440","material":"OSB","torisu":21,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"HLR0670","genban_id":"OSB-T012-1220x2440","material":"OSB","torisu":18,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"HLR0690","genban_id":"OSB-T012-1220x2440","material":"OSB","torisu":24,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"HLR0700","genban_id":"OSB-T012-1220x2440","material":"OSB","torisu":18,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"HLR0720","genban_id":"OSB-T012-1220x2440","material":"OSB","torisu":18,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"HLR0760","genban_id":"OSB-T012-1220x2440","material":"OSB","torisu":18,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"HLR0780","genban_id":"OSB-T012-1220x2440","material":"OSB","torisu":18,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"HLR0850","genban_id":"OSB-T012-1220x2440","material":"OSB","torisu":18,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"HLR0870","genban_id":"OSB-T012-1220x2440","material":"OSB","torisu":18,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"HLR0980","genban_id":"OSB-T012-1220x2440","material":"OSB","torisu":18,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"HLR1020","genban_id":"OSB-T012-1220x2440","material":"OSB","torisu":15,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"HLR1700","genban_id":"OSB-T012-1220x2440","material":"OSB","torisu":15,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"HLR1870","genban_id":"OSB-T012-1220x2440","material":"OSB","torisu":15,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"HLR1980","genban_id":"OSB-T012-1220x2440","material":"OSB","torisu":18,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"SPA0840","genban_id":"OSB-T012-1220x2440","material":"OSB","torisu":162,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"TYL9820","genban_id":"OSB-T012-1220x2440","material":"OSB","torisu":6,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"ZSR9870","genban_id":"PB-T009-910x1820","material":"パーチ","torisu":289,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"TDX0030","genban_id":"PB-T020-898x2128","material":"パーチ","torisu":6,"is_gaichu":true,"kanri_kubun":"通常","valid":true},{"hinban":"TDX0040","genban_id":"PB-T020-898x2128","material":"パーチ","torisu":6,"is_gaichu":true,"kanri_kubun":"通常","valid":true},{"hinban":"UDX0030","genban_id":"PB-T020-910x1820","material":"パーチ","torisu":25,"is_gaichu":true,"kanri_kubun":"通常","valid":true},{"hinban":"UDX0040","genban_id":"PB-T020-910x1820","material":"パーチ","torisu":25,"is_gaichu":true,"kanri_kubun":"通常","valid":true},{"hinban":"UDX0010","genban_id":"PB-T020-910x2440","material":"パーチ","torisu":20,"is_gaichu":true,"kanri_kubun":"通常","valid":true},{"hinban":"UDX0020","genban_id":"PB-T020-910x2440","material":"パーチ","torisu":20,"is_gaichu":true,"kanri_kubun":"通常","valid":true},{"hinban":"DLG6110","genban_id":"PLY-T002-910x1820","material":"ラワン合板","torisu":13,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"HGAE010","genban_id":"PLY-T002-910x1820","material":"ラワン合板","torisu":1485,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"ZQA3820","genban_id":"PLY-T002-910x1820","material":"ラワン合板","torisu":14,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"ZYH0040","genban_id":"PLY-T002-910x1820","material":"ラワン合板","torisu":26,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"ZYH0930","genban_id":"PLY-T002-910x1820","material":"ラワン合板","torisu":756,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"ZYH1230","genban_id":"PLY-T002-910x1820","material":"ラワン合板","torisu":26,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"ZYH1240","genban_id":"PLY-T002-910x1820","material":"ラワン合板","torisu":26,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"ZYH2020","genban_id":"PLY-T002-910x1820","material":"ラワン合板","torisu":28,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"ZYH2030","genban_id":"PLY-T002-910x1820","material":"ラワン合板","torisu":756,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"AOZ1080","genban_id":"PLY-T004-910x1820","material":"ラワン合板","torisu":108,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"AOZ1310","genban_id":"PLY-T004-910x1820","material":"ラワン合板","torisu":195,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"SIA1130","genban_id":"PLY-T004-910x1820","material":"ラワン合板","torisu":1,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"ZYI1430","genban_id":"PLY-T004-910x1820","material":"ラワン合板","torisu":416,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"ZYN1170","genban_id":"PLY-T004-910x1820","material":"ラワン合板","torisu":544,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"EJM0260","genban_id":"PLY-T009-910x1820","material":"針葉樹合板","torisu":68,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"EJM0280","genban_id":"PLY-T009-910x1820","material":"針葉樹合板","torisu":85,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"HUU5230","genban_id":"PLY-T009-910x1820","material":"針葉樹合板","torisu":32,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"SLA1760","genban_id":"PLY-T009-910x1820","material":"針葉樹合板","torisu":50,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"SPA0650","genban_id":"PLY-T009-910x1820","material":"針葉樹合板","torisu":44,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"SPA0710","genban_id":"PLY-T009-910x1820","material":"針葉樹合板","torisu":55,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"SPA0790","genban_id":"PLY-T009-910x1820","material":"針葉樹合板","torisu":88,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"TYJ0290","genban_id":"PLY-T009-910x1820","material":"針葉樹合板","torisu":8,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"TYJ2520","genban_id":"PLY-T009-910x1820","material":"針葉樹合板","torisu":40,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"TYJ8680","genban_id":"PLY-T009-910x1820","material":"針葉樹合板","torisu":28,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"TYL1570","genban_id":"PLY-T009-910x1820","material":"針葉樹合板","torisu":16,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"TYL1640","genban_id":"PLY-T009-910x1820","material":"針葉樹合板","torisu":16,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"TYL2040","genban_id":"PLY-T009-910x1820","material":"針葉樹合板","torisu":4,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"WPA2040","genban_id":"PLY-T009-910x1820","material":"針葉樹合板","torisu":126,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"ZPC4490","genban_id":"PLY-T009-910x1820","material":"針葉樹合板","torisu":50,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"ZPC5420","genban_id":"PLY-T009-910x1820","material":"針葉樹合板","torisu":98,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"ZPC5430","genban_id":"PLY-T009-910x1820","material":"針葉樹合板","torisu":55,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"ZYJ0540","genban_id":"PLY-T009-910x1820","material":"針葉樹合板","torisu":15,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"ZYJ0570","genban_id":"PLY-T009-910x1820","material":"針葉樹合板","torisu":16,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"ZYJ0960","genban_id":"PLY-T009-910x1820","material":"針葉樹合板","torisu":33,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"ZYJ2030","genban_id":"PLY-T009-910x1820","material":"針葉樹合板","torisu":50,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"ZYJ2760","genban_id":"PLY-T009-910x1820","material":"針葉樹合板","torisu":32,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"ZYJ3730","genban_id":"PLY-T009-910x1820","material":"針葉樹合板","torisu":4,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"ZYJ3740","genban_id":"PLY-T009-910x1820","material":"針葉樹合板","torisu":4,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"ZYJ8190","genban_id":"PLY-T009-910x1820","material":"針葉樹合板","torisu":8,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"ZZZE080","genban_id":"PLY-T009-910x1820","material":"針葉樹合板","torisu":30,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"ZZZE090","genban_id":"PLY-T009-910x1820","material":"針葉樹合板","torisu":30,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"AOZ4050","genban_id":"PLY-T012-910x1820","material":"針葉樹合板","torisu":85,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"HGP5060","genban_id":"PLY-T012-910x1820","material":"針葉樹合板","torisu":64,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"HGP6040","genban_id":"PLY-T012-910x1820","material":"針葉樹合板","torisu":32,"is_gaichu":true,"kanri_kubun":"外注別管理","valid":true},{"hinban":"HGP8060","genban_id":"PLY-T012-910x1820","material":"針葉樹合板","torisu":16,"is_gaichu":true,"kanri_kubun":"外注別管理","valid":true},{"hinban":"HGPE020","genban_id":"PLY-T012-910x1820","material":"針葉樹合板","torisu":80,"is_gaichu":true,"kanri_kubun":"外注別管理","valid":true},{"hinban":"HLG1010","genban_id":"PLY-T012-910x1820","material":"針葉樹合板","torisu":24,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"IHH4960","genban_id":"PLY-T012-910x1820","material":"針葉樹合板","torisu":294,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"SLR0450","genban_id":"PLY-T012-910x1820","material":"針葉樹合板","torisu":81,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"TYJ6440","genban_id":"PLY-T012-910x1820","material":"針葉樹合板","torisu":4,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"TYK0080","genban_id":"PLY-T012-910x1820","material":"針葉樹合板","torisu":8,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"TYK0100","genban_id":"PLY-T012-910x1820","material":"針葉樹合板","torisu":8,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"TYK0110","genban_id":"PLY-T012-910x1820","material":"針葉樹合板","torisu":8,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"TYK151L","genban_id":"PLY-T012-910x1820","material":"針葉樹合板","torisu":6,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"TYK2290","genban_id":"PLY-T012-910x1820","material":"針葉樹合板","torisu":4,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"TYK2320","genban_id":"PLY-T012-910x1820","material":"針葉樹合板","torisu":4,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"TYK2410","genban_id":"PLY-T012-910x1820","material":"針葉樹合板","torisu":8,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"TYK2440","genban_id":"PLY-T012-910x1820","material":"針葉樹合板","torisu":8,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"TYK5330","genban_id":"PLY-T012-910x1820","material":"針葉樹合板","torisu":8,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"TYKE760","genban_id":"PLY-T012-910x1820","material":"針葉樹合板","torisu":6,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"ZYAE650","genban_id":"PLY-T012-910x1820","material":"針葉樹合板","torisu":18,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"ZYAE660","genban_id":"PLY-T012-910x1820","material":"針葉樹合板","torisu":18,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"ZYH2050","genban_id":"PLY-T012-910x1820","material":"針葉樹合板","torisu":28,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"ZYH2060","genban_id":"PLY-T012-910x1820","material":"針葉樹合板","torisu":18,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"ZYI818E","genban_id":"PLY-T012-910x1820","material":"針葉樹合板","torisu":338,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"ZYK1480","genban_id":"PLY-T012-910x1820","material":"針葉樹合板","torisu":76,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"ZYKE030","genban_id":"PLY-T012-910x1820","material":"針葉樹合板","torisu":4,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"TDR5010","genban_id":"PLY-T015-910x1820","material":"針葉樹合板","torisu":323,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"TDR5050","genban_id":"PLY-T015-910x1820","material":"針葉樹合板","torisu":306,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"ZYG601E","genban_id":"PLY-T015-910x1820","material":"針葉樹合板","torisu":55,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"EDG2420","genban_id":"PLY-T020-910x1820","material":"針葉樹合板","torisu":1,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"TDS0010","genban_id":"PLY-T020-910x1820","material":"針葉樹合板","torisu":17,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"TDT0030","genban_id":"PLY-T020-910x1820","material":"針葉樹合板","torisu":243,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"TDV7540","genban_id":"PLY-T020-910x1820","material":"針葉樹合板","torisu":21,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"HGP8240","genban_id":"PLY-T055-910x1820","material":"ラワン合板","torisu":242,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"PNB4640","genban_id":"PLY-T055-910x1820","material":"ラワン合板","torisu":42,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"ZYI0100","genban_id":"PLY-T055-910x1820","material":"ラワン合板","torisu":323,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"ZYJF510","genban_id":"PLY-T055-910x1820","material":"ラワン合板","torisu":16,"is_gaichu":false,"kanri_kubun":"通常","valid":true},{"hinban":"ZYJF570","genban_id":"PLY-T055-910x1820","material":"ラワン合板","torisu":16,"is_gaichu":false,"kanri_kubun":"通常","valid":true}],"gaichu":[{"hinban":"HGP8060","genban_id":"PLY-T012-910x1820","torisu":16,"yama_tanni":100,"lt_days":7,"ss_days":2,"hatchusaki":"建材屋→外注直送","nichi_heikin":15.8,"kanri_kubun":"外注","valid":true},{"hinban":"HGP6040","genban_id":"PLY-T012-910x1820","torisu":32,"yama_tanni":50,"lt_days":7,"ss_days":2,"hatchusaki":"建材屋→外注直送","nichi_heikin":5.15,"kanri_kubun":"外注","valid":true},{"hinban":"HGPE020","genban_id":"PLY-T012-910x1820","torisu":80,"yama_tanni":40,"lt_days":7,"ss_days":2,"hatchusaki":"建材屋→外注直送","nichi_heikin":4.46,"kanri_kubun":"外注","valid":true},{"hinban":"UDX0010","genban_id":"PB-T020-910x2440","torisu":20,"yama_tanni":50,"lt_days":7,"ss_days":2,"hatchusaki":"建材屋→外注直送","nichi_heikin":6.03,"kanri_kubun":"外注","valid":true},{"hinban":"UDX0020","genban_id":"PB-T020-910x2440","torisu":20,"yama_tanni":50,"lt_days":7,"ss_days":2,"hatchusaki":"建材屋→外注直送","nichi_heikin":5.98,"kanri_kubun":"外注","valid":true},{"hinban":"UDX0030","genban_id":"PB-T020-910x1820","torisu":25,"yama_tanni":50,"lt_days":7,"ss_days":2,"hatchusaki":"建材屋→外注直送","nichi_heikin":0.63,"kanri_kubun":"外注","valid":true},{"hinban":"UDX0040","genban_id":"PB-T020-910x1820","torisu":25,"yama_tanni":50,"lt_days":7,"ss_days":2,"hatchusaki":"建材屋→外注直送","nichi_heikin":0.62,"kanri_kubun":"外注","valid":true},{"hinban":"TDX0030","genban_id":"PB-T020-898x2128","torisu":6,"yama_tanni":50,"lt_days":7,"ss_days":2,"hatchusaki":"建材屋→外注直送","nichi_heikin":6.09,"kanri_kubun":"外注","valid":true},{"hinban":"TDX0040","genban_id":"PB-T020-898x2128","torisu":6,"yama_tanni":50,"lt_days":7,"ss_days":2,"hatchusaki":"建材屋→外注直送","nichi_heikin":6.34,"kanri_kubun":"外注","valid":true}]};
+
+/* ============ 表示名対応（機械可読key→日本語） ============ */
+const LABELS = {
+  board:{genban_id:"原盤ID",name:"材料名",material:"材質",size:"サイズ",yama_tanni:"山単位",order_unit_yama:"発注単位山",lt_days:"LT(日)",ss_days:"SS(日)",order_method:"発注方式",supply_type:"支給区分",valid:"有効",note:"備考"},
+  item:{hinban:"品番",genban_id:"使用原盤",material:"材質",torisu:"取数",is_gaichu:"外注",kanri_kubun:"管理区分",stock_unit:"在庫単位",order_group:"発注グループ",valid:"有効"},
+  gaichu:{hinban:"品番",genban_id:"使用原盤",torisu:"取数",yama_tanni:"山単位",lt_days:"LT(日)",ss_days:"SS(日)",hatchusaki:"発注先",nichi_heikin:"日平均",stock_unit:"在庫単位",order_group:"発注グループ",kanri_kubun:"管理区分",valid:"有効"}
+};
+const COLS = {board:Object.keys(LABELS.board), item:Object.keys(LABELS.item), gaichu:Object.keys(LABELS.gaichu)};
+
+/* ============ 状態 ============ */
+let M = JSON.parse(JSON.stringify(V3_MASTER));   // {board:[],item:[],gaichu:[]}
+let method="stock", drillMode="acc", inv={}, prodInv={}, openRow=null, masterTabSel="board";
+// 方式: "stock"=在庫枯渇型 / "cum"=累計山到達 / "avg"=移動平均
+// 原盤ごとの方式上書き（マスターの order_method 列。未指定なら全体methodに従う）
+
+/* サンプル投入（実CSV由来の規模感） */
+const SAMPLE_INPUT = [
+  ["20260413","TDT0030",1200],["20260414","TDT0030",980],["20260415","TDT0030",1100],["20260416","TDT0030",900],["20260417","TDT0030",1050],["20260420","TDT0030",1200],["20260421","TDT0030",870],["20260422","TDT0030",1000],
+  ["20260413","IHH4960",900],["20260414","IHH4960",1100],["20260415","IHH4960",850],["20260416","IHH4960",1000],["20260417","IHH4960",950],["20260420","IHH4960",1050],["20260421","IHH4960",800],["20260422","IHH4960",900],
+  ["20260413","ZSR9870",250],["20260414","ZSR9870",268],["20260415","ZSR9870",248],["20260416","ZSR9870",304],["20260417","ZSR9870",224],["20260420","ZSR9870",343],["20260421","ZSR9870",243],["20260422","ZSR9870",170],
+  ["20260414","ZZZE080",300],["20260417","ZZZE080",300],["20260421","ZZZE080",300],
+  ["20260413","HGP8060",200],["20260414","HGP8060",240],["20260415","HGP8060",260],["20260416","HGP8060",180],["20260417","HGP8060",240],["20260420","HGP8060",260],["20260421","HGP8060",140],
+  ["20260413","HGP6040",200],["20260414","HGP6040",220],["20260415","HGP6040",220],["20260416","HGP6040",140],["20260417","HGP6040",220],["20260420","HGP6040",200],["20260421","HGP6040",120],
+  ["20260413","UDX0010",420],["20260415","UDX0010",410],["20260417","UDX0010",430],["20260420","UDX0010",400],["20260421","UDX0010",390],
+  ["20260519","ZYZ0240",7],["20260520","ZYZ0240",30],["20260521","ZYZ0240",25],["20260522","ZYZ0240",40],["20260525","ZYZ0240",35]
+];
+let INPUT = SAMPLE_INPUT.map(r=>({d:parseYmd(r[0]),hin:r[1],qty:r[2]}));
+
+/* ============ ユーティリティ ============ */
+function parseYmd(s){ s=String(s).replace(/\D/g,""); if(s.length!==8)return null; return new Date(+s.slice(0,4),+s.slice(4,6)-1,+s.slice(6,8)); }
+function fmt(d){ if(!d)return""; return d.getFullYear()+"/"+String(d.getMonth()+1).padStart(2,"0")+"/"+String(d.getDate()).padStart(2,"0"); }
+function isWorkday(d){ const w=d.getDay(); return w!==0&&w!==6; }
+function addWorkdays(d,n){ let dt=new Date(d),step=n>=0?1:-1,left=Math.abs(n); while(left>0){dt.setDate(dt.getDate()+step); if(isWorkday(dt))left--;} return dt; }
+function prevWorkday(d){ let dt=new Date(d); do{dt.setDate(dt.getDate()-1);}while(!isWorkday(dt)); return dt; }
+function ceilDiv(a,b){ return Math.ceil(a/b); }
+
+/* マスター解決 */
+function itemInfo(hin){ return M.item.find(i=>i.hinban===hin && i.valid!==false); }
+function gaichuInfo(hin){ return M.gaichu.find(g=>g.hinban===hin && g.valid!==false); }
+function boardInfo(gid){ return M.board.find(b=>b.genban_id===gid && b.valid!==false); }
+function ltDays(b){ if(document.getElementById('ltOverride').checked) return +document.getElementById('ltSlider').value; return b&&b.lt_days!=null?b.lt_days:3; }
+function ssDays(b){ if(document.getElementById('ssOverride').checked) return +document.getElementById('ssSlider').value; return b&&b.ss_days!=null?b.ss_days:1; }
+function methodOf(b){ // 原盤個別方式があればそれを、なければ全体method
+  const m = b && b.order_method;
+  if(m==="在庫枯渇"||m==="stock") return "stock";
+  if(m==="累計山到達"||m==="cum") return "cum";
+  if(m==="移動平均"||m==="avg") return "avg";
+  return method; // 全体デフォルト
+}
+// 在庫管理単位：品番別(true)か原盤単位(false)か。分類別ON/OFF＋個別上書き。
+// 設定優先：品番個別(item.stock_unit) > 分類別(stockUnitByKubun) > 全体(stockUnitGlobal)
+let stockUnitGlobal="board"; // "board"=原盤単位 / "hin"=品番別
+let stockUnitByKubun={内製:"board", 外注:"hin"}; // 分類別デフォルト
+function stockUnitOf(hin,kubun,itemRec){
+  if(itemRec && itemRec.stock_unit && itemRec.stock_unit!=="auto") return itemRec.stock_unit; // 個別
+  if(stockUnitByKubun[kubun]) return stockUnitByKubun[kubun]; // 分類別
+  return stockUnitGlobal; // 全体
+}
+// 発注グループキー：手動グループ名(order_group)があればそれ、無ければ 原盤ID+取数
+function orderGroupKey(gid,torisu,rec){
+  if(rec && rec.order_group) return "G:"+rec.order_group;
+  return gid+"#"+torisu;
+}
+function allGenban(){ const s=new Set(); M.board.forEach(b=>{if(b.valid!==false)s.add(b.genban_id);}); return [...s]; }
+function yamaOf(gid){ const b=boardInfo(gid); return b?b.yama_tanni:1; }
+
+/* ============ 計算コア（根拠trace付き） ============ */
+function compute(){
+  const baseDate=parseYmd(document.getElementById('baseDate').value.replace(/-/g,""));
+  const WIN=+document.getElementById('winSlider').value;
+  const unreg=[], byG={};
+  for(const row of INPUT){
+    // 外注は別管理を優先参照
+    let gi=gaichuInfo(row.hin), it=itemInfo(row.hin), gid, torisu, b, lt, ss, src;
+    if(gi){ const baseGid=gi.genban_id; gid=baseGid+"@外注"; torisu=gi.torisu; b=boardInfo(baseGid)||{}; lt=document.getElementById('ltOverride').checked?+ltSlider.value:gi.lt_days; ss=document.getElementById('ssOverride').checked?+ssSlider.value:gi.ss_days; src="外注"; var yama=gi.yama_tanni||(b.yama_tanni||1); var kubun="外注"; var rec=gi; }
+    else if(it){ if(it.kanri_kubun==="別管理"){ unreg.push({hin:row.hin,reason:"別管理品（原盤で出荷）"}); continue; } gid=it.genban_id; torisu=it.torisu; b=boardInfo(gid); if(!b){ unreg.push({hin:row.hin,reason:"原盤マスター未登録: "+gid}); continue; } lt=ltDays(b); ss=ssDays(b); src="内製"; var yama=b.yama_tanni; var kubun="内製"; var rec=it; }
+    else { unreg.push({hin:row.hin,reason:"カット品マスター未登録"}); continue; }
+    if(!torisu){ unreg.push({hin:row.hin,reason:"取数未設定"}); continue; }
+    const need=ceilDiv(row.qty,torisu);
+    byG[gid]=byG[gid]||{genban:gid,baseGenban:(gi?gi.genban_id:gid),kubun:kubun,yama:yama,orderUnit:(b&&b.order_unit_yama)||1,lt:lt,ss:ss,name:(b&&b.name)||"",board:b,days:{},trace:[],hins:new Set(),byHin:{}};
+    const dk=+row.d;
+    byG[gid].days[dk]=(byG[gid].days[dk]||0)+need;
+    // 品番別の日別出荷（在庫枯渇型で使用）
+    byG[gid].byHin[row.hin]=byG[gid].byHin[row.hin]||{torisu:torisu,days:{},stockUnit:stockUnitOf(row.hin,kubun,rec),groupKey:orderGroupKey(gid,torisu,rec),groupName:(rec&&rec.order_group)||""};
+    byG[gid].byHin[row.hin].days[dk]=(byG[gid].byHin[row.hin].days[dk]||0)+row.qty;
+    byG[gid].trace.push({dk:dk,hin:row.hin,qty:row.qty,torisu:torisu,need:need,src:src});
+    byG[gid].hins.add(row.hin);
+  }
+  const orders=[];
+  for(const gid in byG){
+    const g=byG[gid], stock=inv[gid]||0;
+    const dates=Object.keys(g.days).map(Number).sort((a,b)=>a-b);
+    const avg=listAvg(g.days);
+    const ssBuf=Math.round(g.ss*avg);
+    g.trace.sort((a,b)=>a.dk-b.dk || (a.hin<b.hin?-1:1));
+    const useMethod = methodOf(g.board); // 原盤個別方式 or 全体
+    if(useMethod==="stock"){
+      // ===== 在庫枯渇型（日別 在庫繰越方式・連続発注対応）=====
+      // 在庫管理単位：原盤単位 or 品番別(合算グループ)。品番別は同一グループ(原盤+取数 or 手動名)でまとめる。
+      const hinKeys=Object.keys(g.byHin);
+      const allDates = dates;
+      // 品番を「在庫単位」でグループ分け
+      // 原盤単位の品番 → グループキー "BOARD"（全部まとめて原盤在庫を共有）
+      // 品番別の品番   → グループキー = byHin.groupKey（合算グループごと）
+      const groups={}; // gkey -> {members:[hin], torisu, groupName, isHin}
+      for(const h of hinKeys){
+        const info=g.byHin[h];
+        const isHin = info.stockUnit==="hin";
+        const gkey = isHin ? info.groupKey : "BOARD";
+        groups[gkey]=groups[gkey]||{members:[],torisu:info.torisu,groupName:info.groupName,isHin};
+        groups[gkey].members.push(h);
+      }
+      // グループごとに在庫枯渇シミュレーション
+      for(const gkey in groups){
+        const grp=groups[gkey];
+        const members=grp.members;
+        // このグループが使う原盤在庫：原盤単位は inv[gid]、品番別は inv[gid|gkey]（グループ別在庫）
+        const invKey = grp.isHin ? (gid+"|"+gkey) : gid;
+        const grpStock = inv[invKey]||0;
+        const hinState={}; members.forEach(h=>hinState[h]={prodStock:(prodInv[h]||0),torisu:g.byHin[h].torisu});
+        const ssSheets=g.ss;
+        let boardStock=grpStock;
+        const trace2=[];
+        const firedOrders=[];
+        for(const dk of allDates){
+          for(const h of members){
+            const q=g.byHin[h].days[dk]||0; if(!q) continue;
+            const st=hinState[h];
+            const prodBefore=st.prodStock;
+            const tmp=prodBefore-q;
+            let consume=0,prodAfter;
+            if(tmp>=0){consume=0;prodAfter=tmp;} else {consume=ceilDiv(-tmp,st.torisu);prodAfter=prodBefore-q+consume*st.torisu;}
+            st.prodStock=prodAfter;
+            const boardBefore=boardStock;
+            let boardAfter=boardBefore-consume;
+            let orderInfo=null;
+            if(boardAfter<ssSheets){
+              const shortage=ssSheets-boardAfter;
+              const oy=ceilDiv(Math.max(shortage,1),g.yama), rounded=ceilDiv(oy,g.orderUnit)*g.orderUnit;
+              const replenish=rounded*g.yama;
+              const reach=new Date(dk),wish=prevWorkday(reach),limit=addWorkdays(wish,-g.lt);
+              orderInfo={dk,rounded,sheets:replenish,reach,wish,limit,boardBeforeOrder:boardAfter};
+              boardAfter=boardAfter+replenish;
+              firedOrders.push(orderInfo);
+            }
+            boardStock=boardAfter;
+            const prodFormula=consume>0?`${prodBefore}−${q}+${consume}×${st.torisu}=${prodAfter}`:`${prodBefore}−${q}=${prodAfter}`;
+            const boardFormula=orderInfo?`${boardBefore}−${consume}=${orderInfo.boardBeforeOrder}（発注+${orderInfo.sheets}）→${boardAfter}`:`${boardBefore}−${consume}=${boardAfter}`;
+            trace2.push({dk,hin:h,qty:q,torisu:st.torisu,prodBefore,prodAfter,consume,prodFormula,boardBefore,boardAfter,ordered:!!orderInfo,boardFormula});
+          }
+        }
+        const cand=firedOrders.find(o=>o.reach>=baseDate);
+        if(cand){
+          const memberStr=members.join(", ");
+          const grpLabel = grp.isHin ? (grp.groupName?`外注G:${grp.groupName}`:`外注:${members.join("/")}`) : "原盤単位";
+          orders.push({genban:gid,baseGenban:g.baseGenban,kubun:g.kubun,name:g.name,
+            hins:memberStr, groupLabel:grpLabel, isHinUnit:grp.isHin,
+            reach:cand.reach,wish:cand.wish,limit:cand.limit,orderYama:cand.rounded,sheets:cand.sheets,yama:g.yama,lt:g.lt,ss:g.ss,stock:grpStock,ssBuf,method:"在庫枯渇",shortStock:(grpStock<=0),
+            orderCount:firedOrders.length, firstFiredBeforeBase:firedOrders.length>0&&firedOrders[0].reach<baseDate,
+            detail:`SS${ssSheets}枚を割った時点で発注（発注${cand.rounded}山=${cand.sheets}枚を補充）。${grp.isHin?"品番別在庫":"原盤単位"}。期間内の発注回数 ${firedOrders.length} 回。`,
+            trace:trace2.slice()});
+        }
+      }
+    } else if(useMethod==="cum"){
+      let cum=0,prev=0;
+      const dayCum={}; let c=0; dates.forEach(dk=>{c+=g.days[dk]; dayCum[dk]=c;});
+      for(const dk of dates){
+        cum=dayCum[dk]; const net=cum-stock+ssBuf;
+        const nowY=net>0?Math.floor(net/g.yama):0; const oy=nowY-prev;
+        if(oy>0){
+          const rounded=ceilDiv(oy,g.orderUnit)*g.orderUnit;
+          const reach=new Date(dk), wish=prevWorkday(reach), limit=addWorkdays(wish,-g.lt);
+          if(reach>=baseDate){
+            orders.push({genban:gid,baseGenban:g.baseGenban,kubun:g.kubun,name:g.name,hins:[...g.hins].join(", "),reach,wish,limit,orderYama:rounded,sheets:rounded*g.yama,yama:g.yama,lt:g.lt,ss:g.ss,stock,ssBuf,method:"累計",
+              trace:g.trace.map(t=>({...t,cum:dayCum[t.dk],reached:t.dk===dk}))});
+          }
+          prev=nowY;
+        }
+      }
+    } else {
+      const threshold=avg*(g.lt+g.ss), total=dates.reduce((s,dk)=>s+g.days[dk],0), net=total-stock;
+      if(net>=threshold&&threshold>0){
+        const oy=ceilDiv(Math.max(net,threshold),g.yama), rounded=ceilDiv(oy,g.orderUnit)*g.orderUnit;
+        const first=new Date(dates[0]);
+        orders.push({genban:gid,baseGenban:g.baseGenban,kubun:g.kubun,name:g.name,hins:[...g.hins].join(", "),reach:first,wish:prevWorkday(first),limit:addWorkdays(first,-g.lt),
+          orderYama:rounded,sheets:rounded*g.yama,yama:g.yama,lt:g.lt,ss:g.ss,stock,ssBuf,method:"移動平均",
+          detail:`平均${avg.toFixed(1)}枚/日×(LT${g.lt}+SS${g.ss})=閾値${threshold.toFixed(0)}枚 / 正味需要${net}枚`,
+          trace:g.trace.map(t=>({...t,cum:null,reached:false}))});
+      }
+    }
+  }
+  orders.sort((a,b)=>(a.wish-b.wish)||(a.genban<b.genban?-1:1));
+  // 在庫入力欄用に全集計対象を記録（原盤単位＋品番別グループ）
+  window._allG={};
+  for(const gid in byG){
+    const g=byG[gid];
+    // 品番を在庫単位でグループ化（compute内と同じロジック）
+    const seen={};
+    for(const h in g.byHin){
+      const info=g.byHin[h];
+      if(info.stockUnit==="hin"){
+        const invKey=gid+"|"+info.groupKey;
+        if(!seen[invKey]){ seen[invKey]=1; window._allG[invKey]={kubun:g.kubun,yama:g.yama,label:(info.groupName?("外注G:"+info.groupName):("外注:"+h)),isHin:true,members:[h]}; }
+        else window._allG[invKey].members.push(h);
+      } else {
+        if(!seen[gid]){ seen[gid]=1; window._allG[gid]={kubun:g.kubun,yama:g.yama,label:gid.replace("@外注",""),isHin:false}; }
+      }
+    }
+  }
+  const seen={},u=[]; unreg.forEach(x=>{if(!seen[x.hin+x.reason]){seen[x.hin+x.reason]=1;u.push(x);}});
+  return {orders,unreg:u,count:Object.keys(byG).length};
+}
+function listAvg(o){ const v=Object.values(o); return v.length?v.reduce((a,b)=>a+b,0)/v.length:0; }
+
+/* ============ 描画 ============ */
+function gradeClass(y){ return y>=3?"g3":(y>=2?"g2":"g1"); }
+function gradePill(y){ const c=y>=3?"danger":(y>=2?"warn":"ok"); return `<span class="pill ${c}">${y}山</span>`; }
+
+function render(){
+  const res=compute(); window._res=res;
+  const s=document.getElementById('summary');
+  const shortN=res.orders.filter(o=>o.shortStock).length;
+  s.innerHTML=`<div class="s">処理原盤数<b>${res.count}</b></div>
+    <div class="s link" onclick="showOrderSummary()">発注候補<b>${res.orders.length}</b></div>
+    <div class="s link" onclick="switchTab('unreg')">確認対象<b>${res.unreg.length}</b></div>
+    <div class="s">合計発注枚数<b>${res.orders.reduce((a,o)=>a+o.sheets,0).toLocaleString()}</b></div>
+    <div class="s">全体方式<b style="font-size:14px">${method==="stock"?"③ 在庫枯渇":method==="cum"?"① 累計":"② 移動平均"}</b></div>
+    ${shortN?`<div class="s" style="color:var(--danger)">在庫未設定<b style="color:var(--danger)">⚠ ${shortN}</b></div>`:""}`;
+  if(method==="stock" && shortN){ const w=document.getElementById('stockWarn'); if(w) w.style.display=""; }
+  else { const w=document.getElementById('stockWarn'); if(w) w.style.display="none"; }
+  renderOrders(res); renderUnreg(res); renderMaster();
+  // 在庫欄を最新の集計対象（区分付き）に追従（入力中のフォーカスを邪魔しないよう件数変化時のみ）
+  const curN=document.querySelectorAll('#invTable tbody tr').length;
+  const tgtN=Object.keys(window._allG||{}).length;
+  if(tgtN && curN!==tgtN) renderInvTable();
+}
+function renderOrders(res){
+  const ot=document.getElementById('orderTable');
+  if(!res.orders.length){ ot.innerHTML=`<tbody><tr><td class="empty">発注候補なし（基準日以降に山単位到達なし／需要が閾値未満）</td></tr></tbody>`; return; }
+  let h=`<thead><tr><th class="l">区分</th><th class="l">原盤ID</th><th class="l">対象品番</th><th>山単位</th><th>発注山数</th><th>発注枚数</th><th>到達/起点日</th><th>納品希望日</th><th>LT/SS</th><th>発注期限日</th></tr></thead><tbody>`;
+  res.orders.forEach((o,i)=>{
+    const hinShort=o.hins.length>26?o.hins.slice(0,26)+"…":o.hins;
+    const warn = o.shortStock ? `<span class="pill danger" title="初期原盤在庫が不足（マイナス）。在庫を設定してください" style="margin-left:5px">⚠在庫未設定</span>` : "";
+    const kubunPill = o.kubun==="外注" ? `<span class="pill warn">外注</span>` : `<span class="pill ok">内製</span>`;
+    const dispGid = o.genban.replace("@外注","");
+    const grpTag = o.isHinUnit ? `<span class="srcbadge" title="品番別在庫グループ">${o.groupLabel}</span>` : "";
+    h+=`<tr class="${gradeClass(o.orderYama)} clickable" onclick="onRowClick(${i})">
+      <td class="l">${kubunPill}</td>
+      <td class="l mono">▸ ${dispGid}${warn} ${grpTag}</td><td class="l mono" title="${o.hins}">${hinShort}</td>
+      <td>${o.yama}</td><td>${gradePill(o.orderYama)}</td><td>${o.sheets.toLocaleString()}</td>
+      <td class="mono">${fmt(o.reach)}</td><td class="mono">${fmt(o.wish)}</td><td>${o.lt}/${o.ss}</td>
+      <td class="mono" style="color:var(--danger);font-weight:700">${fmt(o.limit)}</td></tr>`;
+    if(drillMode==="acc"&&openRow===i){ h+=`<tr class="drill"><td colspan="10"><div class="inner">${drillHTML(o)}</div></td></tr>`; }
+  });
+  ot.innerHTML=h+"</tbody>";
+}
+function drillHTML(o){
+  let h=`<div style="margin-bottom:6px;font-size:12px;color:var(--muted)">発注根拠：初期原盤在庫 ${o.stock}枚 / SS ${o.ss}枚。${o.detail?o.detail:"累計が山単位"+o.yama+"枚をまたいだ時点で発注。"}</div>`;
+  if(o.method==="在庫枯渇"){
+    const warnNote = o.shortStock ? `<div class="warnbox">⚠ この原盤は初期在庫が0です。左の「原盤別 現在庫」に実在庫を入力すると、発注時期がより正確になります。</div>` : "";
+    const baseNote = o.firstFiredBeforeBase ? `<div class="okbox">基準日より前にもSS割れ（発注）がありましたが、発注済みとみなして在庫を補充し、基準日以降の発注を候補にしています。期間内の発注回数 ${o.orderCount} 回。</div>` : "";
+    h=`<div style="margin-bottom:6px;font-size:12px;color:var(--muted)">発注根拠：初期原盤在庫 ${o.stock}枚 / SS ${o.ss}枚。製品在庫を先に使い、足りない分だけ原盤を開封（取数ぶん補充）。原盤在庫は品番ごとに1行ずつ差し引き、SSを割ると発注（発注ぶんを補充して継続）。</div>${warnNote}${baseNote}`;
+    h+=`<table><thead><tr><th class="l">納入指示日</th><th class="l">品番</th><th>取数</th><th>製品在庫(前)</th><th>当日使用</th><th>当日原盤消費</th><th>製品在庫(後)</th><th class="l">製品計算式</th><th>原盤在庫(前)</th><th>原盤在庫(後)</th><th class="l">原盤計算式</th></tr></thead><tbody>`;
+    o.trace.forEach(t=>{
+      h+=`<tr class="${t.ordered?'reached':''}"><td class="l mono">${fmt(new Date(t.dk))}</td><td class="l mono">${t.hin}</td>
+        <td>${t.torisu}</td><td>${t.prodBefore}</td><td>${t.qty.toLocaleString()}</td><td class="mono" style="${t.consume>0?'color:var(--accent2);font-weight:700':''}">${t.consume}</td><td>${t.prodAfter}</td>
+        <td class="l mono" style="font-size:11px">${t.prodFormula}</td>
+        <td class="mono">${t.boardBefore}</td>
+        <td class="mono" style="${t.boardAfter<0?'color:var(--danger);font-weight:700':''}">${t.boardAfter}${t.ordered?" ◀発注":""}</td>
+        <td class="l mono" style="font-size:11px">${t.boardFormula}</td></tr>`;
+    });
+    return h+"</tbody></table>";
+  }
+  h+=`<table><thead><tr><th class="l">納入指示日</th><th class="l">品番</th><th class="l">区分</th><th>製品数</th><th>取数</th><th>必要原盤数</th>${o.method==="累計"?"<th>累計原盤</th>":""}</tr></thead><tbody>`;
+  o.trace.forEach(t=>{
+    h+=`<tr class="${t.reached?'reached':''}"><td class="l mono">${fmt(new Date(t.dk))}</td><td class="l mono">${t.hin}</td><td class="l">${t.src}</td>
+      <td>${t.qty.toLocaleString()}</td><td>${t.torisu}</td><td>${t.need}</td>${o.method==="累計"?`<td class="mono">${t.cum}${t.reached?" ◀到達":""}</td>`:""}</tr>`;
+  });
+  return h+"</tbody></table>";
+}
+function onRowClick(i){
+  if(drillMode==="modal"){ const o=window._res.orders[i]; openModal(`${o.genban}　発注根拠`, drillHTML(o)); }
+  else { openRow=(openRow===i?null:i); renderOrders(window._res); }
+}
+function renderUnreg(res){
+  const ut=document.getElementById('unregTable');
+  ut.innerHTML=res.unreg.length?`<thead><tr><th class="l">品番</th><th class="l">例外種別</th></tr></thead><tbody>`+
+    res.unreg.map(u=>`<tr><td class="l mono">${u.hin}</td><td class="l">${u.reason}</td></tr>`).join("")+"</tbody>"
+    :`<tbody><tr><td class="empty">確認対象なし</td></tr></tbody>`;
+}
+
+/* ===== マスター編集 ===== */
+function renderMaster(){
+  const t=masterTabSel, cols=COLS[t], data=M[t];
+  const q=(document.getElementById('masterSearch').value||"").toLowerCase();
+  const mt=document.getElementById('masterTable');
+  let h=`<thead><tr>${cols.map(c=>`<th class="${typeof data[0]?.[c]==='string'||c.includes('id')||c==='hinban'||c==='name'?'l':''}">${LABELS[t][c]}</th>`).join("")}<th>削除</th></tr></thead><tbody>`;
+  data.forEach((row,idx)=>{
+    const hay=Object.values(row).join(" ").toLowerCase();
+    if(q && !hay.includes(q)) return;
+    h+=`<tr class="editrow ${row.valid===false?'flagoff':''}">`;
+    cols.forEach(c=>{
+      const v=row[c];
+      if(c==="valid"){ h+=`<td class="l"><input type="checkbox" ${v!==false?'checked':''} onchange="editMaster('${t}',${idx},'valid',this.checked)"></td>`; }
+      else if(c==="is_gaichu"){ h+=`<td class="l"><input type="checkbox" ${v?'checked':''} onchange="editMaster('${t}',${idx},'is_gaichu',this.checked)"></td>`; }
+      else if(c==="order_method"){ const opts=["","在庫枯渇","累計山到達","移動平均"]; h+=`<td class="l"><select style="width:110px;font-size:11px" onchange="editMaster('${t}',${idx},'order_method',this.value)">${opts.map(o=>`<option value="${o}" ${(""+(v||""))===o?'selected':''}>${o||"（全体に従う）"}</option>`).join("")}</select></td>`; }
+      else if(c==="stock_unit"){ const opts=[["","（分類に従う）"],["board","原盤単位"],["hin","品番別"]]; h+=`<td class="l"><select style="width:100px;font-size:11px" onchange="editMaster('${t}',${idx},'stock_unit',this.value)">${opts.map(o=>`<option value="${o[0]}" ${(""+(v||""))===o[0]?'selected':''}>${o[1]}</option>`).join("")}</select></td>`; }
+      else { const isNum=typeof v==='number'; h+=`<td class="${isNum?'':'l'}"><input type="${isNum?'number':'text'}" value="${v==null?'':v}" style="width:${isNum?70:c.includes('id')||c==='name'?150:90}px" onchange="editMaster('${t}',${idx},'${c}',this.value)"></td>`; }
+    });
+    h+=`<td><button class="btn sm" style="background:var(--danger)" onclick="delMasterRow('${t}',${idx})">×</button></td></tr>`;
+  });
+  mt.innerHTML=h+"</tbody>";
+}
+function editMaster(t,idx,col,val){
+  const cur=M[t][idx][col];
+  if(typeof cur==='number'){ val=val===''?null:+val; }
+  M[t][idx][col]=val;
+  saveState(); renderInvTable(); render();
+}
+function addMasterRow(){
+  const t=masterTabSel, blank={}; COLS[t].forEach(c=>{ blank[c]=(c==='valid')?true:(c==='is_gaichu')?false:(c==='order_unit_yama')?1:""; });
+  M[t].unshift(blank); renderMaster();
+}
+function delMasterRow(t,idx){ if(!confirm("この行を削除します。よろしいですか？（廃止だけなら有効チェックを外してください）"))return; M[t].splice(idx,1); renderInvTable(); render(); }
+function exportMasterCSV(){
+  const t=masterTabSel, cols=COLS[t];
+  let csv=cols.map(c=>LABELS[t][c]).join(",")+"\n";
+  M[t].forEach(r=>{ csv+=cols.map(c=>{ let v=r[c]; if(v===true)v="TRUE"; if(v===false)v="FALSE"; if(v==null)v=""; return /[",]/.test(""+v)?'"'+v+'"':v; }).join(",")+"\n"; });
+  dl(csv, t+"_master.csv");
+}
+
+/* ===== 在庫 ===== */
+function invTargets(){
+  const set=new Map();
+  if(window._allG){ for(const gid in window._allG){ set.set(gid, window._allG[gid]); } }
+  if(!set.size){ M.board.forEach(b=>{ if(b.valid!==false) set.set(b.genban_id,{kubun:"内製",yama:b.yama_tanni,label:b.genban_id,isHin:false}); }); }
+  return set;
+}
+function renderInvTable(){
+  const set=invTargets();
+  let rows="";
+  for(const [key,info] of set){
+    inv[key]=inv[key]||0;
+    const disp=info.label||key.replace("@外注","");
+    const pill=info.kubun==="外注"?`<span class="pill warn" style="font-size:10px">外</span>`:`<span class="pill ok" style="font-size:10px">内</span>`;
+    const unitTag=info.isHin?`<span class="srcbadge" style="font-size:9px">品番別</span>`:"";
+    rows+=`<tr><td class="l mono">${pill} ${disp} ${unitTag}</td><td>${info.yama}</td><td><input type="number" min="0" value="${inv[key]}" data-g="${key}" onchange="inv[this.dataset.g]=+this.value;saveState();render()"></td></tr>`;
+  }
+  document.querySelector('#invTable tbody').innerHTML=rows;
+  renderProdInvTable();
+}
+function applyInvBulk(){
+  const v=+document.getElementById('invBulk').value||0;
+  for(const [gid] of invTargets()){ inv[gid]=v; }
+  saveState(); renderInvTable(); render();
+}
+function renderProdInvTable(){
+  const tb=document.querySelector('#prodInvTable tbody'); if(!tb) return;
+  const items=M.item.filter(i=>i.valid!==false).concat(M.gaichu.filter(g=>g.valid!==false));
+  tb.innerHTML=items.map(i=>{
+    const h=i.hinban; prodInv[h]=prodInv[h]||0;
+    return `<tr><td class="l mono">${h}</td><td>${i.torisu}</td><td><input type="number" min="0" value="${prodInv[h]}" data-h="${h}" onchange="prodInv[this.dataset.h]=+this.value;saveState();render()"></td></tr>`;
+  }).join("");
+}
+function applyProdBulk(){
+  const v=+document.getElementById('prodBulk').value||0;
+  M.item.concat(M.gaichu).forEach(i=>{ prodInv[i.hinban]=v; });
+  saveState(); renderProdInvTable(); render();
+}
+
+/* ===== モーダル ===== */
+function openModal(title,html){ document.getElementById('modalTitle').textContent=title; document.getElementById('modalBody').innerHTML=html; document.getElementById('modalBg').classList.add('show'); }
+function closeModal(){ document.getElementById('modalBg').classList.remove('show'); }
+function showOrderSummary(){
+  const o=window._res.orders;
+  let h=`<table><thead><tr><th class="l">原盤ID</th><th>発注山数</th><th>発注枚数</th><th>発注期限日</th></tr></thead><tbody>`;
+  o.forEach(x=>h+=`<tr><td class="l mono">${x.genban}</td><td>${x.orderYama}山</td><td>${x.sheets}</td><td class="mono">${fmt(x.limit)}</td></tr>`);
+  openModal("発注候補サマリー", h+"</tbody></table>");
+}
+
+/* ============ CSV/Excel 取込（3形式自動判別） ============ */
+function dl(text,name){ const b=new Blob(["\uFEFF"+text],{type:"text/csv;charset=utf-8"}); const a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download=name; a.click(); }
+function readSmart(file,cb){ const r=new FileReader(); r.onload=()=>{ const buf=new Uint8Array(r.result); let txt; try{txt=new TextDecoder("utf-8",{fatal:true}).decode(buf);}catch(e){txt=new TextDecoder("shift_jis").decode(buf);} cb(txt); }; r.readAsArrayBuffer(file); }
+function parseCSV(txt){ return txt.replace(/\r/g,"").split("\n").filter(l=>l.trim().length).map(l=>{ const out=[],re=/("([^"]*)"|[^,]*)(,|$)/g; let m; while((m=re.exec(l))){ out.push(m[2]!==undefined?m[2]:m[1]); if(m[3]==="")break; } return out.map(c=>c.trim()); }); }
+
+document.getElementById('csvFile').addEventListener('change',e=>{
+  const f=e.target.files[0]; if(!f)return; document.getElementById('csvName').textContent="投入: "+f.name;
+  readSmart(f,txt=>{ const rows=parseCSV(txt), head=rows[0];
+    const di=head.findIndex(h=>h.includes("納入指示日")), hi=head.findIndex(h=>h==="品番"||h.includes("品番")), qi=head.findIndex(h=>h.includes("発注数量")||h.includes("数量"));
+    if(di<0||hi<0||qi<0){ alert("必須列（納入指示日/品番/発注数量）が見つかりません"); return; }
+    INPUT=rows.slice(1).map(r=>({d:parseYmd(r[di]),hin:(r[hi]||"").toUpperCase().trim(),qty:+String(r[qi]).replace(/,/g,"")})).filter(x=>x.d&&x.hin&&!isNaN(x.qty));
+    render();
+  });
+});
+
+/* マスター差し替え：CSVは形式自動判別。xlsxはSheetJSが無いHTML単体なのでCSV推奨の旨を案内 */
+document.getElementById('mFile').addEventListener('change',e=>{
+  const files=[...e.target.files]; if(!files.length)return;
+  let xlsx=files.find(f=>f.name.endsWith('.xlsx'));
+  if(xlsx){ alert("xlsxの直接読込はFlask本実装で対応します。プロトタイプでは各シートをCSVに書き出して投入してください（形式は自動判別します）。"); }
+  files.filter(f=>f.name.endsWith('.csv')).forEach(f=>readSmart(f,txt=>{ ingestMasterCSV(parseCSV(txt),f.name); }));
+});
+function ingestMasterCSV(rows,fname){
+  // ヘッダー走査して形式判定（タイトル行/▼区切りを飛ばす）
+  let hi=rows.findIndex(r=>r.some(c=>/品番|材料コード|genban_id|hinban|原盤ID|使用原盤/.test(c)));
+  if(hi<0){ alert(fname+": ヘッダー行を特定できませんでした"); return; }
+  const head=rows[hi], body=rows.slice(hi+1).filter(r=>r[0]&&!String(r[0]).startsWith('▼'));
+  const find=(...keys)=>head.findIndex(h=>keys.some(k=>h.includes(k)));
+  // 原盤マスター判定
+  if(find("材料コード","genban_id")>=0 || (find("山単位")>=0&&find("使用原盤")<0&&find("品番")<0)){
+    const ci={id:find("材料コード","genban_id","原盤ID"),name:find("材料名","name"),mat:find("材質","material"),size:find("サイズ","size"),y:find("山単位"),lt:find("LT"),ss:find("SS"),sup:find("支給")};
+    M.board=body.map(r=>({genban_id:r[ci.id],name:r[ci.name]||"",material:r[ci.mat]||"",size:r[ci.size]||"",yama_tanni:+r[ci.y]||1,order_unit_yama:1,lt_days:+r[ci.lt]||2,ss_days:+r[ci.ss]||1,supply_type:r[ci.sup]||"",valid:true,note:""}));
+    flash(fname+" → 原盤マスター "+M.board.length+"件 読込");
+  } else if(find("使用原盤")>=0 && find("取数")>=0){
+    const ci={hin:find("品番","hinban"),gid:find("使用原盤"),mat:find("材質","○針"),tor:find("取数"),g:find("外注"),k:find("管理区分")};
+    M.item=body.map(r=>({hinban:r[ci.hin],genban_id:r[ci.gid],material:r[ci.mat]||"",torisu:+r[ci.tor]||0,is_gaichu:!!r[ci.g],kanri_kubun:r[ci.k]||"通常",valid:true}));
+    flash(fname+" → カット品マスター "+M.item.length+"件 読込");
+  } else if(find("品番")>=0){ // 旧品番マスター等
+    flash(fname+" → 形式を限定特定できず。原盤/カット品の主要列が無い可能性。");
+  }
+  document.getElementById('masterSrc').textContent="差替済";
+  renderInvTable(); render();
+}
+function flash(msg){ const e=document.getElementById('csvName'); e.innerHTML='<span style="color:var(--accent)">'+msg+'</span>'; }
+
+/* ============ UI バインド ============ */
+document.querySelectorAll('#methodToggle button').forEach(b=>b.onclick=()=>{ document.querySelectorAll('#methodToggle button').forEach(x=>x.classList.remove('active')); b.classList.add('active'); method=b.dataset.m; openRow=null; saveState(); render(); });
+document.querySelectorAll('#drillMode button').forEach(b=>b.onclick=()=>{ document.querySelectorAll('#drillMode button').forEach(x=>x.classList.remove('active')); b.classList.add('active'); drillMode=b.dataset.d; openRow=null; renderOrders(window._res); });
+document.querySelectorAll('#resultTabs button').forEach(b=>b.onclick=()=>switchTab(b.dataset.t));
+function switchTab(t){ document.querySelectorAll('#resultTabs button').forEach(x=>x.classList.toggle('active',x.dataset.t===t)); ['order','unreg','master'].forEach(p=>document.getElementById('panel-'+p).style.display=(p===t?"":"none")); }
+document.querySelectorAll('#masterTab button').forEach(b=>b.onclick=()=>{ document.querySelectorAll('#masterTab button').forEach(x=>x.classList.remove('active')); b.classList.add('active'); masterTabSel=b.dataset.mt; renderMaster(); });
+const ss=document.getElementById('ssSlider'),ssv=document.getElementById('ssVal'),sso=document.getElementById('ssOverride');
+ss.oninput=()=>{ssv.textContent=ss.value;render();}; sso.onchange=()=>{ss.disabled=!sso.checked;ssv.textContent=sso.checked?ss.value:"master";render();};
+const win=document.getElementById('winSlider'),winv=document.getElementById('winVal'); win.oninput=()=>{winv.textContent=win.value;render();};
+const lt=document.getElementById('ltSlider'),ltv=document.getElementById('ltVal'),lto=document.getElementById('ltOverride');
+lt.oninput=()=>{ltv.textContent=lt.value;render();}; lto.onchange=()=>{lt.disabled=!lto.checked;ltv.textContent=lto.checked?lt.value:"master";render();};
+document.getElementById('baseDate').onchange=()=>{saveState();render();};
+function recompute(){ render(); }
+function exportCSV(){
+  const o=window._res?window._res.orders:[];
+  let csv="区分,原盤ID,材料名,対象品番,山単位,発注山数,発注枚数,到達起点日,納品希望日,LT,SS,発注期限日,方式\n";
+  o.forEach(r=>csv+=[r.kubun||"",r.genban.replace("@外注",""),'"'+r.name+'"','"'+r.hins+'"',r.yama,r.orderYama,r.sheets,fmt(r.reach),fmt(r.wish),r.lt,r.ss,fmt(r.limit),r.method].join(",")+"\n");
+  dl(csv,"発注候補.csv");
+}
+
+/* ============ 保存・復元（ブラウザ内＋JSON） ============ */
+const STORE_KEY="genban_tool_state_v1";
+function gatherState(){
+  return {
+    version:"v1", savedAt:new Date().toISOString(),
+    method, drillMode, inv, prodInv,
+    baseDate:document.getElementById('baseDate').value,
+    ltOverride:document.getElementById('ltOverride').checked, ltVal:document.getElementById('ltSlider').value,
+    ssOverride:document.getElementById('ssOverride').checked, ssVal:document.getElementById('ssSlider').value,
+    win:document.getElementById('winSlider').value,
+    master:M
+  };
+}
+function saveState(){
+  try{ localStorage.setItem(STORE_KEY, JSON.stringify(gatherState())); const e=document.getElementById('saveStatus'); if(e){e.textContent="保存済 "+new Date().toLocaleTimeString();} }catch(err){ /* file:// 以外では失敗することがある */ }
+}
+function loadState(){
+  try{
+    const raw=localStorage.getItem(STORE_KEY); if(!raw) return false;
+    applyState(JSON.parse(raw)); return true;
+  }catch(err){ return false; }
+}
+function applyState(s){
+  if(!s) return;
+  if(s.master) M=s.master;
+  inv=s.inv||{}; prodInv=s.prodInv||{};
+  method=s.method||"stock"; drillMode=s.drillMode||"acc";
+  if(s.baseDate) document.getElementById('baseDate').value=s.baseDate;
+  document.getElementById('ltOverride').checked=!!s.ltOverride; document.getElementById('ltSlider').disabled=!s.ltOverride; document.getElementById('ltSlider').value=s.ltVal||3; document.getElementById('ltVal').textContent=s.ltOverride?(s.ltVal||3):"master";
+  document.getElementById('ssOverride').checked=!!s.ssOverride; document.getElementById('ssSlider').disabled=!s.ssOverride; document.getElementById('ssSlider').value=s.ssVal||1; document.getElementById('ssVal').textContent=s.ssOverride?(s.ssVal||1):"master";
+  document.getElementById('winSlider').value=s.win||3; document.getElementById('winVal').textContent=s.win||3;
+  // 方式トグル反映
+  document.querySelectorAll('#methodToggle button').forEach(x=>x.classList.toggle('active',x.dataset.m===method));
+  document.querySelectorAll('#drillMode button').forEach(x=>x.classList.toggle('active',x.dataset.d===drillMode));
+}
+function exportState(){ dl(JSON.stringify(gatherState(),null,1).replace(/^/,"\uFEFF"), "発注ツール設定_"+new Date().toISOString().slice(0,10)+".json"); }
+function importState(file){ const r=new FileReader(); r.onload=()=>{ try{ const s=JSON.parse(r.result.replace(/^\uFEFF/,"")); applyState(s); saveState(); renderInvTable(); render(); flash("設定を読み込みました"); }catch(e){ alert("設定JSONの読込に失敗しました"); } }; r.readAsText(file,"UTF-8"); }
+function resetState(){ if(!confirm("保存した設定を消去し、初期状態に戻します。よろしいですか？"))return; try{localStorage.removeItem(STORE_KEY);}catch(e){} location.reload(); }
+
+/* ============ 初期化 ============ */
+const restored = loadState();
+if(!restored){
+  /* デモ用初期値 */
+  inv["DL-T125-910x2420"]=3;
+  document.getElementById('baseDate').value="2026-05-01";
+}
+renderInvTable(); render();
+
+</script>
+</body>
+</html>

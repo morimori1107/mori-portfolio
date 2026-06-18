@@ -1,0 +1,1439 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>物件データ整形アプリ v4.4</title>
+<style>
+:root{
+  --bg:#f8f7f4;--surface:#fff;--surface2:#f2f0ec;--border:#e0ddd8;--border2:#ccc9c2;
+  --text:#1a1916;--text2:#5a574f;--text3:#9a9790;
+  --accent:#2d6a4f;--accent-light:#e8f4ef;
+  --radius:8px;--radius-lg:12px;--font-ui:'Noto Sans JP',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-ui);background:var(--bg);color:var(--text);font-size:14px;line-height:1.5}
+.shell{display:grid;grid-template-rows:52px 1fr;min-height:100vh}
+header{background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:12px;position:sticky;top:0;z-index:100}
+.logo{font-size:15px;font-weight:700;color:var(--accent)}.ver{font-size:11px;color:var(--text3);background:var(--surface2);padding:2px 7px;border-radius:20px}
+.main{display:grid;grid-template-columns:210px 1fr;height:calc(100vh - 52px)}
+.sidebar{background:var(--surface);border-right:1px solid var(--border);padding:10px 0;overflow-y:auto}
+.nav-item{display:flex;align-items:center;gap:8px;padding:9px 16px;cursor:pointer;font-size:13px;color:var(--text2);border-left:3px solid transparent;transition:all .12s}
+.nav-item:hover{background:var(--surface2);color:var(--text)}
+.nav-item.active{background:var(--accent-light);color:var(--accent);border-left-color:var(--accent);font-weight:500}
+.nav-item svg{width:15px;height:15px;flex-shrink:0}
+.nav-sep{height:1px;background:var(--border);margin:6px 12px}
+.content{overflow-y:auto;padding:18px}
+.panel{display:none}.panel.active{display:block}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-bottom:12px}
+.card-title{font-size:13px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.card-title .sub{font-weight:400;color:var(--text3);font-size:11px}
+.drop{border:1.5px dashed var(--border2);border-radius:var(--radius-lg);padding:26px 20px;text-align:center;cursor:pointer;transition:all .15s;background:var(--surface2)}
+.drop:hover,.drop.over{border-color:var(--accent);background:var(--accent-light)}
+.drop p{font-size:13px;color:var(--text2);margin-bottom:4px}.drop small{font-size:11px;color:var(--text3)}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:6px 13px;border-radius:var(--radius);font-size:13px;font-weight:500;cursor:pointer;transition:all .12s;border:1px solid transparent}
+.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent)}.btn-primary:hover{filter:brightness(1.08)}
+.btn-outline{background:var(--surface);color:var(--text);border-color:var(--border2)}.btn-outline:hover{background:var(--surface2)}
+.btn-danger{background:#fff0ee;color:#c0392b;border-color:#f5bfb8}.btn-danger:hover{background:#ffe0dc}
+.btn-sm{padding:4px 10px;font-size:11px;border-radius:6px}.btn-xs{padding:2px 7px;font-size:10px;border-radius:5px}
+.btn-group{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(85px,1fr));gap:8px;margin-bottom:12px}
+.stat{background:var(--surface2);border-radius:var(--radius);padding:9px 11px;border:1px solid var(--border)}
+.stat-l{font-size:10px;color:var(--text3);margin-bottom:2px}.stat-v{font-size:21px;font-weight:700;line-height:1}
+.stat-v.warn{color:#c8700a}
+.area-tabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
+.area-tab{padding:4px 12px;border-radius:20px;font-size:12px;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--text2);transition:all .12s}
+.area-tab:hover{border-color:var(--accent);color:var(--accent)}
+.area-tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.area-tab.unk{border-color:#f0a84e;color:#c8700a}.area-tab.unk.active{background:#f0a84e;color:#fff}
+.tbl-wrap{overflow-x:auto;max-height:400px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius)}
+table{border-collapse:collapse;font-size:12px;min-width:100%}
+th{background:var(--surface2);padding:6px 8px;font-weight:600;font-size:11px;white-space:nowrap;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:1;color:var(--text2)}
+td{padding:5px 8px;border-bottom:1px solid var(--border);vertical-align:middle;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
+.td-unk{color:#c8700a;font-weight:500}
+.file-item{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px}
+.file-item:last-child{border-bottom:none}.file-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.badge{display:inline-block;font-size:10px;padding:2px 6px;border-radius:10px;font-weight:500}
+.badge-ok{background:#e3f5ec;color:#1a7a4a}.badge-warn{background:#fff0d9;color:#a06010}.badge-info{background:#e8f0fe;color:#1a5cad}
+.stbl{width:100%;border-collapse:collapse;font-size:12px}
+.stbl th{padding:5px 7px;text-align:left;font-weight:600;font-size:11px;color:var(--text2);border-bottom:1px solid var(--border);background:var(--surface2)}
+.stbl td{padding:3px 4px;border-bottom:1px solid var(--border)}.stbl tr:last-child td{border-bottom:none}
+.stbl input[type=text],.stbl input[type=number],.stbl select{width:100%;border:1px solid var(--border);border-radius:5px;padding:3px 6px;font-size:11px;background:var(--surface);color:var(--text);font-family:var(--font-ui)}
+.stbl input:focus,.stbl select:focus{outline:none;border-color:var(--accent)}
+.stbl input[type=checkbox]{width:14px;height:14px;cursor:pointer;accent-color:var(--accent)}
+.mono{font-family:'Courier New',monospace;font-size:10px;color:var(--text3)}
+.tip{font-size:10px;color:var(--text3);margin-top:4px}
+.msg{padding:8px 12px;border-radius:var(--radius);font-size:12px;margin-bottom:8px}
+.msg-info{background:#e8f0fe;color:#1a5cad;border:1px solid #c0d4f8}
+.drag-row{cursor:grab;user-select:none}.drag-row.dragging{opacity:.4;background:#f0f9f5}
+.drag-row.drag-over{border-top:2px solid var(--accent)}
+.drag-handle{display:inline-flex;align-items:center;cursor:grab;color:var(--text3);padding:0 4px}
+.col-drag-row{cursor:default}
+.col-drag-row.dragging{opacity:.4;background:#f0f9f5}
+.col-drag-row.drag-over{border-top:2px solid var(--accent)}
+.col-drag-row .drag-handle{cursor:grab}
+.match-sel{font-size:11px;border:1px solid var(--border);border-radius:5px;padding:3px 5px;background:var(--surface);color:var(--text);cursor:pointer}
+.match-sel:focus{outline:none;border-color:var(--accent)}
+.live-badge{font-size:10px;background:#e3f5ec;color:#1a7a4a;border-radius:10px;padding:2px 7px;font-weight:500}
+.excl-badge{font-size:10px;background:#fff0d9;color:#a06010;border-radius:10px;padding:2px 7px;font-weight:500}
+/* 除外ルール — 列グループ */
+.excl-rule-group{border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;margin-bottom:10px;background:var(--surface2);position:relative}
+.excl-rule-group-title{font-size:11px;font-weight:600;color:var(--text2);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.excl-logic-badge{font-size:10px;padding:1px 6px;border-radius:10px;background:var(--accent-light);color:var(--accent);font-weight:600}
+/* 印刷 */
+@media print{
+  @page{size:A4 landscape;margin:8mm 6mm}
+  /* ★ 空白ページ対策: .shell ごと完全に隠し、印刷専用エリアのみ表示 */
+  .shell{display:none!important}
+  #printArea{display:block!important;margin:0;padding:0}
+  body{background:#fff;font-size:9pt;margin:0;padding:0}
+  .print-area-page{page-break-after:always}
+  .print-area-page:last-child{page-break-after:auto}
+  .print-table{width:100%;border-collapse:collapse;font-size:8.5pt;table-layout:fixed}
+  .print-table th{background:#eae8e3!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:4pt 5pt;font-size:8pt;border:0.5pt solid #ccc;text-align:left;font-weight:600}
+  .print-table td{padding:3pt 5pt;border:0.5pt solid #ddd;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .print-table .col-addr{font-size:7.5pt}
+  .print-page-title{font-size:10pt;font-weight:700;margin-bottom:4pt}
+}
+#printArea{display:none}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<div style="background:#15130e;color:#f4f0e6;font-family:sans-serif;font-size:13px;padding:10px 16px;text-align:center;letter-spacing:.04em;">PORTFOLIO DEMO ｜ 不動産の物件データ整形を題材にした自作ツールです。地名・データはすべて架空のサンプルです。</div>
+<div class="shell">
+<header>
+  <span class="logo">物件データ整形</span><span class="ver">v4.4</span>
+  <span style="flex:1"></span>
+  <span id="hdrStatus" style="font-size:12px;color:var(--text3)"></span>
+</header>
+<div class="main">
+<nav class="sidebar">
+  <div class="nav-item active" onclick="showPanel('upload',this)">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11v2a1 1 0 001 1h10a1 1 0 001-1v-2M8 2v8M5 5l3-3 3 3"/></svg>アップロード
+  </div>
+  <div class="nav-item" onclick="showPanel('result',this)">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="1"/><path d="M5 6h6M5 9h4"/></svg>結果プレビュー
+  </div>
+  <div class="nav-sep"></div>
+  <div class="nav-item" onclick="showPanel('set-excl',this)">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M5 8h6M8 5v6"/></svg>入力除外ルール
+  </div>
+  <div class="nav-item" onclick="showPanel('set-col',this)">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2v12M10 2v12M2 6h12M2 10h12"/></svg>列設定
+  </div>
+  <div class="nav-item" onclick="showPanel('set-row',this)">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4h12M2 8h12M2 12h12"/></svg>表示・出力設定
+  </div>
+  <div class="nav-item" onclick="showPanel('set-area',this)">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="7" r="3"/><path d="M8 1C5 1 3 4 3 7c0 4 5 8 5 8s5-4 5-8c0-3-2-6-5-6z"/></svg>エリアルール
+  </div>
+  <div class="nav-item" onclick="showPanel('set-header',this)">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4h12M2 8h8M2 12h5"/></svg>ヘッダーマップ
+  </div>
+  <div class="nav-sep"></div>
+  <div class="nav-item" onclick="saveAll()">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3h8l2 2v8a1 1 0 01-1 1H3a1 1 0 01-1-1V4a1 1 0 011-1z"/><path d="M5 3v4h6V3M5 12v-3h6v3"/></svg>設定を保存
+  </div>
+  <div class="nav-item" onclick="resetAll()">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 8a6 6 0 1012 0 6 6 0 00-10-2M2 3v3h3"/></svg>初期値に戻す
+  </div>
+</nav>
+<div class="content">
+
+<!-- Upload -->
+<div id="panel-upload" class="panel active">
+  <div class="card">
+    <div class="card-title">ファイルを選択
+      <span class="sub">CSV / Excel (.xlsx .xlsm) — 複数可 / Shift-JIS・UTF-8自動判定</span>
+    </div>
+    <div class="drop" id="dropZone" onclick="document.getElementById('fi').click()">
+      <input type="file" id="fi" accept=".csv,.xlsx,.xlsm" multiple style="display:none" onchange="handleFiles([...this.files])">
+      <p>ここにドロップ、またはクリックして選択</p>
+      <small>CSV（Shift-JIS / UTF-8）/ Excel (.xlsx .xlsm) — ファイル名に yyyymmdd が含まれると日付バッジ表示</small>
+    </div>
+  </div>
+  <div class="card" id="fileCard" style="display:none">
+    <div class="card-title">読み込みファイル</div>
+    <div id="fileList"></div>
+    <div id="sheetSelector"></div>
+    <div class="btn-group">
+      <button class="btn btn-primary" id="btnProcess" onclick="processFiles()">整形を実行</button>
+      <button class="btn btn-outline" onclick="clearFiles()">クリア</button>
+    </div>
+    <div id="procProg" style="display:none;font-size:12px;color:var(--text2);padding:5px 0"></div>
+  </div>
+</div>
+
+<!-- Result -->
+<div id="panel-result" class="panel">
+  <div id="resEmpty" class="msg msg-info">まずアップロードパネルでファイルを読み込み「整形を実行」してください。</div>
+  <div id="resContent" style="display:none">
+    <div id="diagLogBox" style="display:none;margin-bottom:12px"></div>
+    <div class="stats" id="statsRow"></div>
+    <div class="area-tabs" id="areaTabs"></div>
+    <div class="card" style="padding:12px 14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:6px">
+        <span id="areaLabel" style="font-size:13px;font-weight:600"></span>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">
+          <label style="font-size:11px;display:flex;align-items:center;gap:4px;color:var(--text2)">
+            <input type="checkbox" id="chkPrintUnk" style="accent-color:var(--accent)"> UNKNOWNも印刷
+          </label>
+          <button class="btn btn-outline btn-sm no-print" onclick="openPrintDialog()">A4印刷…</button>
+          <button class="btn btn-outline btn-sm no-print" onclick="dlCsv()">CSV</button>
+          <button class="btn btn-outline btn-sm no-print" onclick="dlXlsxSample()">Excel(3行確認)</button>
+          <button class="btn btn-primary btn-sm no-print" onclick="dlXlsx()">Excel 全エリア</button>
+        </div>
+      </div>
+      <div class="tbl-wrap" id="tblWrap"></div>
+      <div id="tblFooter" style="font-size:11px;color:var(--text3);margin-top:5px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 入力除外ルール -->
+<div id="panel-set-excl" class="panel">
+  <div class="card">
+    <div class="card-title">入力除外ルール <span class="excl-badge">EXCL</span>
+      <span class="sub">— 複数列・複数条件に対応。整形実行前に対象行を除外します</span>
+    </div>
+    <!-- 複数除外列グループ -->
+    <div id="exclGroupContainer"></div>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button class="btn btn-outline btn-sm" onclick="addExclGroup()">＋ 除外列グループを追加</button>
+    </div>
+    <p class="tip" style="margin-top:8px">
+      各グループは「対象列」×「除外値リスト」の組み合わせです。<br>
+      行いずれかのグループでヒットした場合に除外されます（グループ間はOR）。<br>
+      判定方式: 完全一致 / 部分一致（含む） / 前方一致 / 正規化一致（表記ゆれ吸収）
+    </p>
+  </div>
+</div>
+
+<!-- 列設定 -->
+<div id="panel-set-col" class="panel">
+  <div class="card">
+    <div class="card-title">列設定 <span class="live-badge">LIVE</span>
+      <span class="sub">— 行をドラッグで並べ替え / 変更は即時プレビュー反映 / 幅・フォント・配置はExcel・印刷にも反映</span>
+    </div>
+    <div style="overflow-x:auto">
+    <table class="stbl" id="colTbl">
+      <thead><tr><th style="width:24px"></th><th>標準列名</th><th>表示名</th><th>幅モード</th><th>固定px</th><th>最大px</th><th>％</th><th>フォント</th><th>pt</th><th>配置</th><th>表示</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    </div>
+    <p class="tip" style="margin-top:6px">
+      幅モード: <b>固定px</b>=指定ピクセル固定 / <b>可変px</b>=最大pxを上限に内容へ自動調整 / <b>％</b>=用紙・ブラウザ幅に対する割合で伸縮（合計100%目安）。<br>
+      ％モードはA4印刷・Excel・プレビューすべてに反映されます。左端の⠿をドラッグで列順を変更できます。
+    </p>
+  </div>
+</div>
+
+<!-- エリアルール -->
+<div id="panel-set-area" class="panel">
+  <div class="card">
+    <div class="card-title">エリアルール <span class="sub">— ドラッグで順序変更 / 判定方式を選択</span></div>
+    <table class="stbl">
+      <thead><tr>
+        <th style="width:28px"></th><th>エリア名</th><th>値1</th><th>方式1</th><th>値2</th><th>方式2</th>
+        <th style="width:50px">有効</th><th style="width:38px"></th>
+      </tr></thead>
+      <tbody id="areaTbl"></tbody>
+    </table>
+    <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
+      <button class="btn btn-outline btn-sm" onclick="addAreaRow()">＋ 追加</button>
+      <span style="font-size:10px;color:var(--text3)">部分一致＝住所に値を含む（千葉県付きでもヒット）/ 除外＝UNKNOWNに</span>
+    </div>
+  </div>
+</div>
+
+<!-- ヘッダーマップ -->
+<div id="panel-set-header" class="panel">
+  <div class="card">
+    <div class="card-title">ヘッダーマップ <span class="sub">— ソース列名 → 標準列名への変換</span></div>
+    <table class="stbl" id="headerTbl">
+      <thead><tr><th>ソース列名</th><th>標準列名</th><th style="width:55px">優先度</th><th style="width:38px"></th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <button class="btn btn-outline btn-sm" style="margin-top:8px" onclick="addHeaderRow()">＋ 追加</button>
+  </div>
+</div>
+
+<!-- 表示・出力設定（行基準） -->
+<div id="panel-set-row" class="panel">
+  <div class="card">
+    <div class="card-title">表示・出力設定 <span class="live-badge">LIVE</span>
+      <span class="sub">— 行の高さ・件数・折り返し・ストライプ・用紙フィット</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:620px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <label style="font-size:12px;width:150px;color:var(--text2)">データ行の高さ (pt)</label>
+        <input type="number" id="rowH" min="10" max="40" style="width:70px;border:1px solid var(--border);border-radius:5px;padding:4px 7px" oninput="liveRow()">
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <label style="font-size:12px;width:150px;color:var(--text2)">ヘッダー行の高さ (pt)</label>
+        <input type="number" id="rowHH" min="10" max="40" style="width:70px;border:1px solid var(--border);border-radius:5px;padding:4px 7px" oninput="liveRow()">
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <label style="font-size:12px;width:150px;color:var(--text2)">1ページあたり件数</label>
+        <input type="number" id="rowPage" min="10" max="200" style="width:70px;border:1px solid var(--border);border-radius:5px;padding:4px 7px" oninput="liveRow()">
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <label style="font-size:12px;width:150px;color:var(--text2)">長文の折り返し表示</label>
+        <input type="checkbox" id="rowWrap" style="width:16px;height:16px;accent-color:var(--accent)" onchange="liveRow()">
+        <span style="font-size:11px;color:var(--text3)">住所・物件名など</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <label style="font-size:12px;width:150px;color:var(--text2)">行の交互色付け</label>
+        <input type="checkbox" id="rowStripe" style="width:16px;height:16px;accent-color:var(--accent)" onchange="liveRow()">
+        <span style="font-size:11px;color:var(--text3)">ストライプ表示</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <label style="font-size:12px;width:150px;color:var(--text2)">A4印刷で用紙幅に自動縮小</label>
+        <input type="checkbox" id="rowFit" style="width:16px;height:16px;accent-color:var(--accent)" onchange="liveRow()">
+        <span style="font-size:11px;color:var(--text3)">はみ出し防止</span>
+      </div>
+    </div>
+    <p class="tip" style="margin-top:10px">行の高さはExcel出力とプレビューに反映。1ページ件数はA4印刷の分割数に反映。折り返しONで長い住所が複数行表示されます（A4印刷・Excelにも反映）。</p>
+  </div>
+</div>
+
+</div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /shell -->
+<!-- A4印刷 設定モーダル -->
+<div id="printModal" class="no-print" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:1000;align-items:center;justify-content:center">
+  <div style="background:var(--surface);border-radius:var(--radius-lg);max-width:520px;width:92%;max-height:88vh;overflow-y:auto;box-shadow:0 12px 40px rgba(0,0,0,.25)">
+    <div style="padding:16px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+      <span style="font-size:14px;font-weight:700">A4印刷の設定</span>
+      <button class="btn btn-outline btn-xs" onclick="closePrintDialog()">✕ 閉じる</button>
+    </div>
+    <div style="padding:16px 18px">
+      <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:8px">印刷するエリアを選択</div>
+      <div id="printAreaChecks" style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px"></div>
+
+      <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px">件数が1ページに収まらない場合</div>
+      <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px">
+        <label style="font-size:12px;display:flex;align-items:center;gap:7px;cursor:pointer">
+          <input type="radio" name="pgMode" value="split" checked style="accent-color:var(--accent)">
+          複数ページに分割する（設定した件数ずつ）
+        </label>
+        <label style="font-size:12px;display:flex;align-items:center;gap:7px;cursor:pointer">
+          <input type="radio" name="pgMode" value="fit" style="accent-color:var(--accent)">
+          1エリアを必ず1ページに収める（自動縮小）
+        </label>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+        <label style="font-size:12px;width:150px;color:var(--text2)">1ページあたり件数</label>
+        <input type="number" id="printPageRows" min="5" max="200" style="width:70px;border:1px solid var(--border);border-radius:5px;padding:4px 7px">
+        <span style="font-size:11px;color:var(--text3)">分割モード時のみ有効</span>
+      </div>
+
+      <div id="printSummary" style="font-size:11px;color:var(--text3);background:var(--surface2);border-radius:var(--radius);padding:8px 10px;margin-bottom:14px"></div>
+
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn btn-outline btn-sm" onclick="updatePrintPreview()">プレビュー更新</button>
+        <button class="btn btn-primary btn-sm" onclick="executePrint()">印刷する</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="printArea"></div>
+
+<!-- ★ xlsx-js-style を先に読み込み、onload後にアプリ初期化 -->
+<script>
+// XLSX未読込状態でprocessFilesが呼ばれないよう、ロード完了まで実行ボタンを無効化
+window._xlsxReady = false;
+</script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"
+  onload="window._xlsxReady=true; document.getElementById('btnProcess') && (document.getElementById('btnProcess').disabled=false);"
+  onerror="console.error('xlsx-js-style CDN読込失敗'); document.getElementById('hdrStatus').textContent='⚠ ライブラリ読込失敗';">
+</script>
+<script>
+// ═══════════════════════════════════════════════════════════
+// 定数
+// ═══════════════════════════════════════════════════════════
+const CANONICAL=['availableDate','propertyName','roomNo','address','layout','rent','utilities','parking','deposit','keyMoney','buildingAge','exclusiveArea'];
+const FONTS=['游ゴシック','MS Pゴシック','メイリオ','ＭＳ 明朝','游明朝'];
+const ALIGNS=[{v:'left',l:'左寄り'},{v:'center',l:'中央'},{v:'right',l:'右寄り'}];
+const MATCH_TYPES=[{v:'startsWith',l:'前方一致'},{v:'contains',l:'部分一致'},{v:'exact',l:'完全一致'},{v:'exclude',l:'除　外'}];
+// 除外ルール判定方式（前方一致追加）
+const EXCL_MATCH=[
+  {v:'exact',      l:'完全一致'},
+  {v:'contains',   l:'部分一致（含む）'},
+  {v:'startsWith', l:'前方一致'},
+  {v:'normalize',  l:'正規化一致'},
+  {v:'exclude',    l:'除外しない（無効）'},
+];
+
+// widthMode: 'fixed'(px固定) / 'autoVar'(可変・最大幅まで) / 'pct'(パーセント伸縮)
+const DEFAULT_COL=[
+  {canon:'availableDate',display:'入居可能日',type:'FIXED', widthMode:'fixed', pct:7, fixedW:72,maxW:72, font:'游ゴシック',size:11,align:'left',  enabled:true},
+  {canon:'propertyName', display:'物件名',   type:'VARIABLE',widthMode:'pct',   pct:16,fixedW:60,maxW:200,font:'游ゴシック',size:11,align:'left',  enabled:true},
+  {canon:'roomNo',       display:'部屋',     type:'FIXED', widthMode:'fixed', pct:5, fixedW:52,maxW:52, font:'游ゴシック',size:11,align:'center',enabled:true},
+  {canon:'address',      display:'住所',     type:'VARIABLE',widthMode:'pct',   pct:20,fixedW:80,maxW:240,font:'游ゴシック',size:10,align:'left',  enabled:true},
+  {canon:'layout',       display:'間取り',   type:'FIXED', widthMode:'fixed', pct:6, fixedW:56,maxW:56, font:'游ゴシック',size:11,align:'center',enabled:true},
+  {canon:'rent',         display:'賃料',     type:'FIXED', widthMode:'fixed', pct:7, fixedW:72,maxW:72, font:'游ゴシック',size:11,align:'right', enabled:true},
+  {canon:'utilities',    display:'公益費',   type:'FIXED', widthMode:'fixed', pct:6, fixedW:60,maxW:60, font:'游ゴシック',size:11,align:'right', enabled:true},
+  {canon:'parking',      display:'車1',      type:'FIXED', widthMode:'fixed', pct:6, fixedW:56,maxW:56, font:'游ゴシック',size:11,align:'center',enabled:true},
+  {canon:'deposit',      display:'敷金',     type:'FIXED', widthMode:'fixed', pct:7, fixedW:72,maxW:72, font:'游ゴシック',size:11,align:'right', enabled:true},
+  {canon:'keyMoney',     display:'礼金',     type:'FIXED', widthMode:'fixed', pct:7, fixedW:72,maxW:72, font:'游ゴシック',size:11,align:'right', enabled:true},
+  {canon:'buildingAge',  display:'築年月',   type:'FIXED', widthMode:'fixed', pct:7, fixedW:72,maxW:72, font:'游ゴシック',size:11,align:'center',enabled:true},
+  {canon:'exclusiveArea',display:'占有面積', type:'FIXED', widthMode:'fixed', pct:6, fixedW:64,maxW:64, font:'游ゴシック',size:11,align:'right', enabled:true},
+];
+// 行基準設定
+const DEFAULT_ROW={
+  rowHeightPt:16,      // データ行の高さ(pt)
+  headerHeightPt:20,   // ヘッダー行の高さ(pt)
+  pageRows:50,         // 1ページあたり件数
+  wrapText:false,      // 長文折り返し
+  stripe:true,         // 交互色付け
+  fitToPage:true,      // A4印刷で用紙幅に自動縮小
+};
+const DEFAULT_AREA=[
+  {area:'みなみ',val1:'みなみ市',m1:'contains',val2:'みなみ',m2:'contains',enabled:true},
+  {area:'きた',  val1:'きた市',  m1:'contains',val2:'',      m2:'contains',enabled:true},
+  {area:'あおば区',val1:'あおば区',  m1:'contains',val2:'都賀',  m2:'contains',enabled:true},
+  {area:'みどり区',val1:'みどり区',  m1:'contains',val2:'',      m2:'contains',enabled:true},
+];
+const DEFAULT_HEADER=[
+  {raw:'入居可能日',canon:'availableDate',pri:1},{raw:'入居日',canon:'availableDate',pri:2},
+  {raw:'物件名',canon:'propertyName',pri:1},{raw:'建物名',canon:'propertyName',pri:2},
+  {raw:'部屋番号',canon:'roomNo',pri:1},{raw:'号室',canon:'roomNo',pri:2},{raw:'部屋',canon:'roomNo',pri:3},
+  {raw:'住所',canon:'address',pri:1},{raw:'所在地',canon:'address',pri:2},
+  {raw:'間取り',canon:'layout',pri:1},
+  {raw:'賃料',canon:'rent',pri:1},{raw:'家賃',canon:'rent',pri:2},
+  {raw:'公益費',canon:'utilities',pri:1},{raw:'共益費',canon:'utilities',pri:2},{raw:'管理費',canon:'utilities',pri:3},
+  {raw:'駐車場',canon:'parking',pri:1},{raw:'車 1',canon:'parking',pri:2},{raw:'車１',canon:'parking',pri:3},{raw:'車1',canon:'parking',pri:4},{raw:'駐車場その他',canon:'parking',pri:5},
+  {raw:'敷金',canon:'deposit',pri:1},{raw:'礼金',canon:'keyMoney',pri:1},
+  {raw:'築年月',canon:'buildingAge',pri:1},{raw:'築年数',canon:'buildingAge',pri:2},{raw:'竣工年月',canon:'buildingAge',pri:3},
+  {raw:'専有面積',canon:'exclusiveArea',pri:1},{raw:'占有面積',canon:'exclusiveArea',pri:2},
+];
+
+// ★ 除外ルール: グループ配列に変更
+// 各グループ = { label, colHeader, colFallback, logic:'OR'|'AND', vals:[{val,match,enabled}], enabled }
+const DEFAULT_EXCL_GROUPS=[
+  {
+    label:'予約申込除外',
+    colHeader:'予約申込',
+    colFallback:'C',
+    logic:'OR',
+    enabled:true,
+    vals:[
+      {val:'申込',  match:'exact',     enabled:true},
+      {val:'予約1', match:'exact',     enabled:true},
+      {val:'キャンセル',match:'contains',enabled:false},
+    ]
+  },
+];
+
+// ═══════════════════════════════════════════════════════════
+// State
+// ═══════════════════════════════════════════════════════════
+let S=loadSettings();
+let files=[],processed={},currentArea='ALL',dragSrc=null;
+let selectedSheets={},diagLog=[];
+
+function loadSettings(){
+  try{
+    const s=localStorage.getItem('propFmtV44')||localStorage.getItem('propFmtV43')||localStorage.getItem('propFmtV42');
+    if(s){
+      const p=JSON.parse(s);
+      // v4.1からのマイグレーション: 旧形式exclValsがあればグループに変換
+      if(!p.exclGroups && p.exclVals){
+        p.exclGroups=[{
+          label:'予約申込除外',colHeader:p.exclHeader||'予約申込',
+          colFallback:p.exclColFallback||'C',logic:'OR',enabled:true,
+          vals:p.exclVals
+        }];
+      }
+      if(!p.exclGroups)p.exclGroups=JSON.parse(JSON.stringify(DEFAULT_EXCL_GROUPS));
+      if(!p.rowConfig)p.rowConfig=JSON.parse(JSON.stringify(DEFAULT_ROW));
+      // 列設定に widthMode/pct が無い旧データは補完
+      (p.colConfig||[]).forEach(c=>{
+        if(!c.widthMode)c.widthMode=(c.type==='VARIABLE'?'autoVar':'fixed');
+        if(c.pct===undefined)c.pct=10;
+      });
+      return p;
+    }
+  }catch(e){}
+  return fresh();
+}
+function fresh(){
+  return{
+    colConfig:   JSON.parse(JSON.stringify(DEFAULT_COL)),
+    headerMap:   JSON.parse(JSON.stringify(DEFAULT_HEADER)),
+    areaRules:   JSON.parse(JSON.stringify(DEFAULT_AREA)),
+    exclGroups:  JSON.parse(JSON.stringify(DEFAULT_EXCL_GROUPS)),
+    rowConfig:   JSON.parse(JSON.stringify(DEFAULT_ROW)),
+  };
+}
+
+// ═══════════════════════════════════════════════════════════
+// 正規化
+// ═══════════════════════════════════════════════════════════
+function normalizeStr(s){
+  if(!s&&s!==0)return'';
+  let t=String(s);
+  t=t.replace(/[Ａ-Ｚａ-ｚ０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0));
+  t=t.replace(/　/g,' ');
+  t=t.replace(/[\s\u3000\/・\-_.,、。「」【】（）()]/g,'');
+  t=t.replace(/し込み/g,'込').replace(/もうしこみ/g,'申込');
+  t=t.replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0));
+  return t.toLowerCase();
+}
+function norm(s){return String(s||'').replace(/\s+/g,' ').trim();}
+
+// ═══════════════════════════════════════════════════════════
+// 設定同期
+// ═══════════════════════════════════════════════════════════
+function syncSettingsFromDOM(){
+  try{if(document.getElementById('aan0'))S.areaRules=readAreaTbl();}catch(e){}
+  try{if(document.getElementById('cd0')) S.colConfig=readColTbl();}catch(e){}
+  try{if(document.getElementById('hr0')) S.headerMap=readHeaderTbl();}catch(e){}
+  try{S.exclGroups=readExclGroups();}catch(e){}
+  try{if(document.getElementById('rowH'))S.rowConfig=readRowConfig();}catch(e){}
+}
+
+// ═══════════════════════════════════════════════════════════
+// Nav
+// ═══════════════════════════════════════════════════════════
+function showPanel(name,el){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  if(el)el.classList.add('active');
+  if(name==='set-col')    renderColTbl();
+  if(name==='set-area')   renderAreaTbl();
+  if(name==='set-header') renderHeaderTbl();
+  if(name==='set-excl')   renderExclGroups_UI();
+  if(name==='set-row')    renderRowPanel();
+}
+
+// ═══════════════════════════════════════════════════════════
+// Files
+// ═══════════════════════════════════════════════════════════
+function handleFiles(fs){
+  fs.forEach(f=>{
+    // 拡張子を正しく判定（二重拡張子対応: .csv.xlsx → 末尾のみ）
+    const parts=f.name.split('.');
+    const ext=parts[parts.length-1].toLowerCase();
+    if(!['csv','xlsx','xlsm'].includes(ext))return;
+    if(!files.find(x=>x.name===f.name))files.push(f);
+  });
+  renderFileList();
+}
+function clearFiles(){files=[];processed={};document.getElementById('fileCard').style.display='none';document.getElementById('fi').value='';}
+function renderFileList(){
+  document.getElementById('fileCard').style.display='';
+  document.getElementById('fileList').innerHTML=files.map((f,i)=>{
+    const dm=f.name.match(/(\d{8})/);
+    const b=dm?`<span class="badge badge-ok">${dm[1].slice(0,4)}-${dm[1].slice(4,6)}-${dm[1].slice(6)}</span>`:`<span class="badge badge-warn">日付なし</span>`;
+    const parts=f.name.split('.');
+    const ext=parts[parts.length-1].toUpperCase();
+    return`<div class="file-item"><span class="badge badge-info">${ext}</span><span class="file-name">${f.name}</span>${b}<button class="btn btn-danger btn-xs" onclick="removeFile(${i})">削除</button></div>`;
+  }).join('');
+}
+function removeFile(i){files.splice(i,1);files.length?renderFileList():clearFiles();}
+
+// ═══════════════════════════════════════════════════════════
+// 除外判定ロジック（複数グループ対応）
+// ═══════════════════════════════════════════════════════════
+function colLetterToIdx(s){
+  s=String(s||'').trim().toUpperCase();
+  if(/^\d+$/.test(s))return parseInt(s)-1;
+  let n=0;for(const c of s)n=n*26+(c.charCodeAt(0)-64);return n-1;
+}
+
+function resolveExclColIdx(headerRow, colHeader, colFallback){
+  const target=norm(colHeader||'');
+  const targetN=normalizeStr(target);
+  // 優先1: 完全一致
+  let idx=headerRow.findIndex(h=>norm(h)===target&&target!=='');
+  if(idx>=0)return{idx,name:headerRow[idx],by:'ヘッダー完全一致'};
+  // 優先2: 正規化一致
+  idx=headerRow.findIndex(h=>normalizeStr(h)===targetN&&targetN!=='');
+  if(idx>=0)return{idx,name:headerRow[idx],by:'正規化一致'};
+  // 優先3: 予備列
+  const fi=colLetterToIdx(colFallback);
+  if(fi>=0&&fi<headerRow.length)return{idx:fi,name:headerRow[fi]||`${colFallback}列`,by:`予備列(${colFallback})`};
+  return{idx:-1,name:'',by:'未検出'};
+}
+
+function checkExclGroups(rawRow, headerRow, groups){
+  for(const grp of groups){
+    if(!grp.enabled)continue;
+    const {idx}=resolveExclColIdx(headerRow,grp.colHeader,grp.colFallback);
+    if(idx<0)continue;
+    const cellVal=rawRow[idx];
+    if(cellVal===undefined||cellVal===null||cellVal==='')continue;
+    const cellStr=String(cellVal);
+    const cellN=normalizeStr(cellStr);
+    const enabledVals=(grp.vals||[]).filter(v=>v.enabled&&v.match!=='exclude');
+    if(!enabledVals.length)continue;
+    // ロジック: OR = いずれか一致, AND = 全て一致
+    const results=enabledVals.map(ev=>{
+      const evN=normalizeStr(ev.val);
+      switch(ev.match){
+        case'exact':      return cellStr===ev.val||cellN===evN;
+        case'contains':   return cellStr.includes(ev.val)||cellN.includes(evN);
+        case'startsWith': return cellStr.startsWith(ev.val)||cellN.startsWith(evN);
+        case'normalize':  return cellN===evN;
+        default: return false;
+      }
+    });
+    const hit=grp.logic==='AND' ? results.every(Boolean) : results.some(Boolean);
+    if(hit){
+      const matchedVal=enabledVals[results.findIndex(Boolean)]?.val||'';
+      return{excluded:true, reason:`[${grp.label||grp.colHeader}] ${matchedVal}`};
+    }
+  }
+  return{excluded:false,reason:''};
+}
+
+// ═══════════════════════════════════════════════════════════
+// processFiles
+// ═══════════════════════════════════════════════════════════
+async function processFiles(){
+  // ★ XLSX ライブラリ読込チェック
+  if(typeof XLSX==='undefined'){
+    alert('ライブラリ読込中です。数秒後に再度お試しください。');
+    return;
+  }
+  if(!files.length)return;
+  syncSettingsFromDOM();
+  diagLog=[];
+  const pg=document.getElementById('procProg');
+  pg.style.display='block';pg.textContent='処理中...';
+
+  const hmap={};
+  (S.headerMap||DEFAULT_HEADER).forEach(m=>{
+    const k=norm(m.raw);
+    if(!hmap[k]||m.pri<hmap[k].pri)hmap[k]={canon:m.canon,pri:m.pri};
+  });
+
+  const exclGroups=(S.exclGroups||DEFAULT_EXCL_GROUPS).filter(g=>g.enabled);
+
+  let allRows=[];
+  let totalRaw=0,totalExcluded=0;
+  const excludedByReason={};
+  let sheetInfoList=[];
+
+  for(const file of files){
+    try{
+      const buf=await file.arrayBuffer();
+      let wb;
+      const parts=file.name.split('.');
+      const ext=parts[parts.length-1].toLowerCase();
+
+      if(ext==='csv'){
+        // ★ CSV: Shift-JIS→UTF-8の順でフォールバック
+        let text='';
+        let decoded=false;
+        // Shift-JIS試行
+        try{
+          const td=new TextDecoder('shift-jis',{fatal:true});
+          text=td.decode(buf);
+          decoded=true;
+          diagLog.push(`  エンコード: Shift-JIS`);
+        }catch(e){}
+        // UTF-8試行
+        if(!decoded){
+          try{
+            const td=new TextDecoder('utf-8',{fatal:true});
+            text=td.decode(buf);
+            decoded=true;
+            diagLog.push(`  エンコード: UTF-8`);
+          }catch(e){}
+        }
+        // フォールバック: 強制UTF-8
+        if(!decoded){
+          text=new TextDecoder('utf-8',{fatal:false}).decode(buf);
+          diagLog.push(`  エンコード: UTF-8(強制)`);
+        }
+        // BOM除去
+        if(text.charCodeAt(0)===0xFEFF)text=text.slice(1);
+        wb=XLSX.read(text,{type:'string',cellDates:true});
+      }else{
+        // Excel (.xlsx / .xlsm) — arrayBuffer で読込
+        wb=XLSX.read(buf,{type:'array',cellDates:true});
+      }
+
+      const sheetNames=wb.SheetNames;
+      sheetInfoList.push({file:file.name,sheets:sheetNames});
+      diagLog.push(`📄 ${file.name} — シート[${sheetNames.join(' / ')}]`);
+
+      const selSheet=selectedSheets[file.name]||sheetNames[0];
+      diagLog.push(`  読込シート: "${selSheet}"`);
+
+      const ws=wb.Sheets[selSheet];
+      const rawData=XLSX.utils.sheet_to_json(ws,{header:1,defval:'',raw:false});
+
+      // ヘッダー行自動判定
+      const hmapKeys=Object.keys(hmap);
+      let headerRowIdx=0,bestScore=0;
+      for(let ri=0;ri<Math.min(10,rawData.length);ri++){
+        const rv=(rawData[ri]||[]).map(v=>norm(String(v)));
+        const sc=rv.filter(v=>hmapKeys.includes(v)||CANONICAL.includes(v)).length;
+        if(sc>bestScore){bestScore=sc;headerRowIdx=ri;}
+      }
+      if(headerRowIdx>0)diagLog.push(`  ヘッダー行: ${headerRowIdx+1}行目（自動判定）`);
+
+      const headerRow=(rawData[headerRowIdx]||[]).map(v=>norm(String(v)));
+      const dataRows=rawData.slice(headerRowIdx+1).filter(r=>r.some(v=>v!==''&&v!==null));
+
+      diagLog.push(`  検出ヘッダー(${headerRow.filter(h=>h).length}列): ${headerRow.filter(h=>h).slice(0,10).join(' / ')}${headerRow.filter(h=>h).length>10?'…':''}`);
+
+      // 除外グループの列解決ログ
+      exclGroups.forEach(grp=>{
+        const r=resolveExclColIdx(headerRow,grp.colHeader,grp.colFallback);
+        const cl=r.idx>=0?String.fromCharCode(65+r.idx)+'列':'未検出';
+        diagLog.push(`  除外グループ[${grp.label||grp.colHeader}]: "${r.name}"（${cl} / ${r.by}）`);
+      });
+
+      totalRaw+=dataRows.length;
+
+      dataRows.forEach(rawRow=>{
+        // ★ 除外判定（複数グループ、標準列変換前）
+        const excl=checkExclGroups(rawRow,headerRow,exclGroups);
+        if(excl.excluded){
+          totalExcluded++;
+          excludedByReason[excl.reason]=(excludedByReason[excl.reason]||0)+1;
+          return;
+        }
+        const r={_src:file.name,_sheet:selSheet};
+        headerRow.forEach((h,ci)=>{
+          if(!h)return;
+          const nk=norm(h);
+          const mapped=hmap[nk];
+          const v=rawRow[ci]??'';
+          if(mapped){
+            if(!r[mapped.canon]||r[mapped.canon]===''||(r['_p_'+mapped.canon]||999)>mapped.pri){
+              r[mapped.canon]=v;r['_p_'+mapped.canon]=mapped.pri;
+            }
+          }else if(!r[h])r[h]=v;
+        });
+        CANONICAL.forEach(c=>{if(r[c]===undefined)r[c]='';});
+        allRows.push(r);
+      });
+
+    }catch(e){
+      diagLog.push(`❌ ${file.name} 読込エラー: ${e.message}`);
+      console.error(file.name,e);
+    }
+  }
+
+  // 診断ログ
+  diagLog.push('');
+  diagLog.push('─── 除外処理結果 ───');
+  diagLog.push(`✅ 元データ件数: ${totalRaw}件`);
+  diagLog.push(`✅ 除外件数: ${totalExcluded}件`);
+  diagLog.push(`✅ 整形後件数: ${totalRaw-totalExcluded}件`);
+  if(Object.keys(excludedByReason).length>0){
+    diagLog.push('  除外理由:');
+    Object.entries(excludedByReason).forEach(([r,c])=>diagLog.push(`    ${r}: ${c}件`));
+  }
+  diagLog.push('');
+  diagLog.push('─── ヘッダーマップ結果 ───');
+  CANONICAL.forEach(c=>{
+    const cnt=allRows.filter(r=>r[c]!==''&&r[c]!=null).length;
+    diagLog.push(cnt===0?`⚠️  ${c}: 0件 — ヘッダーマップ確認`:`✅ ${c}: ${cnt}件`);
+  });
+
+  const addrCnt=allRows.filter(r=>r.address!==''&&r.address!=null).length;
+  if(addrCnt===0){
+    diagLog.push('');
+    diagLog.push('🚫 住所列(address)が取得できていません。エリア判定を中止します。');
+    allRows.forEach(r=>r._area='UNKNOWN');
+  }else{
+    const activeRules=(S.areaRules||DEFAULT_AREA).filter(r=>r.enabled);
+    diagLog.push('');
+    diagLog.push(`─── エリアルール (有効:${activeRules.length}件) ───`);
+    activeRules.forEach((r,i)=>diagLog.push(`  [${i+1}] ${r.area}: "${r.val1}"(${r.m1}) / "${r.val2}"(${r.m2})`));
+    allRows.forEach(r=>{r._area=tagArea(String(r.address||''));});
+  }
+
+  processed={ALL:allRows};
+  [...new Set(allRows.map(r=>r._area))].sort().forEach(a=>{processed[a]=allRows.filter(r=>r._area===a);});
+  diagLog.push('');
+  diagLog.push('─── エリア判定結果 ───');
+  Object.keys(processed).filter(k=>k!=='ALL').sort().forEach(a=>{
+    diagLog.push(`${a==='UNKNOWN'?'⚠️ ':'✅'} ${a}: ${processed[a].length}件`);
+  });
+  const unkRows=processed['UNKNOWN']||[];
+  if(unkRows.length>0){
+    diagLog.push(`  サンプル: ${unkRows.slice(0,3).map(r=>r.address||'(住所なし)').join(' / ')}`);
+  }
+
+  renderSheetSelector(sheetInfoList);
+  pg.textContent=`完了 — ${allRows.length}件（除外${totalExcluded}件）`;
+  renderResult();
+  renderDiagLog();
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('panel-result').classList.add('active');
+  document.querySelectorAll('.nav-item')[1].classList.add('active');
+  document.getElementById('hdrStatus').textContent=`${allRows.length}件（除外${totalExcluded}件）`;
+}
+
+// ═══════════════════════════════════════════════════════════
+// エリア判定
+// ═══════════════════════════════════════════════════════════
+function matchVal(addr,val,method){
+  if(!val||!val.trim())return false;
+  const v=val.trim();
+  switch(method){
+    case'startsWith':return addr.startsWith(v);
+    case'contains':  return addr.includes(v);
+    case'exact':     return addr===v;
+    case'exclude':   return addr.includes(v);
+    default:         return addr.includes(v);
+  }
+}
+function tagArea(addr){
+  const rules=(S.areaRules||DEFAULT_AREA).filter(r=>r.enabled);
+  for(const r of rules){
+    if((r.m1==='exclude'&&matchVal(addr,r.val1,'exclude'))||(r.m2==='exclude'&&matchVal(addr,r.val2,'exclude')))return'UNKNOWN';
+  }
+  for(const r of rules){
+    if(r.m1==='exclude'&&r.m2==='exclude')continue;
+    if((r.m1!=='exclude'&&matchVal(addr,r.val1,r.m1))||(r.m2!=='exclude'&&matchVal(addr,r.val2,r.m2)))return r.area;
+  }
+  return'UNKNOWN';
+}
+
+// ═══════════════════════════════════════════════════════════
+// Result & Table
+// ═══════════════════════════════════════════════════════════
+function renderResult(){
+  document.getElementById('resEmpty').style.display='none';
+  document.getElementById('resContent').style.display='';
+  const areas=Object.keys(processed).filter(k=>k!=='ALL').sort();
+  document.getElementById('areaTabs').innerHTML=['ALL',...areas].map(a=>{
+    const c=processed[a]?.length||0,u=a==='UNKNOWN';
+    return`<div class="area-tab${a===currentArea?' active':''}${u?' unk':''}" onclick="switchArea('${a}')">${a} <span style="opacity:.7;font-size:10px">${c}</span></div>`;
+  }).join('');
+  const total=processed.ALL?.length||0,unk=processed.UNKNOWN?.length||0;
+  document.getElementById('statsRow').innerHTML=`
+    <div class="stat"><div class="stat-l">整形後件数</div><div class="stat-v">${total}</div></div>
+    <div class="stat"><div class="stat-l">エリア数</div><div class="stat-v">${areas.filter(a=>a!=='UNKNOWN').length}</div></div>
+    <div class="stat"><div class="stat-l">UNKNOWN</div><div class="stat-v${unk>0?' warn':''}\">${unk}</div></div>
+    <div class="stat"><div class="stat-l">ファイル数</div><div class="stat-v">${files.length}</div></div>`;
+  renderTable(currentArea);
+}
+function switchArea(a){
+  currentArea=a;
+  document.querySelectorAll('.area-tab').forEach(t=>t.classList.toggle('active',t.textContent.trim().startsWith(a)));
+  renderTable(a);
+}
+function renderTable(area){
+  const rows=processed[area]||[],cols=activeCols();
+  const rc=S.rowConfig||DEFAULT_ROW;
+  document.getElementById('areaLabel').textContent=`${area}  (${rows.length}件)`;
+  // 幅モードに応じた colgroup 生成（プレビュー）
+  const pctTotal=cols.filter(c=>c.widthMode==='pct').reduce((s,c)=>s+(c.pct||0),0)||100;
+  const colW=cols.map(c=>{
+    if(c.widthMode==='pct')      return (c.pct||10)+'%';
+    if(c.widthMode==='autoVar')  return Math.min(c.maxW,260)+'px';
+    return c.fixedW+'px'; // fixed
+  });
+  const wrapCss=rc.wrapText
+    ? 'white-space:normal;word-break:break-all;'
+    : 'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
+  const rowHpx=Math.round((rc.rowHeightPt||16)*1.33);
+  const stripeCss=rc.stripe?'<style>#tblWrap tbody tr:nth-child(even) td{background:#faf9f6}</style>':'';
+  document.getElementById('tblWrap').innerHTML=stripeCss+`<table style="${cols.some(c=>c.widthMode==='pct')?'width:100%;table-layout:fixed;':''}">
+    <colgroup>${colW.map(w=>`<col style="width:${w}">`).join('')}</colgroup>
+    <thead><tr>${cols.map(c=>`<th style="text-align:${c.align}">${c.display}</th>`).join('')}</tr></thead>
+    <tbody>${rows.slice(0,300).map(r=>`<tr>${cols.map(c=>{
+      const v=r[c.canon]??'',u=c.canon==='address'&&r._area==='UNKNOWN';
+      return`<td style="text-align:${c.align};font-family:'${c.font}',sans-serif;font-size:${c.size}px;height:${rowHpx}px;${wrapCss}"${u?' class="td-unk"':''}>${v}</td>`;
+    }).join('')}</tr>`).join('')}</tbody>
+  </table>`;
+  document.getElementById('tblFooter').textContent=rows.length>300?`先頭300件表示 (全${rows.length}件)`:'';
+}
+function activeCols(){return(S.colConfig||DEFAULT_COL).filter(c=>c.enabled!==false);}
+
+// ═══════════════════════════════════════════════════════════
+// A4印刷
+// ═══════════════════════════════════════════════════════════
+const PRINT_PAGE_ROWS=50;
+// ── 印刷対象エリアの算出（チェック選択 or 現在タブ）──
+function getPrintableAreas(){
+  const inclUnk=document.getElementById('chkPrintUnk')?.checked;
+  return Object.keys(processed)
+    .filter(k=>k!=='ALL')
+    .filter(k=>inclUnk||k!=='UNKNOWN')
+    .sort();
+}
+
+// ── 印刷設定モーダルを開く ──
+function openPrintDialog(){
+  if(!Object.keys(processed).length){alert('先に整形を実行してください');return;}
+  const areas=getPrintableAreas();
+  if(!areas.length){alert('印刷対象がありません');return;}
+  // 現在タブを既定選択（ALLの場合は全エリア選択）
+  const con=document.getElementById('printAreaChecks');
+  con.innerHTML=areas.map(a=>{
+    const cnt=(processed[a]||[]).length;
+    const checked=(currentArea==='ALL'||currentArea===a)?'checked':'';
+    return `<label style="font-size:12px;display:flex;align-items:center;gap:7px;cursor:pointer">
+      <input type="checkbox" class="print-area-chk" value="${esc(a)}" ${checked} style="accent-color:var(--accent)" onchange="updatePrintPreview()">
+      ${esc(a)} <span style="color:var(--text3);font-size:11px">（${cnt}件）</span>
+    </label>`;
+  }).join('');
+  // 1ページ件数の既定
+  const rc=S.rowConfig||DEFAULT_ROW;
+  document.getElementById('printPageRows').value=rc.pageRows||50;
+  // ラジオ変更時もプレビュー更新
+  document.querySelectorAll('input[name="pgMode"]').forEach(r=>r.onchange=updatePrintPreview);
+  document.getElementById('printPageRows').oninput=updatePrintPreview;
+  document.getElementById('printModal').style.display='flex';
+  updatePrintPreview();
+}
+function closePrintDialog(){document.getElementById('printModal').style.display='none';}
+
+// ── 選択内容からページ数を試算してサマリ表示 ──
+function getSelectedPrintAreas(){
+  return [...document.querySelectorAll('.print-area-chk:checked')].map(c=>c.value);
+}
+function getPageMode(){
+  const r=document.querySelector('input[name="pgMode"]:checked');
+  return r?r.value:'split';
+}
+function updatePrintPreview(){
+  const sel=getSelectedPrintAreas();
+  const mode=getPageMode();
+  const pageRows=Math.max(1,parseInt(document.getElementById('printPageRows').value)||50);
+  if(!sel.length){
+    document.getElementById('printSummary').innerHTML='エリアが選択されていません。';
+    return;
+  }
+  let totalPages=0;
+  const lines=sel.map(a=>{
+    const cnt=(processed[a]||[]).length;
+    let pages;
+    if(mode==='fit'){ pages=1; }
+    else { pages=Math.max(1,Math.ceil(cnt/pageRows)); }
+    totalPages+=pages;
+    return `${a}: ${cnt}件 → ${pages}ページ${(mode==='fit'&&cnt>pageRows)?'（縮小）':''}`;
+  });
+  document.getElementById('printSummary').innerHTML=
+    `選択 ${sel.length}エリア / 合計 <b>${totalPages}ページ</b><br>`+
+    lines.map(l=>`・${l}`).join('<br>');
+}
+
+// ── 実際の印刷実行 ──
+function executePrint(){
+  const sel=getSelectedPrintAreas();
+  if(!sel.length){alert('印刷するエリアを選択してください');return;}
+  const mode=getPageMode();
+  const pageRows=Math.max(1,parseInt(document.getElementById('printPageRows').value)||50);
+  buildPrintHTML(sel,mode,pageRows);
+  closePrintDialog();
+  // モーダルを閉じてから印刷
+  setTimeout(()=>window.print(),100);
+}
+
+// ── 印刷HTML生成（エリアごとに改ページ）──
+function buildPrintHTML(areas,mode,pageRows){
+  const cols=activeCols();
+  const rc=S.rowConfig||DEFAULT_ROW;
+  const addrIdx=cols.findIndex(c=>c.canon==='address');
+  const USABLE_MM=285; // A4横 使用可能幅
+  const USABLE_H_MM=190; // A4横 使用可能高さ目安
+
+  // 列幅(mm)算出
+  const rawW=cols.map(c=>{
+    if(c.widthMode==='pct')     return (c.pct||10);
+    if(c.widthMode==='autoVar') return Math.min(c.maxW,200)/7;
+    return c.fixedW/7;
+  });
+  const sum=rawW.reduce((a,b)=>a+b,0)||1;
+  const colMM=rawW.map(w=>USABLE_MM*(w/sum));
+  const wrapCss=rc.wrapText?'white-space:normal;word-break:break-all;':'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
+  const stripe=rc.stripe;
+
+  let html='';
+
+  areas.forEach(area=>{
+    const rows=processed[area]||[];
+    if(!rows.length)return;
+
+    // fitモード: 1エリア=1ページ、件数に応じて行高・フォント縮小
+    // splitモード: pageRowsごとに分割（各チャンク1ページ）
+    let chunks=[];
+    if(mode==='fit'){
+      chunks=[rows]; // 全件1ページ
+    }else{
+      for(let s=0;s<rows.length;s+=pageRows)chunks.push(rows.slice(s,s+pageRows));
+    }
+
+    chunks.forEach((chunk,ci)=>{
+      // fitモードで件数が多い場合の縮小スケール
+      let rowHpt=rc.rowHeightPt||16;
+      let baseFs=null;
+      if(mode==='fit'){
+        // 目安: 1行あたり高さ(mm) = USABLE_H_MM / 件数。pt換算(1mm≒2.83pt)
+        const perRowMM=USABLE_H_MM/(chunk.length+1.5); // +ヘッダー分
+        const fitPt=Math.max(5, Math.min(rowHpt, perRowMM*2.83*0.7));
+        rowHpt=fitPt;
+        baseFs=Math.max(5, Math.min(8.5, fitPt*0.55));
+      }
+
+      html+=`<div class="print-area-page">`;
+      html+=`<div class="print-page-title">${esc(area)}　`+
+        (mode==='fit'
+          ? `全${rows.length}件${rows.length>pageRows?'（1ページ自動縮小）':''}`
+          : `${ci*pageRows+1}〜${Math.min((ci+1)*pageRows,rows.length)}件 / 全${rows.length}件`)+
+        `</div>`;
+      html+=`<table class="print-table"><colgroup>`;
+      cols.forEach((c,k)=>{html+=`<col style="width:${colMM[k].toFixed(1)}mm">`;});
+      html+=`</colgroup><thead><tr>`;
+      cols.forEach(c=>{html+=`<th style="text-align:${c.align}${baseFs?';font-size:'+(baseFs+0.5).toFixed(1)+'pt':''}">${esc(c.display)}</th>`;});
+      html+=`</tr></thead><tbody>`;
+      chunk.forEach(r=>{
+        html+=`<tr>`;
+        cols.forEach((c,k)=>{
+          const v=r[c.canon]??'';
+          const fs=baseFs!=null?baseFs:Math.max(6,(c.size||11)-2.5);
+          html+=`<td${k===addrIdx?' class="col-addr"':''} style="text-align:${c.align};font-family:'${c.font}';font-size:${fs.toFixed(1)}pt;height:${rowHpt.toFixed(1)}pt;${wrapCss}">${esc(v)}</td>`;
+        });
+        html+=`</tr>`;
+      });
+      html+=`</tbody></table></div>`;
+    });
+  });
+
+  // ストライプCSS（動的）
+  const stripeStyle=stripe
+    ? '<style>.print-table tbody tr:nth-child(even) td{background:#f3f1ed!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}</style>'
+    : '';
+  document.getElementById('printArea').innerHTML=stripeStyle+html;
+}
+
+// ═══════════════════════════════════════════════════════════
+// 診断ログ & シート選択
+// ═══════════════════════════════════════════════════════════
+function renderDiagLog(){
+  const el=document.getElementById('diagLogBox');
+  if(!el||!diagLog.length){if(el)el.style.display='none';return;}
+  el.style.display='';
+  el.innerHTML='<div style="font-size:12px;font-weight:600;margin-bottom:5px;color:var(--text2)">診断ログ <span style="font-weight:400;color:var(--text3);font-size:11px">— 処理詳細</span></div>'+
+    '<div style="max-height:220px;overflow-y:auto;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px;font-size:11px;font-family:monospace;line-height:1.7;white-space:pre-wrap;color:var(--text2)">'+
+    diagLog.map(l=>{
+      if(l.startsWith('❌')||l.startsWith('🚫')||l.startsWith('⚠️'))return`<span style="color:#c0392b">${esc(l)}</span>`;
+      if(l.startsWith('✅'))return`<span style="color:#1a7a4a">${esc(l)}</span>`;
+      if(l.startsWith('─'))return`<span style="color:var(--text3)">${esc(l)}</span>`;
+      return esc(l);
+    }).join('\n')+'</div>';
+}
+function renderSheetSelector(list){
+  const el=document.getElementById('sheetSelector');
+  if(!el||!list)return;
+  if(!list.some(s=>s.sheets.length>1)){el.innerHTML='';return;}
+  el.innerHTML='<div style="font-size:12px;font-weight:600;margin:8px 0 5px;color:var(--text2)">読込シート選択</div>'+
+    list.filter(s=>s.sheets.length>1).map(s=>`<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;font-size:12px">
+      <span style="min-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(s.file)}</span>
+      <select onchange="selectedSheets['${esc(s.file)}']=this.value" style="font-size:11px;border:1px solid var(--border);border-radius:5px;padding:2px 5px">
+        ${s.sheets.map(sh=>`<option value="${esc(sh)}" ${(selectedSheets[s.file]||s.sheets[0])===sh?'selected':''}>${esc(sh)}</option>`).join('')}
+      </select>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════════
+// Excel出力（フォント・列幅・配置 反映）
+// ═══════════════════════════════════════════════════════════
+function pxToWch(px){return Math.max(4,Math.round(px/7.2*10)/10);}
+function strWch(s){let w=0;for(const c of String(s)){w+=(c.charCodeAt(0)>0x7f)?2:1;}return w;}
+function calcVarWch(display,rows,canon,maxPx){
+  const mx=pxToWch(maxPx);
+  const dm=Math.max(strWch(display),...rows.map(r=>strWch(String(r[canon]??''))));
+  return Math.min(dm+1,mx);
+}
+function fmtDateCell(v){
+  if(!v&&v!==0)return'';
+  const s=String(v);
+  if(/[^\d\-\/年月日]/.test(s)&&!/^\d{4}/.test(s))return s;
+  if(v instanceof Date)return`${v.getFullYear()}/${v.getMonth()+1}/${v.getDate()}`;
+  const m=s.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})/);
+  return m?`${m[1]}/${parseInt(m[2])}/${parseInt(m[3])}`:s;
+}
+function fmtBuildAge(v){
+  if(!v&&v!==0)return'';
+  const s=String(v);
+  if(/年/.test(s))return s;
+  if(v instanceof Date)return`${v.getFullYear()}年${v.getMonth()+1}月`;
+  const m=s.match(/^(\d{4})[-\/](\d{1,2})/);
+  return m?`${m[1]}年${parseInt(m[2])}月`:s;
+}
+function makeStyle(cc,isH,wrap){
+  return{
+    font:{name:cc.font||'游ゴシック',sz:cc.size||11,bold:!!isH},
+    alignment:{horizontal:cc.align||'left',vertical:'center',wrapText:!!wrap&&!isH},
+    border:{top:{style:'thin',color:{rgb:'E8E5E0'}},bottom:{style:'thin',color:{rgb:'E8E5E0'}},left:{style:'thin',color:{rgb:'E8E5E0'}},right:{style:'thin',color:{rgb:'E8E5E0'}}},
+    ...(isH?{fill:{patternType:'solid',fgColor:{rgb:'EAE8E3'}}}:{})
+  };
+}
+function buildSheet(cols,rows){
+  const rc=S.rowConfig||DEFAULT_ROW;
+  const DATE_C=new Set(['availableDate','buildingAge']);
+  const aoa=[cols.map(c=>c.display),...rows.map(r=>cols.map(c=>{
+    const raw=r[c.canon]??'';
+    if(c.canon==='buildingAge')return fmtBuildAge(raw);
+    if(c.canon==='availableDate')return fmtDateCell(raw);
+    return raw??'';
+  }))];
+  const ws=XLSX.utils.aoa_to_sheet(aoa);
+  // ★ 幅モードごとに Excel列幅(wch)を確実に算出
+  // pctモードはExcel総幅の目安(全列でwch合計≈120)に配分
+  const pctCols=cols.filter(c=>c.widthMode==='pct');
+  const pctSum=pctCols.reduce((s,c)=>s+(c.pct||0),0)||100;
+  ws['!cols']=cols.map(c=>{
+    if(c.widthMode==='pct'){
+      return {wch: Math.max(5, Math.round((c.pct||10)/pctSum*120))};
+    }else if(c.widthMode==='autoVar'){
+      return {wch: calcVarWch(c.display,rows,c.canon,c.maxW)};
+    }else{ // fixed
+      return {wch: pxToWch(c.fixedW)};
+    }
+  });
+  // 行の高さ
+  ws['!rows']=[{hpt:rc.headerHeightPt||20},...Array(aoa.length-1).fill({hpt:rc.rowHeightPt||16})];
+  ws['!freeze']={xSplit:0,ySplit:1,topLeftCell:'A2',activePane:'bottomLeft'};
+  const range=XLSX.utils.decode_range(ws['!ref']||'A1');
+  for(let R=range.s.r;R<=range.e.r;R++){
+    for(let C=range.s.c;C<=range.e.c;C++){
+      const addr=XLSX.utils.encode_cell({r:R,c:C});
+      if(!ws[addr])ws[addr]={t:'s',v:''};
+      const cell=ws[addr];
+      const cc=cols[C];if(!cc)continue;
+      if(typeof cell.v==='number'&&DATE_C.has(cc.canon)){cell.v=String(cell.v);cell.t='s';}
+      cell.s=makeStyle(cc,R===0,rc.wrapText);
+    }
+  }
+  ws['!autofilter']={ref:`A1:${XLSX.utils.encode_col(cols.length-1)}1`};
+  return ws;
+}
+function dlXlsxSample(){
+  if(typeof XLSX==='undefined'){alert('ライブラリ読込中です');return;}
+  if(!Object.keys(processed).length){alert('先に整形を実行してください');return;}
+  const cols=activeCols(),sample=(processed['ALL']||[]).slice(0,3);
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,buildSheet(cols,sample),'SAMPLE');
+  XLSX.writeFile(wb,`PROP_サンプル_${yyyymmdd()}.xlsx`);
+}
+function dlXlsx(){
+  if(typeof XLSX==='undefined'){alert('ライブラリ読込中です');return;}
+  if(!Object.keys(processed).length){alert('先に整形を実行してください');return;}
+  const cols=activeCols();
+  const areas=['ALL',...Object.keys(processed).filter(k=>k!=='ALL').sort()];
+  const wb=XLSX.utils.book_new();
+  areas.forEach(area=>{
+    XLSX.utils.book_append_sheet(wb,buildSheet(cols,processed[area]||[]),('PROP_'+area).slice(0,31));
+  });
+  XLSX.writeFile(wb,`PROP_物件整形_${yyyymmdd()}.xlsx`);
+}
+function dlCsv(){
+  const rows=processed[currentArea]||[],cols=activeCols();
+  const h=cols.map(c=>c.display).join(',');
+  const b=rows.map(r=>cols.map(c=>`"${String(r[c.canon]??'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob(['\uFEFF'+h+'\n'+b],{type:'text/csv;charset=utf-8'}));
+  a.download=`PROP_${currentArea}.csv`;a.click();
+}
+function yyyymmdd(){const d=new Date();return`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;}
+
+// ═══════════════════════════════════════════════════════════
+// 除外ルール UI（複数グループ対応）
+// ═══════════════════════════════════════════════════════════
+function renderExclGroups_UI(){
+  const groups=S.exclGroups||DEFAULT_EXCL_GROUPS;
+  const con=document.getElementById('exclGroupContainer');
+  con.innerHTML=groups.map((grp,gi)=>renderExclGroupHTML(grp,gi)).join('');
+}
+
+function renderExclGroupHTML(grp,gi){
+  const logicOpts=['OR','AND'].map(v=>`<option value="${v}"${grp.logic===v?' selected':''}>${v==='OR'?'OR（いずれか一致で除外）':'AND（全て一致で除外）'}</option>`).join('');
+  const valRows=(grp.vals||[]).map((v,vi)=>`<tr>
+    <td><input type="text" value="${esc(v.val)}" id="ev_${gi}_${vi}" placeholder="例: 申込"></td>
+    <td><select id="em_${gi}_${vi}" class="match-sel">
+      ${EXCL_MATCH.map(m=>`<option value="${m.v}"${v.match===m.v?' selected':''}>${m.l}</option>`).join('')}
+    </select></td>
+    <td style="text-align:center"><input type="checkbox" id="een_${gi}_${vi}"${v.enabled?' checked':''}></td>
+    <td><button class="btn btn-danger btn-xs" onclick="removeExclVal(${gi},${vi})">削除</button></td>
+  </tr>`).join('');
+  return`<div class="excl-rule-group" id="exclGrp_${gi}">
+    <div class="excl-rule-group-title">
+      <span>除外グループ ${gi+1}</span>
+      <span class="excl-logic-badge" id="logicBadge_${gi}">${grp.logic||'OR'}</span>
+      <button class="btn btn-danger btn-xs" style="margin-left:auto" onclick="removeExclGroup(${gi})">グループ削除</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <div>
+        <div style="font-size:11px;color:var(--text2);margin-bottom:4px;font-weight:600">対象列の指定</div>
+        <div style="display:flex;flex-direction:column;gap:5px">
+          <div style="display:flex;align-items:center;gap:6px">
+            <label style="font-size:11px;width:80px;flex-shrink:0;color:var(--text2)">ヘッダー名</label>
+            <input type="text" value="${esc(grp.colHeader||'')}" id="egrpH_${gi}" placeholder="例: 予約申込" style="flex:1;border:1px solid var(--border);border-radius:5px;padding:3px 7px;font-size:12px">
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <label style="font-size:11px;width:80px;flex-shrink:0;color:var(--text2)">予備列番号</label>
+            <input type="text" value="${esc(grp.colFallback||'')}" id="egrpF_${gi}" placeholder="C, D, 3 など" style="flex:1;border:1px solid var(--border);border-radius:5px;padding:3px 7px;font-size:12px">
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <label style="font-size:11px;width:80px;flex-shrink:0;color:var(--text2)">グループ名</label>
+            <input type="text" value="${esc(grp.label||'')}" id="egrpL_${gi}" placeholder="例: 予約申込除外" style="flex:1;border:1px solid var(--border);border-radius:5px;padding:3px 7px;font-size:12px">
+          </div>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--text2);margin-bottom:4px;font-weight:600">判定ロジック</div>
+        <select id="egrpLogic_${gi}" onchange="document.getElementById('logicBadge_${gi}').textContent=this.value"
+          style="font-size:12px;border:1px solid var(--border);border-radius:5px;padding:4px 8px;width:100%;margin-bottom:8px">
+          ${logicOpts}
+        </select>
+        <div style="display:flex;align-items:center;gap:6px">
+          <label style="font-size:11px;color:var(--text2)">グループ有効</label>
+          <input type="checkbox" id="egrpEn_${gi}"${grp.enabled?' checked':''} style="accent-color:var(--accent)">
+        </div>
+        <div style="font-size:10px;color:var(--text3);margin-top:6px">
+          OR: 除外値のいずれか一致で除外<br>AND: 除外値すべて一致で除外
+        </div>
+      </div>
+    </div>
+    <div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:5px">除外値リスト</div>
+    <table class="stbl">
+      <thead><tr><th>除外値</th><th style="width:130px">判定方式</th><th style="width:45px">有効</th><th style="width:38px"></th></tr></thead>
+      <tbody>${valRows}</tbody>
+    </table>
+    <button class="btn btn-outline btn-xs" style="margin-top:6px" onclick="addExclVal(${gi})">＋ 除外値を追加</button>
+  </div>`;
+}
+
+function readExclGroups(){
+  const groups=S.exclGroups||DEFAULT_EXCL_GROUPS;
+  return groups.map((grp,gi)=>{
+    const hEl=document.getElementById(`egrpH_${gi}`);
+    if(!hEl)return grp;
+    const vals=(grp.vals||[]).map((_,vi)=>{
+      const ve=document.getElementById(`ev_${gi}_${vi}`);
+      if(!ve)return null;
+      return{
+        val:ve.value,
+        match:document.getElementById(`em_${gi}_${vi}`).value,
+        enabled:document.getElementById(`een_${gi}_${vi}`).checked,
+      };
+    }).filter(Boolean);
+    return{
+      label:document.getElementById(`egrpL_${gi}`).value,
+      colHeader:hEl.value,
+      colFallback:document.getElementById(`egrpF_${gi}`).value,
+      logic:document.getElementById(`egrpLogic_${gi}`).value,
+      enabled:document.getElementById(`egrpEn_${gi}`).checked,
+      vals,
+    };
+  });
+}
+
+function addExclGroup(){
+  syncSettingsFromDOM();
+  S.exclGroups.push({label:'新グループ',colHeader:'',colFallback:'',logic:'OR',enabled:true,vals:[{val:'',match:'exact',enabled:true}]});
+  renderExclGroups_UI();
+}
+function removeExclGroup(gi){
+  syncSettingsFromDOM();
+  S.exclGroups.splice(gi,1);
+  renderExclGroups_UI();
+}
+function addExclVal(gi){
+  syncSettingsFromDOM();
+  S.exclGroups[gi].vals.push({val:'',match:'exact',enabled:true});
+  renderExclGroups_UI();
+}
+function removeExclVal(gi,vi){
+  syncSettingsFromDOM();
+  S.exclGroups[gi].vals.splice(vi,1);
+  renderExclGroups_UI();
+}
+
+// ═══════════════════════════════════════════════════════════
+// 列設定テーブルUI
+// ═══════════════════════════════════════════════════════════
+const WIDTH_MODES=[{v:'fixed',l:'固定px'},{v:'autoVar',l:'可変px'},{v:'pct',l:'％'}];
+let colDragSrc=null;
+function renderColTbl(){
+  document.querySelector('#colTbl tbody').innerHTML=(S.colConfig||DEFAULT_COL).map((c,i)=>{
+    const wm=c.widthMode||(c.type==='VARIABLE'?'autoVar':'fixed');
+    return `<tr class="col-drag-row" draggable="true" data-cidx="${i}">
+    <td style="text-align:center"><span class="drag-handle" title="ドラッグで並べ替え">⠿</span></td>
+    <td><span class="mono">${c.canon}</span></td>
+    <td><input type="text" value="${esc(c.display)}" id="cd${i}" oninput="liveCol()"></td>
+    <td><select id="cwm${i}" onchange="liveCol()">${WIDTH_MODES.map(m=>`<option value="${m.v}"${wm===m.v?' selected':''}>${m.l}</option>`).join('')}</select></td>
+    <td><input type="number" value="${c.fixedW}" id="cfw${i}" style="width:48px" oninput="liveCol()"></td>
+    <td><input type="number" value="${c.maxW}" id="cmw${i}" style="width:48px" oninput="liveCol()"></td>
+    <td><input type="number" value="${c.pct||10}" id="cpct${i}" style="width:42px" min="2" max="60" oninput="liveCol()"></td>
+    <td><select id="cfn${i}" onchange="liveCol()">${FONTS.map(f=>`<option${c.font===f?' selected':''}>${f}</option>`).join('')}</select></td>
+    <td><input type="number" value="${c.size||11}" id="csz${i}" style="width:40px" min="8" max="18" oninput="liveCol()"></td>
+    <td><select id="cal${i}" onchange="liveCol()">${ALIGNS.map(a=>`<option value="${a.v}"${c.align===a.v?' selected':''}>${a.l}</option>`).join('')}</select></td>
+    <td style="text-align:center"><input type="checkbox" id="cen${i}"${c.enabled!==false?' checked':''} onchange="liveCol()"></td>
+  </tr>`;}).join('');
+  // ドラッグ並べ替えイベント
+  document.querySelectorAll('#colTbl tbody tr.col-drag-row').forEach(row=>{
+    row.addEventListener('dragstart',onColDragStart);
+    row.addEventListener('dragover', onColDragOver);
+    row.addEventListener('dragleave',function(){this.classList.remove('drag-over');});
+    row.addEventListener('drop',     onColDrop);
+    row.addEventListener('dragend',  function(){document.querySelectorAll('.col-drag-row').forEach(r=>r.classList.remove('dragging','drag-over'));colDragSrc=null;});
+  });
+}
+function readColTbl(){
+  return(S.colConfig||DEFAULT_COL).map((c,i)=>({
+    canon:c.canon,
+    display:document.getElementById('cd'+i)?.value||c.display,
+    widthMode:document.getElementById('cwm'+i)?.value||c.widthMode||'fixed',
+    type:(document.getElementById('cwm'+i)?.value==='autoVar')?'VARIABLE':'FIXED',
+    fixedW:parseInt(document.getElementById('cfw'+i)?.value)||c.fixedW,
+    maxW:parseInt(document.getElementById('cmw'+i)?.value)||c.maxW,
+    pct:parseFloat(document.getElementById('cpct'+i)?.value)||c.pct||10,
+    font:document.getElementById('cfn'+i)?.value||c.font,
+    size:parseInt(document.getElementById('csz'+i)?.value)||c.size,
+    align:document.getElementById('cal'+i)?.value||c.align,
+    enabled:document.getElementById('cen'+i)?.checked!==false,
+  }));
+}
+function liveCol(){
+  S.colConfig=readColTbl();
+  if(Object.keys(processed).length>0)renderTable(currentArea);
+}
+// 列のドラッグ並べ替え
+function onColDragStart(e){colDragSrc=this;this.classList.add('dragging');e.dataTransfer.effectAllowed='move';}
+function onColDragOver(e){e.preventDefault();e.dataTransfer.dropEffect='move';this.classList.add('drag-over');return false;}
+function onColDrop(e){
+  e.preventDefault();if(colDragSrc===this)return;
+  const arr=readColTbl();
+  const si=parseInt(colDragSrc.dataset.cidx),ti=parseInt(this.dataset.cidx);
+  const[moved]=arr.splice(si,1);arr.splice(ti,0,moved);
+  S.colConfig=arr;renderColTbl();
+  if(Object.keys(processed).length>0)renderTable(currentArea);
+}
+
+// ── 行基準パネル ──
+function renderRowPanel(){
+  const rc=S.rowConfig||DEFAULT_ROW;
+  document.getElementById('rowH').value=rc.rowHeightPt||16;
+  document.getElementById('rowHH').value=rc.headerHeightPt||20;
+  document.getElementById('rowPage').value=rc.pageRows||50;
+  document.getElementById('rowWrap').checked=!!rc.wrapText;
+  document.getElementById('rowStripe').checked=rc.stripe!==false;
+  document.getElementById('rowFit').checked=rc.fitToPage!==false;
+}
+function readRowConfig(){
+  return{
+    rowHeightPt:parseInt(document.getElementById('rowH').value)||16,
+    headerHeightPt:parseInt(document.getElementById('rowHH').value)||20,
+    pageRows:parseInt(document.getElementById('rowPage').value)||50,
+    wrapText:document.getElementById('rowWrap').checked,
+    stripe:document.getElementById('rowStripe').checked,
+    fitToPage:document.getElementById('rowFit').checked,
+  };
+}
+function liveRow(){
+  S.rowConfig=readRowConfig();
+  if(Object.keys(processed).length>0)renderTable(currentArea);
+}
+
+// ═══════════════════════════════════════════════════════════
+// エリアルールUI
+// ═══════════════════════════════════════════════════════════
+function renderAreaTbl(){
+  const tb=document.getElementById('areaTbl');
+  tb.innerHTML=(S.areaRules||DEFAULT_AREA).map((r,i)=>{
+    const mo=MATCH_TYPES.map(t=>`<option value="${t.v}"${r.m1===t.v?' selected':''}>${t.l}</option>`).join('');
+    const mo2=MATCH_TYPES.map(t=>`<option value="${t.v}"${r.m2===t.v?' selected':''}>${t.l}</option>`).join('');
+    return`<tr class="drag-row" draggable="true" data-idx="${i}">
+      <td><span class="drag-handle">⠿</span></td>
+      <td><input type="text" value="${esc(r.area)}" id="aan${i}" style="min-width:60px"></td>
+      <td><input type="text" value="${esc(r.val1||'')}" id="av1${i}" placeholder="例: きた市"></td>
+      <td><select class="match-sel" id="am1${i}">${mo}</select></td>
+      <td><input type="text" value="${esc(r.val2||'')}" id="av2${i}" placeholder="任意"></td>
+      <td><select class="match-sel" id="am2${i}">${mo2}</select></td>
+      <td style="text-align:center"><input type="checkbox" id="aen${i}"${r.enabled?' checked':''}></td>
+      <td><button class="btn btn-danger btn-xs" onclick="removeAreaRow(${i})">削除</button></td>
+    </tr>`;
+  }).join('');
+  tb.querySelectorAll('tr.drag-row').forEach(row=>{
+    row.addEventListener('dragstart',onDragStart);row.addEventListener('dragover',onDragOver);
+    row.addEventListener('dragleave',onDragLeave);row.addEventListener('drop',onDrop);row.addEventListener('dragend',onDragEnd);
+  });
+}
+function readAreaTbl(){
+  return(S.areaRules||DEFAULT_AREA).map((_,i)=>{
+    const el=document.getElementById('aan'+i);if(!el)return null;
+    return{area:el.value,val1:document.getElementById('av1'+i).value,m1:document.getElementById('am1'+i).value,val2:document.getElementById('av2'+i).value,m2:document.getElementById('am2'+i).value,enabled:document.getElementById('aen'+i).checked};
+  }).filter(Boolean);
+}
+function addAreaRow(){S.areaRules=readAreaTbl();S.areaRules.push({area:'新エリア',val1:'',m1:'contains',val2:'',m2:'contains',enabled:true});renderAreaTbl();}
+function removeAreaRow(i){S.areaRules=readAreaTbl();S.areaRules.splice(i,1);renderAreaTbl();}
+function onDragStart(e){dragSrc=this;this.classList.add('dragging');e.dataTransfer.effectAllowed='move';}
+function onDragOver(e){e.preventDefault();e.dataTransfer.dropEffect='move';this.classList.add('drag-over');return false;}
+function onDragLeave(){this.classList.remove('drag-over');}
+function onDrop(e){
+  e.preventDefault();if(dragSrc===this)return;
+  const rules=readAreaTbl();
+  const si=parseInt(dragSrc.dataset.idx),ti=parseInt(this.dataset.idx);
+  const[moved]=rules.splice(si,1);rules.splice(ti,0,moved);
+  S.areaRules=rules;renderAreaTbl();
+}
+function onDragEnd(){document.querySelectorAll('.drag-row').forEach(r=>r.classList.remove('dragging','drag-over'));dragSrc=null;}
+
+// ═══════════════════════════════════════════════════════════
+// ヘッダーマップUI
+// ═══════════════════════════════════════════════════════════
+function renderHeaderTbl(){
+  document.querySelector('#headerTbl tbody').innerHTML=(S.headerMap||DEFAULT_HEADER).map((m,i)=>`<tr>
+    <td><input type="text" value="${esc(m.raw)}" id="hr${i}"></td>
+    <td><select id="hc${i}">${CANONICAL.map(c=>`<option value="${c}"${m.canon===c?' selected':''}>${c}</option>`).join('')}</select></td>
+    <td><input type="number" value="${m.pri||1}" id="hp${i}" style="width:45px"></td>
+    <td><button class="btn btn-danger btn-xs" onclick="removeHeaderRow(${i})">削除</button></td>
+  </tr>`).join('');
+}
+function readHeaderTbl(){
+  return(S.headerMap||DEFAULT_HEADER).map((_,i)=>{
+    const el=document.getElementById('hr'+i);if(!el)return null;
+    return{raw:el.value,canon:document.getElementById('hc'+i).value,pri:parseInt(document.getElementById('hp'+i).value)||1};
+  }).filter(Boolean);
+}
+function addHeaderRow(){S.headerMap=readHeaderTbl();S.headerMap.push({raw:'',canon:'propertyName',pri:9});renderHeaderTbl();}
+function removeHeaderRow(i){S.headerMap=readHeaderTbl();S.headerMap.splice(i,1);renderHeaderTbl();}
+
+// ═══════════════════════════════════════════════════════════
+// Save / Reset
+// ═══════════════════════════════════════════════════════════
+function saveAll(){
+  syncSettingsFromDOM();
+  try{localStorage.setItem('propFmtV44',JSON.stringify(S));}catch(e){}
+  document.getElementById('hdrStatus').textContent='保存済 '+new Date().toLocaleTimeString('ja-JP');
+  setTimeout(()=>document.getElementById('hdrStatus').textContent='',3000);
+}
+function resetAll(){
+  if(!confirm('設定を初期値に戻しますか？'))return;
+  S=fresh();
+  try{localStorage.removeItem('propFmtV44');localStorage.removeItem('propFmtV43');localStorage.removeItem('propFmtV42');}catch(e){}
+  document.getElementById('hdrStatus').textContent='初期値に戻しました';
+  setTimeout(()=>document.getElementById('hdrStatus').textContent='',2500);
+}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
+
+// ═══════════════════════════════════════════════════════════
+// Drop Zone
+// ═══════════════════════════════════════════════════════════
+document.getElementById('dropZone').addEventListener('dragover',e=>{e.preventDefault();document.getElementById('dropZone').classList.add('over');});
+document.getElementById('dropZone').addEventListener('dragleave',()=>document.getElementById('dropZone').classList.remove('over'));
+document.getElementById('dropZone').addEventListener('drop',e=>{e.preventDefault();document.getElementById('dropZone').classList.remove('over');handleFiles([...e.dataTransfer.files]);});
+</script>
+</body>
+</html>

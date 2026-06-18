@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MORI | 現場改善 × AI実装 ポートフォリオ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#15130e;--paper:#f4f0e6;--paper2:#ece6d6;
+  --accent:#b5451f;--accent2:#1f5e4d;--line:#cabfa6;--muted:#6b6354;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font-family:"Zen Kaku Gothic New",sans-serif;line-height:1.8;font-feature-settings:"palt";-webkit-font-smoothing:antialiased}
+.wrap{max-width:1080px;margin:0 auto;padding:0 28px}
+.mono{font-family:"Space Mono",monospace}
+.mincho{font-family:"Shippori Mincho",serif}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:1000;opacity:.04;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23n)'/%3E%3C/svg%3E")}
+header{border-bottom:1.5px solid var(--ink);position:sticky;top:0;background:var(--paper);z-index:100}
+.bar{display:flex;justify-content:space-between;align-items:center;padding:16px 28px;max-width:1080px;margin:0 auto}
+.brand{font-weight:800;letter-spacing:.18em;font-size:.95rem}
+.brand span{color:var(--accent)}
+nav a{color:var(--ink);text-decoration:none;font-size:.78rem;letter-spacing:.12em;margin-left:22px;font-weight:500;opacity:.7;transition:opacity .2s}
+nav a:hover{opacity:1}
+@media(max-width:680px){nav{display:none}}
+.hero{padding:88px 0 64px;position:relative;overflow:hidden}
+.hero .tag{font-size:.72rem;letter-spacing:.3em;color:var(--accent);font-weight:700;margin-bottom:24px}
+.hero h1{font-family:"Shippori Mincho",serif;font-weight:800;font-size:clamp(2.2rem,5.6vw,4.3rem);line-height:1.2;margin-bottom:28px}
+.hero h1 em{font-style:normal;color:var(--accent)}
+.hero h1 .x{color:var(--accent2)}
+.hero .lead{max-width:640px;font-size:1.02rem;color:var(--muted);margin-bottom:36px}
+.hero .meta{display:flex;gap:30px;flex-wrap:wrap;font-size:.8rem;letter-spacing:.06em}
+.hero .meta div span{display:block;color:var(--accent);font-weight:700;font-size:.66rem;letter-spacing:.18em;margin-bottom:4px}
+.hero-num{position:absolute;right:-15px;top:36px;font-family:"Space Mono",monospace;font-size:11rem;color:var(--paper2);z-index:-1;font-weight:700;line-height:1}
+@media(max-width:680px){.hero-num{display:none}}
+.sec{padding:60px 0;border-top:1.5px solid var(--line)}
+.sec-h{display:flex;align-items:baseline;gap:18px;margin-bottom:42px}
+.sec-h .no{font-family:"Space Mono",monospace;color:var(--accent);font-size:.85rem;font-weight:700}
+.sec-h h2{font-family:"Shippori Mincho",serif;font-size:1.85rem;font-weight:700}
+.sec-h .en{margin-left:auto;font-size:.68rem;letter-spacing:.26em;color:var(--muted)}
+.thesis{background:var(--ink);color:var(--paper);padding:46px 40px;border-radius:2px;margin-bottom:8px}
+.thesis .arc{display:flex;align-items:center;gap:18px;flex-wrap:wrap;font-family:"Shippori Mincho",serif;font-size:1.15rem;line-height:1.6}
+.thesis .arc b{color:#e8a07a}
+.thesis .arc .ar{color:var(--accent);font-family:"Space Mono",monospace;font-size:1.4rem}
+.thesis p{margin-top:18px;color:#bcae93;font-size:.9rem;max-width:680px}
+.about-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:48px}
+@media(max-width:760px){.about-grid{grid-template-columns:1fr;gap:28px}}
+.about-grid p{margin-bottom:18px;color:#3a352b}
+.creed{background:var(--accent2);color:var(--paper);padding:30px;border-radius:2px}
+.creed .q{font-family:"Shippori Mincho",serif;font-size:1.2rem;line-height:1.7;margin-bottom:12px}
+.creed .src{font-size:.72rem;letter-spacing:.16em;opacity:.75}
+.pillars{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-top:24px}
+@media(max-width:680px){.pillars{grid-template-columns:1fr}}
+.pillars .p{background:var(--paper);padding:26px}
+.pillars .p .k{font-family:"Space Mono",monospace;font-size:.66rem;letter-spacing:.18em;color:var(--accent);font-weight:700;margin-bottom:8px}
+.pillars .p h4{font-size:1.05rem;font-weight:700;margin-bottom:8px}
+.pillars .p p{font-size:.84rem;color:var(--muted)}
+.proj{display:grid;grid-template-columns:64px 1fr;gap:28px;padding:36px 0;border-top:1px solid var(--line);transition:background .25s}
+.proj:hover{background:var(--paper2)}
+.proj .pn{font-family:"Space Mono",monospace;font-size:1.5rem;color:var(--accent);font-weight:700}
+.proj h3{font-family:"Shippori Mincho",serif;font-size:1.4rem;font-weight:700;margin-bottom:6px}
+.proj .role{font-size:.74rem;letter-spacing:.12em;color:var(--accent2);font-weight:700;margin-bottom:16px}
+.cpr{display:grid;grid-template-columns:repeat(3,1fr);margin:16px 0;border:1px solid var(--line)}
+.cpr div{padding:14px 16px;border-right:1px solid var(--line)}
+.cpr div:last-child{border-right:none}
+.cpr .lbl{font-size:.62rem;letter-spacing:.2em;color:var(--accent);font-weight:700;margin-bottom:6px}
+.cpr .val{font-size:.85rem;color:#3a352b;line-height:1.6}
+@media(max-width:640px){.cpr{grid-template-columns:1fr}.cpr div{border-right:none;border-bottom:1px solid var(--line)}.cpr div:last-child{border-bottom:none}}
+.stack{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+.stack span{font-family:"Space Mono",monospace;font-size:.68rem;border:1px solid var(--ink);padding:3px 9px;border-radius:2px}
+.result{margin-top:14px;padding-left:16px;border-left:3px solid var(--accent);font-size:.88rem;color:#3a352b}
+.skills{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}
+@media(max-width:760px){.skills{grid-template-columns:1fr}}
+.skills .cell{background:var(--paper);padding:24px}
+.skills .cell h4{font-size:.7rem;letter-spacing:.18em;color:var(--accent);font-weight:700;margin-bottom:14px}
+.skills .cell ul{list-style:none}
+.skills .cell li{font-size:.85rem;padding:5px 0;border-bottom:1px dashed var(--line);display:flex;justify-content:space-between}
+.skills .cell li:last-child{border-bottom:none}
+.skills .cell li b{font-family:"Space Mono",monospace;font-size:.66rem;color:var(--muted)}
+.tl{position:relative;padding-left:26px}
+.tl::before{content:"";position:absolute;left:6px;top:6px;bottom:6px;width:2px;background:var(--line)}
+.tl .item{position:relative;padding:0 0 28px 8px}
+.tl .item::before{content:"";position:absolute;left:-23px;top:7px;width:11px;height:11px;background:var(--accent);border-radius:50%;border:2px solid var(--paper)}
+.tl .item.big::before{background:var(--accent2);width:14px;height:14px;left:-24px}
+.tl .yr{font-family:"Space Mono",monospace;font-size:.78rem;color:var(--accent);font-weight:700}
+.tl .item h4{font-size:1rem;font-weight:700;margin:3px 0 4px}
+.tl .item p{font-size:.85rem;color:var(--muted)}
+.contact{background:var(--ink);color:var(--paper);text-align:center;padding:68px 28px}
+.contact h2{font-family:"Shippori Mincho",serif;font-size:2.1rem;margin-bottom:16px}
+.contact p{color:#bcae93;max-width:480px;margin:0 auto 28px;font-size:.92rem}
+.contact a.btn{display:inline-block;background:var(--accent);color:#fff;text-decoration:none;padding:14px 38px;font-weight:700;letter-spacing:.1em;font-size:.85rem;border-radius:2px;transition:transform .2s}
+.contact a.btn:hover{transform:translateY(-2px)}
+.contact .links{margin-top:24px;font-family:"Space Mono",monospace;font-size:.74rem}
+.contact .links a{color:#bcae93;padding:0 10px;text-decoration:none}
+footer{text-align:center;font-size:.68rem;letter-spacing:.2em;padding:24px;background:var(--ink);color:#7a715d}
+.rv{opacity:0;transform:translateY(24px);transition:opacity .7s ease,transform .7s ease}
+.rv.in{opacity:1;transform:none}
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <div class="brand">MORI<span>.</span>KAIZEN×AI</div>
+    <nav>
+      <a href="#about">ABOUT</a>
+      <a href="#work">WORK</a>
+      <a href="#skills">SKILLS</a>
+      <a href="#career">CAREER</a>
+      <a href="#contact">CONTACT</a>
+    </nav>
+  </div>
+</header>
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-num mono">22y</div>
+    <div class="tag">FIELD KAIZEN × AI IMPLEMENTATION</div>
+    <h1>22年、現場を<em>改善</em>してきた。<br>いまは<span class="x">AI</span>でつくり、改善する。</h1>
+    <p class="lead">製造業22年・工場長としての現場改善とチーム管理が土台。その課題発見力と改善のサイクルを、いまはAI実装という新しい手段で回しています。動く試作を即日出して、現場と対話しながら磨き込む。それが私のものづくりです。</p>
+    <div class="meta">
+      <div><span>CAREER</span>製造業 22年 / 工場長</div>
+      <div><span>NOW</span>業務DX / AI実装 / 不動産PropTech</div>
+      <div><span>STYLE</span>まず動くものを、翌朝までに</div>
+    </div>
+  </div>
+</section>
+<section class="sec" id="about">
+  <div class="wrap">
+    <div class="sec-h"><span class="no">01</span><h2>私という人間</h2><span class="en">— ABOUT</span></div>
+    <div class="thesis">
+      <div class="arc">
+        <b>製造現場で22年、改善とチームを動かす</b>
+        <span class="ar">&rarr;</span>
+        <b>不動産の実務でドメインを習得</b>
+        <span class="ar">&rarr;</span>
+        <b>AIで自分で「動くもの」をつくる</b>
+      </div>
+      <p>一本の軸は「現場を知り、課題を見つけ、手を動かして改善する」こと。手段が工程改善からAI実装に変わっただけで、やっていることはずっと同じです。</p>
+    </div>
+    <div class="about-grid" style="margin-top:36px">
+      <div>
+        <p>キャリアの大半は製造業です。工場長として22年、生産工程の改善、品質管理、コスト管理、そして複数のチームと人を動かすマネジメントを実践してきました。数字で判断し、ボトルネックを見つけ、カイゼンを回し続ける——これが私の仕事の原点です。</p>
+        <p>その後、不動産賃貸管理の実務で新たなドメイン知識を習得。空室確認、入居条件、物件査定など「現場で本当に確認すべきこと」を体で覚えました。そして近年、生成AIを業務に取り込み、判定メモ生成・公的データ統合・募集文の自動作成などを自分の手で実装しています。</p>
+        <p>「要件を完璧に固めてから作る」のではなく、「動く試作を見せ、現場と対話しながら要件を確定させる」。製造業の試作・改善文化と地続きの、現場巻き込み型の開発が私のやり方です。</p>
+      </div>
+      <div class="creed">
+        <p class="q mincho">「まずは動くものを<br>作ってから確認」</p>
+        <p class="src">— 製造現場のカイゼンから、<br>AI実装まで一貫した姿勢</p>
+      </div>
+    </div>
+    <div class="pillars">
+      <div class="p"><div class="k">PILLAR 01</div><h4>現場改善 × マネジメント</h4><p>製造業22年・工場長として、工程改善・品質/コスト管理・チーム運営を実践。課題発見と改善サイクルが体に染みついている。</p></div>
+      <div class="p"><div class="k">PILLAR 02</div><h4>ドメイン × AI実装</h4><p>不動産賃貸管理の実務知識を土台に、生成AIで業務課題を解く「動くプロダクト」を企画から実装・検証まで自走。</p></div>
+    </div>
+  </div>
+</section>
+<section class="sec" id="work">
+  <div class="wrap">
+    <div class="sec-h"><span class="no">02</span><h2>主なプロジェクト</h2><span class="en">— SELECTED WORK</span></div>
+    <p style="color:var(--muted);font-size:.82rem;margin-bottom:10px">※構成サンプルです。数値・案件名はダミーデータを含みます。実測値に差し替えてご利用ください。</p>
+    <div class="proj">
+      <div class="pn mono">01</div>
+      <div>
+        <h3>物件判定メモ自動生成アプリ</h3>
+        <div class="role">企画 / 設計 / 実装(個人開発・自走)</div>
+        <div class="cpr">
+          <div><div class="lbl">課題 / ISSUE</div><div class="val">判定メモ作成に毎回30分以上。担当者ごとに観点がばらついていた。</div></div>
+          <div><div class="lbl">打ち手 / ACTION</div><div class="val">物件情報からAIが観点付き判定メモを自動生成するWebアプリを開発。保存先を切替可能に。</div></div>
+          <div><div class="lbl">結果 / RESULT</div><div class="val">メモ作成を約8割短縮(ダミー値)、観点の標準化を実現。</div></div>
+        </div>
+        <div class="stack"><span>HTML/JS</span><span>Claude API</span><span>Notion DB</span></div>
+        <div class="result">「観点の標準化」は、工場での作業標準化(SOP)づくりと同じ発想。属人化を仕組みで潰す。</div>
+      </div>
+    </div>
+    <div class="proj">
+      <div class="pn mono">02</div>
+      <div>
+        <h3>公的データ統合・物件リスク可視化</h3>
+        <div class="role">データ統合設計 / 実装</div>
+        <div class="cpr">
+          <div><div class="lbl">課題 / ISSUE</div><div class="val">ハザードマップ・地価・用途地域の確認が分散し、見落としリスクがあった。</div></div>
+          <div><div class="lbl">打ち手 / ACTION</div><div class="val">公的データを物件に自動紐付けし、リスクを一画面に集約。AIが注意点をコメント。</div></div>
+          <div><div class="lbl">結果 / RESULT</div><div class="val">確認漏れの削減と説明資料の作成時間短縮(ダミー値)。</div></div>
+        </div>
+        <div class="stack"><span>外部データ統合</span><span>ハザードマップ</span><span>Claude API</span></div>
+        <div class="result">「見落としを仕組みで防ぐ」は製造業の品質管理(ポカヨケ)の考え方そのもの。</div>
+      </div>
+    </div>
+    <div class="proj">
+      <div class="pn mono">03</div>
+      <div>
+        <h3>OCR連携 査定・募集文自動生成</h3>
+        <div class="role">パイプライン設計 / 実装</div>
+        <div class="cpr">
+          <div><div class="lbl">課題 / ISSUE</div><div class="val">紙・PDF資料の転記が手作業。募集文の品質も担当者依存だった。</div></div>
+          <div><div class="lbl">打ち手 / ACTION</div><div class="val">OCRで読み取り、差分検知と募集コピーをAIが自動生成するパイプラインを構築。</div></div>
+          <div><div class="lbl">結果 / RESULT</div><div class="val">転記工数の削減と募集文の品質均一化(ダミー値)。</div></div>
+        </div>
+        <div class="stack"><span>Google Vision OCR</span><span>Claude API</span><span>差分検知</span></div>
+        <div class="result">ツール選定で詰まった際、外部連携ツールから自己完結型へ即座に方針転換。手段に固執せず目的を取る判断。</div>
+      </div>
+    </div>
+    <p style="margin-top:30px;font-size:.86rem;color:var(--muted);border-top:1px dashed var(--line);padding-top:20px"><b style="color:var(--accent)">開発スタイル：</b> 1つのMVPを5×5〜10回ほど、計20回以上作り直して磨き込むのが常。速攻で動くものを出し、回しながら完成に近づける高速反復が得意分野です。</p>
+  </div>
+</section>
+<section class="sec" id="skills">
+  <div class="wrap">
+    <div class="sec-h"><span class="no">03</span><h2>スキルセット</h2><span class="en">— SKILLS</span></div>
+    <div class="skills">
+      <div class="cell">
+        <h4>現場 / マネジメント</h4>
+        <ul>
+          <li>工程改善・カイゼン <b>★★★★★</b></li>
+          <li>品質・コスト管理 <b>★★★★★</b></li>
+          <li>チーム / 人材マネジメント <b>★★★★☆</b></li>
+          <li>業務の標準化・仕組み化 <b>★★★★★</b></li>
+        </ul>
+      </div>
+      <div class="cell">
+        <h4>AI / 実装</h4>
+        <ul>
+          <li>Claude API / 生成AI活用 <b>★★★★☆</b></li>
+          <li>HTML / JS フロント <b>★★★★☆</b></li>
+          <li>OCR / データ統合 <b>★★★☆☆</b></li>
+          <li>高速プロトタイピング <b>★★★★★</b></li>
+        </ul>
+      </div>
+      <div class="cell">
+        <h4>ドメイン / 進め方</h4>
+        <ul>
+          <li>不動産賃貸管理 <b>★★★★☆</b></li>
+          <li>業務課題の言語化 <b>★★★★☆</b></li>
+          <li>意思決定の速さ <b>★★★★★</b></li>
+          <li>検証ドリブン開発 <b>★★★★☆</b></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="sec" id="career">
+  <div class="wrap">
+    <div class="sec-h"><span class="no">04</span><h2>経歴(サンプル)</h2><span class="en">— CAREER</span></div>
+    <div class="tl">
+      <div class="item big"><div class="yr mono">22年間</div><h4>製造業 / 工場長</h4><p>生産工程の改善、品質・コスト管理、チームマネジメントを統括。数字で判断し、カイゼンを回し続けた現場改善のキャリア。</p></div>
+      <div class="item"><div class="yr mono">現在</div><h4>不動産会社 / 賃貸管理・物件募集</h4><p>物件募集・入居者管理・オーナー対応を担当。業務へのAI導入を自主的に推進。</p></div>
+      <div class="item"><div class="yr mono">2026</div><h4>AI物件管理アプリ MVP開発</h4><p>判定メモ生成・公的データ統合・OCR査定の3つのMVPを企画から実装まで自走で完成。</p></div>
+      <div class="item"><div class="yr mono">NEXT</div><h4>不動産DX / PropTech / 物流DX 領域へ</h4><p>現場改善力 × AI実装力を掛け合わせ、業務改善・プロダクト開発に貢献したい。</p></div>
+    </div>
+  </div>
+</section>
+<section class="contact" id="contact">
+  <h2 class="mincho">現場が、本当に<br>変わるものを。</h2>
+  <p>不動産DX・PropTech・物流DX領域でのご相談、採用のお問い合わせはこちらから。すぐに動く試作からご一緒できます。</p>
+  <a class="btn" href="mailto:your-address@example.com">メールで連絡する</a>
+  <div class="links">
+    <a href="#">GitHub</a>・<a href="#">デモ動画</a>・<a href="#">ブログ</a>
+  </div>
+</section>
+<footer>(c) 2026 MORI — FIELD KAIZEN × AI. ダミーデータを含むサンプルです。</footer>
+<script>
+const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in')})},{threshold:.12});
+document.querySelectorAll('.sec,.proj,.thesis,.pillars,.creed').forEach((el,i)=>{el.classList.add('rv');el.style.transitionDelay=(i%3)*0.07+'s';io.observe(el)});
+</script>
+</body>
+</html>
