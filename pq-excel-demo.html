@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>生産管理ダッシュボード — クロス集計／日邸別集計デモ</title>
+<style>
+  :root{
+    --ink:#1a1d21; --paper:#f6f4ef; --line:#d8d2c4; --rule:#c4bdac;
+    --steel:#2b4a6f; --steel-l:#3d6394; --amber:#c2762a; --oem:#8a3b2e;
+    --grid:#e9e5db; --cell-hot:#fbeede; --total:#eef1f4; --muted:#6b7178;
+    --green:#3a6b4a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,system-ui,sans-serif;
+    background:var(--paper); color:var(--ink); line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1200px;margin:0 auto;padding:24px 20px 60px}
+
+  /* ---- header ---- */
+  header{border-bottom:3px solid var(--ink);padding-bottom:16px;margin-bottom:6px}
+  .eyebrow{font-size:11px;letter-spacing:.22em;color:var(--steel);font-weight:700;text-transform:uppercase}
+  h1{font-size:26px;font-weight:800;letter-spacing:-.01em;margin-top:4px}
+  .sub{display:flex;gap:18px;flex-wrap:wrap;margin-top:8px;font-size:12px;color:var(--muted)}
+  .sub b{color:var(--ink);font-weight:700}
+  .demo-badge{display:inline-block;background:var(--amber);color:#fff;font-size:10px;
+    font-weight:700;letter-spacing:.1em;padding:2px 8px;border-radius:2px;vertical-align:middle;margin-left:8px}
+
+  /* ---- tabs ---- */
+  .tabs{display:flex;gap:2px;margin:20px 0 0;border-bottom:2px solid var(--line)}
+  .tab{appearance:none;border:none;background:transparent;font:inherit;cursor:pointer;
+    padding:10px 18px;font-weight:700;font-size:14px;color:var(--muted);
+    border-bottom:3px solid transparent;margin-bottom:-2px;transition:.15s}
+  .tab:hover{color:var(--ink)}
+  .tab.active{color:var(--steel);border-bottom-color:var(--steel)}
+
+  /* ---- controls ---- */
+  .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;
+    margin:18px 0 14px;padding:12px 14px;background:#fff;border:1px solid var(--line);border-radius:6px}
+  .ctl-label{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.05em}
+  select,input[type=text]{font:inherit;font-size:13px;padding:6px 10px;border:1px solid var(--line);
+    border-radius:4px;background:#fff;color:var(--ink)}
+  .seg{display:flex;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+  .seg button{appearance:none;border:none;background:#fff;font:inherit;font-size:12px;font-weight:600;
+    padding:6px 12px;cursor:pointer;color:var(--muted);border-right:1px solid var(--line)}
+  .seg button:last-child{border-right:none}
+  .seg button.on{background:var(--steel);color:#fff}
+  .spacer{flex:1}
+  .count{font-size:12px;color:var(--muted)}
+
+  /* ---- table ---- */
+  .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:6px;background:#fff}
+  table{border-collapse:collapse;width:100%;font-size:13px;font-variant-numeric:tabular-nums}
+  thead th{background:var(--steel);color:#fff;font-weight:700;font-size:12px;
+    padding:9px 10px;text-align:right;white-space:nowrap;position:sticky;top:0}
+  thead th.l{text-align:left}
+  tbody td{padding:7px 10px;text-align:right;border-bottom:1px solid var(--grid);white-space:nowrap}
+  tbody td.l{text-align:left}
+  tbody tr:hover{background:#fafaf7}
+  .code{font-family:"SF Mono",Menlo,Consolas,monospace;font-weight:600;font-size:12.5px}
+  .grouprow td{background:var(--paper);font-weight:800;font-size:11px;color:var(--steel);
+    letter-spacing:.05em;padding:6px 10px;border-bottom:1px solid var(--line)}
+  td.qty{color:var(--ink)}
+  td.qty.zero{color:#cdc8bc}
+  td.hot{background:var(--cell-hot);font-weight:700}
+  td.total{background:var(--total);font-weight:800;border-left:2px solid var(--line)}
+  .fam{display:inline-block;font-size:9px;font-weight:700;padding:1px 6px;border-radius:10px;
+    margin-left:6px;vertical-align:middle;letter-spacing:.04em}
+  .fam-OEM{background:#f3e0dc;color:var(--oem)}
+  .fam-PNL{background:#dde6f0;color:var(--steel)}
+  .fam-TOP{background:#e4ecdf;color:var(--green)}
+  .fam-ZPL{background:#ece0ef;color:#6b3f7a}
+  .fam-EDG{background:#f5ead6;color:var(--amber)}
+  .fam-CUT{background:#e8e6e0;color:#5a5650}
+
+  .oem-flag{font-size:10px;font-weight:700;color:var(--oem);background:#f3e0dc;
+    padding:2px 8px;border-radius:3px;margin-left:8px}
+
+  /* ---- daylist ---- */
+  .day-section{margin-bottom:22px}
+  .day-head{display:flex;align-items:baseline;gap:10px;margin:14px 0 8px;
+    padding-bottom:6px;border-bottom:2px solid var(--steel)}
+  .day-date{font-size:16px;font-weight:800;color:var(--steel)}
+  .day-sum{font-size:12px;color:var(--muted)}
+
+  footer{margin-top:34px;padding-top:16px;border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);line-height:1.7}
+  footer b{color:var(--ink)}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px}
+  .legend span{display:inline-flex;align-items:center;gap:5px;font-size:11px}
+  .sw{width:12px;height:12px;border-radius:3px;display:inline-block}
+  .hide{display:none}
+  @media(max-width:640px){h1{font-size:20px}.wrap{padding:16px 12px 40px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">生産管理 · 発注集計</div>
+    <h1>受注データ集計ダッシュボード<span class="demo-badge">DEMO</span></h1>
+    <div class="sub">
+      <span>事業者：<b id="m-company"></b></span>
+      <span>取引先：<b id="m-client"></b></span>
+      <span>対象期間：<b id="m-period"></b></span>
+      <span>集計方式：<b>クロス集計（品番×日付）／ 日邸別明細</b></span>
+    </div>
+  </header>
+
+  <nav class="tabs" id="tabs">
+    <button class="tab active" data-view="cross">クロス集計（ライン別）</button>
+    <button class="tab" data-view="day">日邸別明細</button>
+  </nav>
+
+  <!-- ===== CROSS ===== -->
+  <section id="view-cross">
+    <div class="controls">
+      <span class="ctl-label">ライン</span>
+      <div class="seg" id="line-seg"></div>
+      <span class="ctl-label" style="margin-left:8px">表示</span>
+      <div class="seg" id="zero-seg">
+        <button data-zero="show" class="on">全品番</button>
+        <button data-zero="hide">受注ありのみ</button>
+      </div>
+      <input type="text" id="cross-search" placeholder="品番で絞り込み…" style="margin-left:8px">
+      <span class="spacer"></span>
+      <span class="count" id="cross-count"></span>
+    </div>
+    <div class="tablewrap">
+      <table id="cross-table"></table>
+    </div>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--cell-hot)"></span>当日受注あり</span>
+      <span><span class="sw" style="background:var(--total)"></span>期間合計</span>
+      <span class="oem-flag">OEM = 外注品（発注ロジック分離）</span>
+    </div>
+  </section>
+
+  <!-- ===== DAYLIST ===== -->
+  <section id="view-day" class="hide">
+    <div class="controls">
+      <span class="ctl-label">区分</span>
+      <div class="seg" id="kind-seg">
+        <button data-kind="normal" class="on">通常品</button>
+        <button data-kind="oem">外注品（OEM）</button>
+      </div>
+      <input type="text" id="day-search" placeholder="品番・邸名で絞り込み…" style="margin-left:8px">
+      <span class="spacer"></span>
+      <span class="count" id="day-count"></span>
+    </div>
+    <div id="day-body"></div>
+  </section>
+
+  <footer>
+    <b>このページについて：</b>本デモは木材加工（合板パネル）の生産管理ツールから、クロス集計・日邸別集計の機能を抜き出して再現したものです。
+    <b>掲載データはすべてデモ用の架空値で、実在の取引先・顧客・品番は含みません。</b>品番は実際の系統構造（通常パネル／天板／Z系パネル／エッジ／外注／カット品）を保ったまま中立的な架空コードへ全面置換しています。<br>
+    外注品（OEM系）は通常品と発注ロジック・在庫管理を完全分離する、という実運用上のルールをデモ画面でも区分表示で反映しています。
+    <div class="legend" style="margin-top:8px">
+      <span><span class="sw fam-PNL" style="width:auto;padding:1px 6px;font-size:9px;font-weight:700">PNL</span>通常パネル</span>
+      <span><span class="sw fam-TOP" style="width:auto;padding:1px 6px;font-size:9px;font-weight:700">TOP</span>天板</span>
+      <span><span class="sw fam-ZPL" style="width:auto;padding:1px 6px;font-size:9px;font-weight:700">ZPL</span>Z系パネル</span>
+      <span><span class="sw fam-EDG" style="width:auto;padding:1px 6px;font-size:9px;font-weight:700">EDG</span>エッジ加工</span>
+      <span><span class="sw fam-OEM" style="width:auto;padding:1px 6px;font-size:9px;font-weight:700">OEM</span>外注品</span>
+      <span><span class="sw fam-CUT" style="width:auto;padding:1px 6px;font-size:9px;font-weight:700">CUT</span>カット品</span>
+    </div>
+  </footer>
+</div>
+
+<script>
+const DATA = {"cross": {"A": {"label": "薄物CUTライン", "dates": ["2026/07/01", "2026/07/02", "2026/07/03", "2026/07/06"], "rows": [{"line": "LINE1", "group": "G01_GROUP", "code": "PNL00900", "qty": [240, 200, 200, 220], "total": 860}, {"line": "LINE1", "group": "G01_GROUP", "code": "PNL00700", "qty": [160, 180, 180, 160], "total": 680}, {"line": "LINE1", "group": "G02_GROUP", "code": "CUT03200", "qty": [59, 63, 56, 70], "total": 248}, {"line": "LINE1", "group": "G02_GROUP", "code": "ZPL01300", "qty": [0, 14, 0, 0], "total": 14}, {"line": "LINE1", "group": "G03_GROUP", "code": "OEM00600", "qty": [0, 0, 0, 2], "total": 2}, {"line": "LINE1", "group": "G04_GROUP", "code": "OEM00800", "qty": [20, 0, 20, 0], "total": 40}, {"line": "LINE1", "group": "G04_GROUP", "code": "OEM00700", "qty": [11, 2, 4, 0], "total": 17}, {"line": "LINE1", "group": "G05_GROUP", "code": "OEM00100", "qty": [0, 0, 13, 0], "total": 13}, {"line": "LINE1", "group": "G05_GROUP", "code": "OEM00200", "qty": [6, 0, 4, 0], "total": 10}, {"line": "LINE1", "group": "G06_GROUP", "code": "EDG00200", "qty": [0, 0, 6, 0], "total": 6}, {"line": "LINE1", "group": "G06_GROUP", "code": "EDG00700", "qty": [0, 0, 20, 0], "total": 20}, {"line": "LINE2", "group": "G07_GROUP", "code": "OEM00800", "qty": [5, 2, 6, 7], "total": 20}, {"line": "LINE2", "group": "G07_GROUP", "code": "OEM00900", "qty": [0, 3, 5, 8], "total": 16}, {"line": "LINE3", "group": "G08_GROUP", "code": "PNL00100", "qty": [0, 0, 1, 0], "total": 1}, {"line": "LINE3", "group": "G08_GROUP", "code": "PNL00200", "qty": [0, 16, 0, 0], "total": 16}, {"line": "LINE3", "group": "G08_GROUP", "code": "PNL00300", "qty": [0, 8, 0, 0], "total": 8}, {"line": "LINE3", "group": "G08_GROUP", "code": "PNL00400", "qty": [1, 0, 0, 1], "total": 2}, {"line": "LINE3", "group": "G08_GROUP", "code": "PNL00500", "qty": [1, 1, 1, 0], "total": 3}, {"line": "LINE3", "group": "G08_GROUP", "code": "PNL00600", "qty": [4, 2, 8, 6], "total": 20}, {"line": "LINE3", "group": "G08_GROUP", "code": "PNL00800", "qty": [4, 0, 4, 0], "total": 8}, {"line": "LINE3", "group": "G08_GROUP", "code": "PNL01000", "qty": [0, 92, 20, 0], "total": 112}, {"line": "LINE3", "group": "G08_GROUP", "code": "ZPL00300", "qty": [8, 6, 8, 13], "total": 35}, {"line": "LINE3", "group": "G08_GROUP", "code": "ZPL00400", "qty": [0, 7, 5, 2], "total": 14}, {"line": "LINE3", "group": "G08_GROUP", "code": "ZPL00100", "qty": [0, 8, 0, 0], "total": 8}, {"line": "LINE3", "group": "G08_GROUP", "code": "CUT00100", "qty": [1, 0, 1, 1], "total": 3}, {"line": "LINE3", "group": "G08_GROUP", "code": "CUT00200", "qty": [0, 16, 0, 0], "total": 16}, {"line": "LINE3", "group": "G09_GROUP", "code": "EDG00100", "qty": [0, 0, 0, 3], "total": 3}, {"line": "LINE3", "group": "G09_GROUP", "code": "EDG00300", "qty": [0, 0, 0, 1], "total": 1}, {"line": "LINE3", "group": "G09_GROUP", "code": "EDG00400", "qty": [0, 0, 0, 1], "total": 1}, {"line": "LINE3", "group": "G09_GROUP", "code": "EDG00500", "qty": [0, 0, 0, 1], "total": 1}, {"line": "LINE3", "group": "G09_GROUP", "code": "EDG00600", "qty": [0, 0, 0, 2], "total": 2}, {"line": "LINE4", "group": "G10_GROUP", "code": "CUT03700", "qty": [520, 620, 562, 498], "total": 2200}]}, "B": {"label": "NCライン", "dates": ["2026/07/01", "2026/07/02", "2026/07/03", "2026/07/06"], "rows": [{"line": "LINE5", "group": "G11_GROUP", "code": "OEM00900", "qty": [5, 0, 0, 0], "total": 5}, {"line": "LINE5", "group": "G11_GROUP", "code": "OEM00300", "qty": [0, 1, 0, 0], "total": 1}, {"line": "LINE5", "group": "G11_GROUP", "code": "OEM00400", "qty": [0, 0, 1, 0], "total": 1}, {"line": "LINE5", "group": "G11_GROUP", "code": "OEM00500", "qty": [0, 0, 1, 0], "total": 1}, {"line": "LINE5", "group": "G11_GROUP", "code": "EDG01000", "qty": [0, 0, 1, 0], "total": 1}, {"line": "LINE5", "group": "G12_GROUP", "code": "CUT00300", "qty": [0, 0, 0, 2], "total": 2}, {"line": "LINE5", "group": "G12_GROUP", "code": "CUT00400", "qty": [0, 0, 0, 2], "total": 2}, {"line": "LINE5", "group": "G12_GROUP", "code": "CUT00500", "qty": [0, 0, 0, 1], "total": 1}, {"line": "LINE5", "group": "G12_GROUP", "code": "CUT00600", "qty": [0, 0, 0, 1], "total": 1}, {"line": "LINE5", "group": "G12_GROUP", "code": "CUT00700", "qty": [0, 0, 0, 2], "total": 2}, {"line": "LINE5", "group": "G12_GROUP", "code": "CUT00800", "qty": [1, 0, 1, 2], "total": 4}, {"line": "LINE5", "group": "G12_GROUP", "code": "CUT00900", "qty": [0, 0, 1, 1], "total": 2}, {"line": "LINE5", "group": "G12_GROUP", "code": "CUT01000", "qty": [1, 0, 1, 1], "total": 3}, {"line": "LINE5", "group": "G12_GROUP", "code": "CUT01100", "qty": [0, 0, 3, 0], "total": 3}, {"line": "LINE5", "group": "G12_GROUP", "code": "CUT01200", "qty": [0, 0, 1, 0], "total": 1}, {"line": "LINE5", "group": "G12_GROUP", "code": "CUT01300", "qty": [1, 0, 0, 1], "total": 2}, {"line": "LINE5", "group": "G12_GROUP", "code": "CUT01400", "qty": [1, 0, 0, 0], "total": 1}, {"line": "LINE5", "group": "G12_GROUP", "code": "CUT01500", "qty": [0, 0, 0, 1], "total": 1}, {"line": "LINE5", "group": "G12_GROUP", "code": "CUT01600", "qty": [0, 0, 0, 1], "total": 1}, {"line": "LINE5", "group": "G12_GROUP", "code": "CUT01700", "qty": [2, 0, 1, 0], "total": 3}, {"line": "LINE6", "group": "G12_GROUP", "code": "CUT01800", "qty": [1, 0, 0, 2], "total": 3}, {"line": "LINE6", "group": "G12_GROUP", "code": "CUT01900", "qty": [0, 0, 0, 2], "total": 2}, {"line": "LINE6", "group": "G12_GROUP", "code": "CUT02000", "qty": [1, 0, 0, 2], "total": 3}, {"line": "LINE6", "group": "G12_GROUP", "code": "CUT02100", "qty": [0, 0, 0, 1], "total": 1}, {"line": "LINE6", "group": "G12_GROUP", "code": "CUT02200", "qty": [1, 0, 0, 0], "total": 1}, {"line": "LINE6", "group": "G12_GROUP", "code": "CUT02300", "qty": [0, 0, 1, 0], "total": 1}, {"line": "LINE6", "group": "G12_GROUP", "code": "CUT02400", "qty": [0, 0, 1, 0], "total": 1}, {"line": "LINE6", "group": "G12_GROUP", "code": "CUT02500", "qty": [0, 0, 1, 0], "total": 1}, {"line": "LINE6", "group": "G12_GROUP", "code": "CUT02600", "qty": [0, 0, 1, 2], "total": 3}, {"line": "LINE6", "group": "G12_GROUP", "code": "CUT02700", "qty": [0, 0, 0, 1], "total": 1}, {"line": "LINE6", "group": "G12_GROUP", "code": "CUT02800", "qty": [0, 0, 1, 1], "total": 2}, {"line": "LINE6", "group": "G12_GROUP", "code": "CUT02900", "qty": [0, 0, 1, 0], "total": 1}, {"line": "LINE7", "group": "G13_GROUP", "code": "PNL01100", "qty": [10, 10, 0, 2], "total": 22}, {"line": "LINE8", "group": "G14_GROUP", "code": "CUT03000", "qty": [1, 1, 2, 1], "total": 5}, {"line": "LINE8", "group": "G14_GROUP", "code": "CUT03100", "qty": [0, 1, 0, 0], "total": 1}, {"line": "LINE8", "group": "G14_GROUP", "code": "ZPL00800", "qty": [2, 13, 7, 8], "total": 30}, {"line": "LINE8", "group": "G14_GROUP", "code": "ZPL00900", "qty": [0, 0, 0, 19], "total": 19}, {"line": "LINE8", "group": "G14_GROUP", "code": "ZPL01000", "qty": [2, 13, 7, 5], "total": 27}, {"line": "LINE8", "group": "G14_GROUP", "code": "ZPL01100", "qty": [0, 0, 0, 8], "total": 8}, {"line": "LINE8", "group": "G14_GROUP", "code": "ZPL00700", "qty": [1, 1, 2, 0], "total": 4}, {"line": "LINE8", "group": "G14_GROUP", "code": "ZPL01200", "qty": [2, 0, 0, 1], "total": 3}, {"line": "LINE8", "group": "G14_GROUP", "code": "ZPL00600", "qty": [2, 0, 2, 2], "total": 6}, {"line": "LINE9", "group": "G15_GROUP", "code": "CUT03400", "qty": [2, 0, 0, 0], "total": 2}, {"line": "LINE9", "group": "G15_GROUP", "code": "CUT03500", "qty": [0, 0, 1, 0], "total": 1}, {"line": "LINE9", "group": "G15_GROUP", "code": "CUT03600", "qty": [0, 0, 1, 0], "total": 1}, {"line": "LINE9", "group": "G15_GROUP", "code": "CUT03300", "qty": [1, 0, 0, 0], "total": 1}, {"line": "LINE10", "group": "G16_GROUP", "code": "TOP00100", "qty": [1, 0, 1, 0], "total": 2}, {"line": "LINE10", "group": "G17_GROUP", "code": "ZPL00200", "qty": [10, 8, 9, 12], "total": 39}, {"line": "LINE4", "group": "G10_GROUP", "code": "CUT03700", "qty": [48, 48, 49, 84], "total": 229}]}, "C": {"label": "厚物CUTライン", "dates": ["2026/07/01", "2026/07/02", "2026/07/03", "2026/07/06"], "rows": [{"line": "LINE11", "group": "G18_GROUP", "code": "PNL01400", "qty": [0, 0, 0, 1], "total": 1}, {"line": "LINE11", "group": "G18_GROUP", "code": "PNL01500", "qty": [0, 0, 1, 1], "total": 2}, {"line": "LINE11", "group": "G18_GROUP", "code": "PNL01600", "qty": [0, 0, 1, 2], "total": 3}, {"line": "LINE12", "group": "G19_GROUP", "code": "PNL01200", "qty": [2, 2, 4, 0], "total": 8}, {"line": "LINE12", "group": "G19_GROUP", "code": "PNL01300", "qty": [2, 2, 0, 0], "total": 4}, {"line": "LINE12", "group": "G19_GROUP", "code": "PNL02600", "qty": [0, 0, 2, 0], "total": 2}, {"line": "LINE12", "group": "G20_GROUP", "code": "PNL02700", "qty": [0, 2, 2, 0], "total": 4}, {"line": "LINE12", "group": "G20_GROUP", "code": "PNL02800", "qty": [0, 2, 2, 0], "total": 4}, {"line": "LINE13", "group": "G21_GROUP", "code": "PNL01700", "qty": [1, 1, 0, 0], "total": 2}, {"line": "LINE13", "group": "G21_GROUP", "code": "PNL01800", "qty": [0, 1, 0, 1], "total": 2}, {"line": "LINE13", "group": "G21_GROUP", "code": "PNL01900", "qty": [0, 0, 1, 0], "total": 1}, {"line": "LINE13", "group": "G21_GROUP", "code": "PNL02400", "qty": [0, 0, 0, 1], "total": 1}, {"line": "LINE13", "group": "G21_GROUP", "code": "PNL02500", "qty": [0, 0, 1, 0], "total": 1}, {"line": "LINE13", "group": "G21_GROUP", "code": "PNL02000", "qty": [0, 0, 1, 0], "total": 1}, {"line": "LINE13", "group": "G21_GROUP", "code": "PNL02100", "qty": [0, 1, 0, 0], "total": 1}, {"line": "LINE14", "group": "G22_GROUP", "code": "PNL02200", "qty": [0, 0, 1, 0], "total": 1}, {"line": "LINE14", "group": "G22_GROUP", "code": "PNL02300", "qty": [1, 1, 1, 0], "total": 3}, {"line": "LINE4", "group": "G10_GROUP", "code": "CUT03700", "qty": [6, 12, 17, 6], "total": 41}]}}, "daylist": {"normal": [{"date": "2026/07/01", "code": "OEM00200", "qty": 6, "stage": "ﾎ", "name": "パネル材 t13 225mm", "seq": "4", "line": "A", "client": "サンプル邸A"}, {"date": "2026/07/01", "code": "CUT03200", "qty": 59, "stage": "ﾎ   -1", "name": "パネル材 t20 450mm", "seq": "0", "line": "", "client": "サンプル邸B"}, {"date": "2026/07/01", "code": "OEM00700", "qty": 5, "stage": "1700", "name": "パネル材 t18 342mm", "seq": "13", "line": "A", "client": "サンプル邸C"}, {"date": "2026/07/01", "code": "OEM00700", "qty": 3, "stage": "1700", "name": "パネル材 t13 892mm", "seq": "15", "line": "A", "client": "サンプル邸D"}, {"date": "2026/07/01", "code": "OEM00700", "qty": 2, "stage": "1700", "name": "パネル材 t13 804mm", "seq": "7", "line": "A", "client": "サンプル邸E"}, {"date": "2026/07/01", "code": "OEM00700", "qty": 1, "stage": "1700", "name": "パネル材 t23 232mm", "seq": "9", "line": "A", "client": "サンプル邸F"}, {"date": "2026/07/01", "code": "OEM00800", "qty": 20, "stage": "1700", "name": "パネル材 t13 295mm", "seq": "0", "line": "", "client": "サンプル邸G"}, {"date": "2026/07/01", "code": "ZPL00500", "qty": 1, "stage": "JA", "name": "パネル材 t18 438mm", "seq": "3", "line": "A", "client": "サンプル邸H"}, {"date": "2026/07/02", "code": "CUT03200", "qty": 63, "stage": "ﾎ   -1", "name": "パネル材 t13 774mm", "seq": "0", "line": "", "client": "サンプル邸I"}, {"date": "2026/07/02", "code": "OEM00700", "qty": 2, "stage": "1700", "name": "パネル材 t18 865mm", "seq": "18", "line": "A", "client": "サンプル邸J"}, {"date": "2026/07/02", "code": "ZPL01300", "qty": 14, "stage": "ﾎ", "name": "パネル材 t23 425mm", "seq": "12", "line": "A", "client": "サンプル邸K"}, {"date": "2026/07/03", "code": "OEM00100", "qty": 13, "stage": "1700", "name": "パネル材 t23 803mm", "seq": "0", "line": "A", "client": "サンプル邸L"}, {"date": "2026/07/03", "code": "OEM00200", "qty": 4, "stage": "ﾎ", "name": "パネル材 t20 206mm", "seq": "20", "line": "A", "client": "サンプル邸M"}, {"date": "2026/07/03", "code": "EDG00200", "qty": 1, "stage": "1700", "name": "パネル材 t18 632mm", "seq": "27", "line": "A", "client": "サンプル邸N"}, {"date": "2026/07/03", "code": "EDG00200", "qty": 5, "stage": "1700", "name": "パネル材 t20 484mm", "seq": "28", "line": "A", "client": "サンプル邸O"}, {"date": "2026/07/03", "code": "EDG00700", "qty": 20, "stage": "1700", "name": "パネル材 t18 420mm", "seq": "0", "line": "", "client": "サンプル邸P"}, {"date": "2026/07/03", "code": "CUT03200", "qty": 56, "stage": "ﾎ   -1", "name": "パネル材 t20 304mm", "seq": "0", "line": "", "client": "サンプル邸A"}, {"date": "2026/07/03", "code": "OEM00700", "qty": 2, "stage": "1700", "name": "パネル材 t13 589mm", "seq": "27", "line": "A", "client": "サンプル邸B"}, {"date": "2026/07/03", "code": "OEM00700", "qty": 2, "stage": "1700", "name": "パネル材 t13 567mm", "seq": "32", "line": "A", "client": "サンプル邸C"}, {"date": "2026/07/03", "code": "OEM00800", "qty": 20, "stage": "1700", "name": "パネル材 t20 818mm", "seq": "0", "line": "", "client": "サンプル邸D"}, {"date": "2026/07/06", "code": "CUT03200", "qty": 70, "stage": "ﾎ   -1", "name": "パネル材 t20 244mm", "seq": "0", "line": "", "client": "サンプル邸E"}, {"date": "2026/07/06", "code": "OEM00600", "qty": 2, "stage": "1700", "name": "パネル材 t23 749mm", "seq": "40", "line": "A", "client": "サンプル邸F"}, {"date": "2026/07/06", "code": "ZPL00500", "qty": 2, "stage": "JA", "name": "パネル材 t13 587mm", "seq": "29", "line": "A", "client": "サンプル邸G"}], "oem": [{"date": "2026/07/01", "code": "OEM00800", "qty": 2, "stage": "ﾖ", "name": "パネル材 t13 765mm", "seq": "13", "line": "A", "client": "サンプル邸A"}, {"date": "2026/07/01", "code": "OEM00800", "qty": 2, "stage": "ﾖ", "name": "パネル材 t20 843mm", "seq": "7", "line": "A", "client": "サンプル邸B"}, {"date": "2026/07/01", "code": "OEM00800", "qty": 1, "stage": "ﾖ", "name": "パネル材 t20 791mm", "seq": "9", "line": "A", "client": "サンプル邸C"}, {"date": "2026/07/02", "code": "OEM00800", "qty": 2, "stage": "ﾖ", "name": "パネル材 t18 271mm", "seq": "18", "line": "A", "client": "サンプル邸D"}, {"date": "2026/07/02", "code": "OEM00900", "qty": 3, "stage": "ﾖ", "name": "パネル材 t13 877mm", "seq": "13", "line": "A", "client": "サンプル邸E"}, {"date": "2026/07/03", "code": "OEM00800", "qty": 4, "stage": "ﾖ", "name": "パネル材 t18 496mm", "seq": "28", "line": "A", "client": "サンプル邸F"}, {"date": "2026/07/03", "code": "OEM00800", "qty": 1, "stage": "ﾖ", "name": "パネル材 t13 438mm", "seq": "28", "line": "B", "client": "サンプル邸G"}, {"date": "2026/07/03", "code": "OEM00800", "qty": 1, "stage": "ﾖ", "name": "パネル材 t13 589mm", "seq": "32", "line": "A", "client": "サンプル邸H"}, {"date": "2026/07/03", "code": "OEM00900", "qty": 1, "stage": "ﾖ", "name": "パネル材 t20 664mm", "seq": "15", "line": "A", "client": "サンプル邸I"}, {"date": "2026/07/03", "code": "OEM00900", "qty": 1, "stage": "ﾖ", "name": "パネル材 t20 366mm", "seq": "15", "line": "B", "client": "サンプル邸J"}, {"date": "2026/07/03", "code": "OEM00900", "qty": 1, "stage": "ﾖ", "name": "パネル材 t20 563mm", "seq": "20", "line": "B", "client": "サンプル邸K"}, {"date": "2026/07/03", "code": "OEM00900", "qty": 2, "stage": "ﾖ", "name": "パネル材 t18 886mm", "seq": "22", "line": "B", "client": "サンプル邸L"}, {"date": "2026/07/06", "code": "OEM00800", "qty": 3, "stage": "ﾖ", "name": "パネル材 t20 899mm", "seq": "32", "line": "A", "client": "サンプル邸M"}, {"date": "2026/07/06", "code": "OEM00800", "qty": 4, "stage": "ﾖ", "name": "パネル材 t13 823mm", "seq": "40", "line": "A", "client": "サンプル邸N"}, {"date": "2026/07/06", "code": "OEM00900", "qty": 2, "stage": "ﾖ", "name": "パネル材 t18 746mm", "seq": "27", "line": "A", "client": "サンプル邸O"}, {"date": "2026/07/06", "code": "OEM00900", "qty": 5, "stage": "ﾖ", "name": "パネル材 t18 367mm", "seq": "28", "line": "A", "client": "サンプル邸P"}, {"date": "2026/07/06", "code": "OEM00900", "qty": 1, "stage": "ﾖ", "name": "パネル材 t23 588mm", "seq": "28", "line": "B", "client": "サンプル邸A"}]}, "meta": {"company": "サンプル組織", "client": "サンプル案件", "period": "2026/07/01 - 07/06"}};
+
+// meta
+document.getElementById('m-company').textContent = DATA.meta.company;
+document.getElementById('m-client').textContent  = DATA.meta.client;
+document.getElementById('m-period').textContent  = DATA.meta.period;
+
+const fam = c => (c||'').slice(0,3);
+const famTag = c => `<span class="fam fam-${fam(c)}">${fam(c)}</span>`;
+
+// ---------- tab switching ----------
+document.getElementById('tabs').addEventListener('click', e=>{
+  const b=e.target.closest('.tab'); if(!b) return;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t===b));
+  const v=b.dataset.view;
+  document.getElementById('view-cross').classList.toggle('hide', v!=='cross');
+  document.getElementById('view-day').classList.toggle('hide', v!=='day');
+});
+
+// ---------- CROSS ----------
+const crossState={line:'A', zero:'show', q:''};
+const lineSeg=document.getElementById('line-seg');
+['A','B','C'].forEach((k,i)=>{
+  const b=document.createElement('button');
+  b.dataset.line=k; b.textContent=DATA.cross[k].label;
+  if(i===0)b.classList.add('on');
+  lineSeg.appendChild(b);
+});
+lineSeg.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+  crossState.line=b.dataset.line;
+  [...lineSeg.children].forEach(x=>x.classList.toggle('on',x===b)); renderCross();});
+document.getElementById('zero-seg').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return; crossState.zero=b.dataset.zero;
+  [...e.currentTarget.children].forEach(x=>x.classList.toggle('on',x===b)); renderCross();});
+document.getElementById('cross-search').addEventListener('input',e=>{
+  crossState.q=e.target.value.trim().toUpperCase(); renderCross();});
+
+function renderCross(){
+  const blk=DATA.cross[crossState.line];
+  const dates=blk.dates;
+  let rows=blk.rows.slice();
+  if(crossState.q) rows=rows.filter(r=>r.code.includes(crossState.q));
+  if(crossState.zero==='hide') rows=rows.filter(r=>r.total>0);
+
+  let html='<thead><tr><th class="l">品番</th>';
+  dates.forEach(d=>html+=`<th>${d.slice(5)}</th>`);
+  html+='<th>期間合計</th></tr></thead><tbody>';
+
+  let lastGroup=null, colTot=dates.map(()=>0), grand=0;
+  rows.forEach(r=>{
+    if(r.group!==lastGroup){
+      html+=`<tr class="grouprow"><td class="l" colspan="${dates.length+2}">▸ ${r.group}</td></tr>`;
+      lastGroup=r.group;
+    }
+    html+=`<tr><td class="l"><span class="code">${r.code}</span>${famTag(r.code)}`
+        + (fam(r.code)==='OEM'?'<span class="oem-flag">外注</span>':'') + '</td>';
+    r.qty.forEach((q,i)=>{ colTot[i]+=q;
+      html+=`<td class="qty ${q>0?'hot':'zero'}">${q>0?q:'·'}</td>`;});
+    grand+=r.total;
+    html+=`<td class="total">${r.total}</td></tr>`;
+  });
+  // footer totals
+  html+='<tr class="grouprow"><td class="l">合計</td>';
+  colTot.forEach(c=>html+=`<td style="text-align:right">${c}</td>`);
+  html+=`<td class="total">${grand}</td></tr>`;
+  html+='</tbody>';
+  document.getElementById('cross-table').innerHTML=html;
+  document.getElementById('cross-count').textContent=`${rows.length} 品番 / 合計 ${grand} 枚`;
+}
+
+// ---------- DAYLIST ----------
+const dayState={kind:'normal', q:''};
+document.getElementById('kind-seg').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return; dayState.kind=b.dataset.kind;
+  [...e.currentTarget.children].forEach(x=>x.classList.toggle('on',x===b)); renderDay();});
+document.getElementById('day-search').addEventListener('input',e=>{
+  dayState.q=e.target.value.trim().toUpperCase(); renderDay();});
+
+function renderDay(){
+  let rows=DATA.daylist[dayState.kind].slice();
+  if(dayState.q) rows=rows.filter(r=>
+    r.code.includes(dayState.q)||r.client.toUpperCase().includes(dayState.q));
+  // group by date
+  const byDate={};
+  rows.forEach(r=>{(byDate[r.date]=byDate[r.date]||[]).push(r);});
+  const dates=Object.keys(byDate).sort();
+  let html='';
+  dates.forEach(d=>{
+    const list=byDate[d];
+    const sum=list.reduce((a,r)=>a+r.qty,0);
+    html+=`<div class="day-section"><div class="day-head">`
+        + `<span class="day-date">${d}</span>`
+        + `<span class="day-sum">${list.length} 件 / ${sum} 枚`
+        + (dayState.kind==='oem'?' <span class="oem-flag">外注ライン（分離管理）</span>':'')
+        + `</span></div><div class="tablewrap"><table><thead><tr>`
+        + `<th class="l">品番</th><th class="l">品名</th><th>数量</th>`
+        + `<th class="l">ステージ</th><th>生産順</th><th class="l">ライン</th><th class="l">邸名</th>`
+        + `</tr></thead><tbody>`;
+    list.forEach(r=>{
+      html+=`<tr><td class="l"><span class="code">${r.code}</span>${famTag(r.code)}</td>`
+          + `<td class="l">${r.name}</td><td class="qty">${r.qty}</td>`
+          + `<td class="l">${r.stage||'·'}</td><td>${r.seq}</td>`
+          + `<td class="l">${r.line||'·'}</td><td class="l">${r.client}</td></tr>`;
+    });
+    html+='</tbody></table></div></div>';
+  });
+  document.getElementById('day-body').innerHTML=html||'<p style="padding:20px;color:var(--muted)">該当データがありません。</p>';
+  const total=rows.reduce((a,r)=>a+r.qty,0);
+  document.getElementById('day-count').textContent=`${rows.length} 件 / 合計 ${total} 枚`;
+}
+
+renderCross();
+renderDay();
+</script>
+</body>
+</html>

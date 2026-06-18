@@ -103,12 +103,14 @@
       <div class="card">
         <h2>データ投入 <span class="srcbadge" id="masterSrc">v3内蔵</span></h2>
         <div class="body">
-          <button class="btn ghost" onclick="document.getElementById('csvFile').click()">投入CSVを選択</button>
-          <button class="btn ghost" onclick="loadDemoCsv()">デモCSVを読み込む</button>
-          <a class="btn ghost" href="demo_input_sample.csv" target="_blank" rel="noopener">サンプルCSVを開く</a>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+            <button class="btn ghost" onclick="document.getElementById('csvFile').click()">投入CSVを選択</button>
+            <button class="btn alt" onclick="loadDemoCsv()">デモCSVを読み込む</button>
+            <a class="btn ghost" href="demo_input_sample.csv" target="_blank" rel="noopener" style="text-decoration:none;display:inline-block">サンプルCSVを開く</a>
+          </div>
           <input type="file" id="csvFile" accept=".csv" hidden>
           <div class="note" id="csvName" style="padding:6px 0">未選択（サンプル内蔵）</div>
-          <div class="note" style="padding:0 0 6px">※デモCSVは架空データです。会社名・顧客名・実品番・実数量は含みません。</div>
+          <p class="note" style="padding:0 0 8px">※デモCSVは架空データです。会社名・顧客名・実品番・実数量は含みません。</p>
           <details>
             <summary>マスターを差し替える（任意・3形式自動判別）</summary>
             <label>統合マスター xlsx／個別CSV</label>
@@ -587,25 +589,20 @@ function showOrderSummary(){
 function dl(text,name){ const b=new Blob(["\uFEFF"+text],{type:"text/csv;charset=utf-8"}); const a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download=name; a.click(); }
 function readSmart(file,cb){ const r=new FileReader(); r.onload=()=>{ const buf=new Uint8Array(r.result); let txt; try{txt=new TextDecoder("utf-8",{fatal:true}).decode(buf);}catch(e){txt=new TextDecoder("shift_jis").decode(buf);} cb(txt); }; r.readAsArrayBuffer(file); }
 function parseCSV(txt){ return txt.replace(/\r/g,"").split("\n").filter(l=>l.trim().length).map(l=>{ const out=[],re=/("([^"]*)"|[^,]*)(,|$)/g; let m; while((m=re.exec(l))){ out.push(m[2]!==undefined?m[2]:m[1]); if(m[3]==="")break; } return out.map(c=>c.trim()); }); }
-
-function normalizeHinban(v){ return String(v||"").toUpperCase().replace(/[^A-Z0-9]/g,"").trim(); }
-function loadCsvTextToInput(csvText,sourceName,opt={}){
+function loadCsvTextToInput(csvText, sourceName){
   const rows=parseCSV(csvText), head=rows[0]||[];
   const di=head.findIndex(h=>h.includes("納入指示日")), hi=head.findIndex(h=>h==="品番"||h.includes("品番")), qi=head.findIndex(h=>h.includes("発注数量")||h.includes("数量"));
-  if(di<0||hi<0||qi<0){ if(!opt.silent) alert("必須列（納入指示日/品番/発注数量）が見つかりません"); return false; }
-  INPUT=rows.slice(1).map(r=>({d:parseYmd(r[di]),hin:normalizeHinban(r[hi]),qty:+String(r[qi]).replace(/,/g,"")})).filter(x=>x.d&&x.hin&&!isNaN(x.qty));
-  if(sourceName) document.getElementById('csvName').textContent=sourceName;
+  if(di<0||hi<0||qi<0){ alert("必須列（納入指示日/品番/発注数量）が見つかりません"); return false; }
+  INPUT=rows.slice(1).map(r=>({d:parseYmd(r[di]),hin:(r[hi]||"").toUpperCase().trim(),qty:+String(r[qi]).replace(/,/g,"")})).filter(x=>x.d&&x.hin&&!isNaN(x.qty));
+  document.getElementById('csvName').textContent = sourceName==="demo_input_sample.csv" ? "デモCSV読込済：demo_input_sample.csv" : "投入CSV読込済："+sourceName;
   render();
   return true;
 }
-
 async function loadDemoCsv(){
   try{
     const res=await fetch("demo_input_sample.csv",{cache:"no-store"});
     if(!res.ok) throw new Error("HTTP "+res.status);
-    const txt=await res.text();
-    M=JSON.parse(JSON.stringify(V3_MASTER));
-    if(!loadCsvTextToInput(txt,"デモCSV読込済：demo_input_sample.csv",{silent:true})) throw new Error("Invalid CSV");
+    loadCsvTextToInput(await res.text(),"demo_input_sample.csv");
   }catch(e){
     alert("デモCSVの読み込みに失敗しました。ファイル名・配置・GitHub Pagesへの反映を確認してください。");
   }
@@ -613,7 +610,7 @@ async function loadDemoCsv(){
 
 document.getElementById('csvFile').addEventListener('change',e=>{
   const f=e.target.files[0]; if(!f)return;
-  readSmart(f,txt=>loadCsvTextToInput(txt,"投入: "+f.name));
+  readSmart(f,txt=>loadCsvTextToInput(txt,f.name));
 });
 
 /* マスター差し替え：CSVは形式自動判別。xlsxはSheetJSが無いHTML単体なのでCSV推奨の旨を案内 */
