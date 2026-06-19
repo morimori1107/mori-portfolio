@@ -71,14 +71,14 @@ footer{text-align:center;font-size:.66rem;letter-spacing:.2em;padding:26px;backg
 <section class="hero">
   <div class="wrap">
     <div class="tag">SELECTED WORKS — CASE STUDIES</div>
-    <h1>業務課題を、<br>動く道具で解いてきた。</h1>
-    <p>製造・不動産の現場で実際に直面した課題を題材に、自作したツール群です。要件を固めてから作るのではなく、まず動く試作を出し、現場で使いながら磨き込む——製造現場のカイゼンと同じ進め方でつくっています。</p>
+    <h1>現場課題を、<br>動く仕組みに変える。</h1>
+    <p>製造現場で実際に直面した在庫・発注・集計課題を中心に、公開用サンプルで再現した業務DXのMVP集です。要件を固めてから作るのではなく、まず動く試作を出し、現場で使いながら磨き込む——製造現場のカイゼンと同じ進め方でつくっています。</p>
     <div class="stats">
       <div><span>4</span>自作ツール</div>
       <div><span>20+</span>1ツールあたりの試作反復</div>
       <div><span>3</span>開発環境(PQ/VBA・JS・GAS)</div>
     </div>
-    <p class="note">※掲載のデモ・数値・固有名詞はすべて架空のサンプルです。実データは含みません。</p>
+    <p class="note">※掲載のデモ・数値・名称は公開用の架空サンプルです。実在の顧客名・品番・図面・社内データは含めていません。</p>
   </div>
 </section>
 
@@ -88,13 +88,13 @@ footer{text-align:center;font-size:.66rem;letter-spacing:.2em;padding:26px;backg
     <div class="case-top"><span class="case-no">01</span><h2>原盤発注トリガー判定ツール</h2></div>
     <div class="badges"><span class="badge dom">製造業ドメイン</span><span class="badge live">ブラウザで試せる</span><span class="badge">在庫最適化</span></div>
     <div class="cpa">
-      <div><div class="lbl">課題 ISSUE</div><div class="val">製品出荷の変動に対し、原盤(資材)の発注タイミングが担当者の経験頼みで、欠品・過剰在庫のリスクがあった。</div></div>
-      <div><div class="lbl">打ち手 ACTION</div><div class="val">日次の使用実績から、3つの発注判定方式を実装。発注期限・必要数を自動算出し、発注候補をCSV出力。</div></div>
-      <div><div class="lbl">工夫 POINT</div><div class="val">①累計到達 ②移動平均×(リードタイム+安全在庫) ③在庫枯渇予測、を品番ごとに切替可能。マスター駆動で設定を一元管理。</div></div>
-      <div><div class="lbl">成果 RESULT</div><div class="val">発注判断の属人化を解消し、欠品リスクを事前に可視化(※実測値を記入)。</div></div>
+      <div><div class="lbl">課題 ISSUE</div><div class="val">製品出荷の変動に対し、原盤(資材)の発注判断が経験に寄りやすく、欠品・過剰在庫のリスクを事前に見づらかった。</div></div>
+      <div><div class="lbl">打ち手 ACTION</div><div class="val">日別消費量、原盤マスター、安全在庫、リードタイムをもとに、発注期限・必要数・候補を見える化するMVPを試作。</div></div>
+      <div><div class="lbl">工夫 POINT</div><div class="val">①累計到達 ②移動平均×(リードタイム+安全在庫) ③在庫枯渇予測を切替可能にし、原盤マスターを基準に判断条件を整理。</div></div>
+      <div><div class="lbl">結果 RESULT</div><div class="val">属人判断を減らす設計として、発注候補と根拠を画面上で確認できる形に可視化。</div></div>
     </div>
     <div class="stack"><span>HTML</span><span>JavaScript</span><span>営業日計算</span><span>移動平均/安全在庫</span><span>マスター駆動設計</span></div>
-    <div class="highlight"><b>工場長の知見が設計に：</b>「在庫を切らさず、かつ持ちすぎない」発注点の考え方は、製造現場の生産管理そのもの。ドメインを知る人間だからこそ、現場で使える判定ロジックを設計できた。</div>
+    <div class="highlight"><b>工場長の知見が設計に：</b>「在庫を切らさず、かつ持ちすぎない」発注点の考え方は、製造現場の生産管理そのもの。現場判断をロジック化し、確認できる形にする試みです。</div>
     <a class="cta" href="demo-order-trigger.html" target="_blank">▶ デモを触ってみる</a>
   </div>
 </section>
@@ -102,30 +102,13 @@ footer{text-align:center;font-size:.66rem;letter-spacing:.2em;padding:26px;backg
 <!-- CASE 02 -->
 <section class="case">
   <div class="wrap">
-    <div class="case-top"><span class="case-no">02</span><h2>物件データ整形ツール</h2></div>
-    <div class="badges"><span class="badge dom">不動産ドメイン</span><span class="badge live">ブラウザで試せる</span><span class="badge">データ整形</span></div>
+    <div class="case-top"><span class="case-no">02</span><h2>Power Query × VBA 集計・帳票自動生成</h2></div>
+    <div class="badges"><span class="badge dom">製造業ドメイン</span><span class="badge live">ブラウザで試せる</span><span class="badge">集計・帳票補助</span></div>
     <div class="cpa">
-      <div><div class="lbl">課題 ISSUE</div><div class="val">物件データの列構成がバラバラで、エリア別の整形・不要行の除外・印刷用整形に手作業の時間がかかっていた。</div></div>
-      <div><div class="lbl">打ち手 ACTION</div><div class="val">列マッピング・除外ルール・印刷レイアウトを設定駆動で定義し、ワンクリックでエリア別に整形・Excel/CSV出力。</div></div>
-      <div><div class="lbl">工夫 POINT</div><div class="val">除外条件をAND/OR・優先度付きで定義可能に。A4印刷の用紙幅自動縮小など、現場の実務要件を反映。</div></div>
-      <div><div class="lbl">成果 RESULT</div><div class="val">整形作業の標準化と時間短縮(※実測値を記入)。担当者による仕上がりのばらつきを解消。</div></div>
-    </div>
-    <div class="stack"><span>HTML</span><span>JavaScript</span><span>SheetJS(xlsx)</span><span>設定駆動UI</span><span>印刷レイアウト制御</span></div>
-    <div class="highlight"><b>不動産実務の粒度：</b>「どの列が要るか」「どの行を除外すべきか」は、賃貸管理の実務を知らないと設計できない。現場で本当に必要な整形だけを、設定として外出しした。</div>
-    <a class="cta" href="property_formatter_demo.html" target="_blank">▶ デモを触ってみる</a>
-  </div>
-</section>
-
-<!-- CASE 03 -->
-<section class="case">
-  <div class="wrap">
-    <div class="case-top"><span class="case-no">03</span><h2>Power Query × VBA 集計・帳票自動生成</h2></div>
-    <div class="badges"><span class="badge dom">製造業ドメイン</span><span class="badge doc">設計説明(社内ツール)</span><span class="badge">基幹データ自動化</span></div>
-    <div class="cpa">
-      <div><div class="lbl">課題 ISSUE</div><div class="val">基幹システムから出力されるデータの集計・帳票作成が手作業で、工数と転記ミスが発生していた。</div></div>
-      <div><div class="lbl">打ち手 ACTION</div><div class="val">Power Queryでデータを取り込み・整形、VBAで日次リスト・クロス集計・印刷用シートを自動生成する仕組みを構築。</div></div>
-      <div><div class="lbl">工夫 POINT</div><div class="val">抽出ルール・レイアウト・システム設定をテーブルで外出しし、コードを触らず設定変更で運用できる構成に。</div></div>
-      <div><div class="lbl">成果 RESULT</div><div class="val">集計・帳票作成工数の削減と転記ミス防止(※実測値を記入)。現職で自主的に推進中。</div></div>
+      <div><div class="lbl">課題 ISSUE</div><div class="val">基幹システムから出力されるCSVの集計、クロス集計、日邸別明細、帳票作成が手作業に残りやすかった。</div></div>
+      <div><div class="lbl">打ち手 ACTION</div><div class="val">Power Queryでデータを取り込み・整形し、マスター結合や集計ルールを整理。公開デモでは集計画面をHTMLで再現。</div></div>
+      <div><div class="lbl">工夫 POINT</div><div class="val">抽出ルール・レイアウト・システム設定をテーブルで外出しし、処理手順を再現しやすい形に整理。</div></div>
+      <div><div class="lbl">結果 RESULT</div><div class="val">手作業を再現可能な処理へ置き換える設計として、帳票作成・在庫判断の補助MVPを検証中。</div></div>
     </div>
     <div class="stack"><span>Power Query(M言語)</span><span>VBA</span><span>Excel</span><span>マスター駆動(ルールテーブル)</span></div>
     <div class="diagram">
@@ -133,14 +116,31 @@ footer{text-align:center;font-size:.66rem;letter-spacing:.2em;padding:26px;backg
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="ar">↓</span> <span class="n">Power Query</span> で取込・整形・結合<br>
 [ 統合データ ]<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="ar">↓</span> <span class="n">ルールテーブル</span>(抽出/レイアウト/設定)で制御<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="ar">↓</span> <span class="n">VBA</span> で自動生成<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="ar">↓</span> <span class="n">VBA</span> でリスト・帳票を生成<br>
 [ 日次リスト ] [ クロス集計 A/B/C ] [ 印刷用シート ]
     </div>
     <div class="shot">スクリーンショット掲載予定<span class="ph">※マスタ実データが写り込まないよう加工して掲載</span></div>
-    <div class="highlight"><b>「設定で動く」設計思想：</b>処理をコードに埋め込まず、ルールをテーブルに外出しした。これは製造現場の「作業標準書(SOP)で誰でも同じ品質を出す」考え方と同じ。属人化を仕組みで防ぐ設計。</div>
+    <div class="highlight"><b>「設定で動く」設計思想：</b>処理をコードに埋め込みすぎず、ルールをテーブルに外出しする。製造現場の作業標準化と同じ発想で、属人判断を減らす設計です。</div>
     <a class="cta" href="pq-excel-demo.html" target="_blank">▶ 生産管理デモを見る</a>
     <a class="cta alt" href="pq-sample-input.csv" target="_blank">サンプルCSVを見る</a>
-    <p class="note">本ツールは社内業務マスターを含むため、現物の配布は行っていません。設計と画面で内容をご説明します。</p>
+    <p class="note">公開デモは架空サンプルのみで再現しています。実Excel、社内業務マスター、図面、会社固有の品番は公開していません。</p>
+  </div>
+</section>
+
+<!-- CASE 03 -->
+<section class="case">
+  <div class="wrap">
+    <div class="case-top"><span class="case-no">03</span><h2>物件データ整形ツール</h2></div>
+    <div class="badges"><span class="badge dom">副業実務の横展開</span><span class="badge live">ブラウザで試せる</span><span class="badge">入力・確認補助</span></div>
+    <div class="cpa">
+      <div><div class="lbl">課題 ISSUE</div><div class="val">物件データの列構成がバラバラで、確認・転記・入力前チェックに手作業の負担があった。</div></div>
+      <div><div class="lbl">打ち手 ACTION</div><div class="val">列マッピング・除外ルール・印刷レイアウトを設定駆動で定義し、CSVを読み込んで整形できる補助デモを試作。</div></div>
+      <div><div class="lbl">工夫 POINT</div><div class="val">除外条件をAND/OR・優先度付きで定義可能に。A4印刷の用紙幅自動縮小など、現場の実務要件を反映。</div></div>
+      <div><div class="lbl">結果 RESULT</div><div class="val">賃貸不動産実務で学んだ確認・転記業務を、入力支援MVPとして横展開。</div></div>
+    </div>
+    <div class="stack"><span>HTML</span><span>JavaScript</span><span>SheetJS(xlsx)</span><span>設定駆動UI</span><span>印刷レイアウト制御</span></div>
+    <div class="highlight"><b>別ドメインへの横展開：</b>副業で触れている賃貸不動産実務を題材に、確認・転記・入力前チェックを設定として整理した補助デモです。</div>
+    <a class="cta" href="property_formatter_demo.html" target="_blank">▶ デモを触ってみる</a>
   </div>
 </section>
 
@@ -150,14 +150,14 @@ footer{text-align:center;font-size:.66rem;letter-spacing:.2em;padding:26px;backg
     <div class="case-top"><span class="case-no">04</span><h2>Google スプレッドシート 集計ツール群(GAS)</h2></div>
     <div class="badges"><span class="badge doc">設計説明</span><span class="badge">マスター準拠</span><span class="badge">クラウド集計</span></div>
     <div class="cpa">
-      <div><div class="lbl">課題 ISSUE</div><div class="val">複数人で扱うデータの集計を、クラウド上で共有しながら自動化したいニーズがあった。</div></div>
-      <div><div class="lbl">打ち手 ACTION</div><div class="val">マスター準拠型で、日次別・終別・集計の各処理をGAS(Google Apps Script)で自動化するツール群を構築。</div></div>
-      <div><div class="lbl">工夫 POINT</div><div class="val">マスターを基準にデータの整合性を保ちつつ、複数の集計ビューを自動生成。クラウドで共同編集前提の設計。</div></div>
-      <div><div class="lbl">成果 RESULT</div><div class="val">クラウド上での集計自動化と共有の効率化(※実測値を記入)。</div></div>
+      <div><div class="lbl">課題 ISSUE</div><div class="val">複数人で扱うデータの集計を、クラウド上で共有しながら確認したいニーズがあった。</div></div>
+      <div><div class="lbl">打ち手 ACTION</div><div class="val">マスター準拠型で、日次別・終別・集計の各処理をGAS(Google Apps Script)で試作。</div></div>
+      <div><div class="lbl">工夫 POINT</div><div class="val">マスターを基準にデータの整合性を保ちつつ、複数の集計ビューを作れる構成を検討。</div></div>
+      <div><div class="lbl">結果 RESULT</div><div class="val">クラウド上での集計確認と共有の補助MVPとして検証中。</div></div>
     </div>
     <div class="stack"><span>Google Apps Script</span><span>スプレッドシート</span><span>マスター準拠設計</span><span>クラウド共同編集</span></div>
     <div class="shot">スクリーンショット掲載予定<span class="ph">※実データを架空サンプルに置き換えて掲載</span></div>
-    <div class="highlight"><b>同じ発想を別環境でも：</b>Power Query/VBA(オンプレ)、JavaScript(ブラウザ)、GAS(クラウド)。環境が変わっても「業務を自動化する道具をつくる」という軸は一貫している。</div>
+    <div class="highlight"><b>同じ発想を別環境でも：</b>Power Query/VBA(オンプレ)、JavaScript(ブラウザ)、GAS(クラウド)。環境が変わっても「現場課題を動く仕組みにする」という軸は一貫しています。</div>
   </div>
 </section>
 

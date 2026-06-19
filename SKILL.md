@@ -20,7 +20,7 @@ The site presents:
 The main positioning is:
 
 * Primary: factory manager, manufacturing improvement, inventory/order logic
-* Secondary: business DX implementation
+* Secondary: business DX, AI-assisted workflow improvement, and small MVP demos
 * Supporting: rental real estate domain learning and property data formatter
 
 ## Always preserve this project order in index.html
@@ -59,9 +59,7 @@ Good:
 
 Bad:
 
-```html
-<a href="/demo-order-trigger.html">
-```
+Leading-slash paths such as `/demo-order-trigger.html`.
 
 ## Genban order trigger demo workflow
 
