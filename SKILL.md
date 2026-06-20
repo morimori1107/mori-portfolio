@@ -2,7 +2,7 @@
 
 name: portfolio-demo-maintenance
 description: Use this skill when editing the mori-portfolio GitHub Pages site, especially when fixing demo links, sample CSV loading, index.html project order, works_casestudies.html links, or safety checks before commit.
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+---
 
 # Portfolio Demo Maintenance Skill
 
