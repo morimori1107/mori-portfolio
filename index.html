@@ -241,6 +241,26 @@ footer{text-align:center;font-size:.68rem;letter-spacing:.2em;padding:24px;backg
     <div class="proj">
       <div class="pn mono">03</div>
       <div>
+        <h3>OCR / LLM 伝票読取ツール</h3>
+        <div class="role">製造業ドメイン / 受入・検品の入力自動化 / OCR・LLMデモ</div>
+        <div class="cpr">
+          <div><div class="lbl">課題 / ISSUE</div><div class="val">受入・検品で発生する紙の納品伝票を、手作業で在庫・発注の入力へ転記しており、入力負担と転記ミスが残っていた。</div></div>
+          <div><div class="lbl">打ち手 / ACTION</div><div class="val">伝票画像をOCR/LLMで読み取り、品名・数量・単価・伝票番号を構造化データに変換。金額整合チェックで要確認行を提示する流れを試作。</div></div>
+          <div><div class="lbl">結果 / RESULT</div><div class="val">紙伝票の転記を、抽出→検証→CSV出力の再現可能な流れとして整理。在庫・発注の入力前処理を補助するMVPとして検証中。</div></div>
+        </div>
+        <div class="stack"><span>OCR</span><span>LLM</span><span>HTML</span><span>CSV出力</span><span>項目抽出</span><span>受入・検品</span></div>
+        <div class="result">紙伝票の入力自動化を、製造現場の在庫・発注業務に直結させる静的デモです。処理前の伝票イメージと抽出後の構造化結果を対比表示します。</div>
+        <div class="proj-actions">
+          <a href="ocr-slip-demo.html">伝票読取デモを見る</a>
+          <a class="sub" href="slip-sample.csv">抽出結果サンプルCSV</a>
+          <a class="alt" href="works_casestudies.html">設計説明を見る</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="proj">
+      <div class="pn mono">04</div>
+      <div>
         <h3>物件データ整形ツール</h3>
         <div class="role">副業実務の横展開 / 入力・確認業務の補助デモ / JavaScript</div>
         <div class="cpr">
@@ -311,7 +331,7 @@ footer{text-align:center;font-size:.68rem;letter-spacing:.2em;padding:24px;backg
   <p>製造管理・工程改善・在庫最適化・業務DXを中心に、現場課題を整理し、小さな試作で改善することを得意としています。採用・業務相談・副業での小規模MVP作成について、必要に応じてご相談ください。</p>
   <a class="btn" href="mailto:o_morou@yahoo.co.jp">メールで連絡する</a>
   <div class="links">
-    <a href="works_casestudies.html">Works</a>・<a href="demo-order-trigger.html">原盤発注デモ</a>・<a href="property_formatter_demo.html">物件整形デモ</a>
+    <a href="works_casestudies.html">Works</a>・<a href="demo-order-trigger.html">原盤発注デモ</a>・<a href="ocr-slip-demo.html">伝票読取デモ</a>・<a href="property_formatter_demo.html">物件整形デモ</a>
   </div>
 </section>
 <footer>(c) 2026 MORI — FIELD KAIZEN × 業務DX. 公開用サンプル・架空データを含みます。</footer>

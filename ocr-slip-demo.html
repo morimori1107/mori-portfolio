@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OCR/LLM 伝票読取デモ（静的） | MORI ポートフォリオ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@600;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#15130e;--paper:#f4f0e6;--paper2:#ece6d6;
+  --accent:#b5451f;--accent2:#1f5e4d;--line:#cabfa6;--muted:#6b6354;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:"Zen Kaku Gothic New",sans-serif;line-height:1.8;font-feature-settings:"palt";-webkit-font-smoothing:antialiased}
+.wrap{max-width:1080px;margin:0 auto;padding:0 28px}
+.mono{font-family:"Space Mono",monospace}
+.mincho{font-family:"Shippori Mincho",serif}
+header{border-bottom:1.5px solid var(--ink);background:var(--paper)}
+.bar{display:flex;justify-content:space-between;align-items:center;padding:16px 28px;max-width:1080px;margin:0 auto}
+.brand{font-weight:800;letter-spacing:.18em;font-size:.95rem}
+.brand span{color:var(--accent)}
+.bar a.back{color:var(--ink);text-decoration:none;font-size:.78rem;letter-spacing:.12em;font-weight:700;border:1.5px solid var(--ink);padding:7px 14px;border-radius:2px}
+.hero{padding:56px 0 28px}
+.hero .tag{font-size:.72rem;letter-spacing:.3em;color:var(--accent);font-weight:700;margin-bottom:16px}
+.hero h1{font-family:"Shippori Mincho",serif;font-weight:800;font-size:clamp(1.7rem,4vw,2.6rem);line-height:1.25;margin-bottom:18px}
+.hero h1 em{font-style:normal;color:var(--accent)}
+.hero .lead{max-width:720px;font-size:.95rem;color:var(--muted)}
+.note{margin-top:18px;padding:12px 16px;border-left:3px solid var(--accent2);background:#fffdf8;font-size:.82rem;color:#3a352b}
+.sec{padding:34px 0;border-top:1.5px solid var(--line)}
+.flow{display:grid;grid-template-columns:1fr 56px 1fr;gap:18px;align-items:center}
+@media(max-width:760px){.flow{grid-template-columns:1fr;gap:14px}}
+.arrow{font-family:"Space Mono",monospace;font-size:2rem;color:var(--accent);text-align:center;font-weight:700}
+@media(max-width:760px){.arrow{transform:rotate(90deg)}}
+.card{border:1px solid var(--line);background:#fffdf8;border-radius:4px;overflow:hidden}
+.card-h{padding:12px 16px;border-bottom:1px solid var(--line);background:var(--paper2);display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.card-h b{font-size:.92rem}
+.card-h .k{font-family:"Space Mono",monospace;font-size:.64rem;letter-spacing:.16em;color:var(--accent);font-weight:700}
+.card-b{padding:16px}
+/* 処理前：伝票イメージ（擬似スキャン） */
+.slip{font-family:"Space Mono",monospace;font-size:.78rem;background:#fff;border:1px dashed var(--muted);border-radius:2px;padding:16px;color:#2c281f;filter:contrast(1.05)}
+.slip .title{font-weight:700;font-size:.9rem;letter-spacing:.1em;border-bottom:1.5px solid var(--ink);padding-bottom:6px;margin-bottom:10px;display:flex;justify-content:space-between}
+.slip .meta{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;color:#4a4436;margin-bottom:10px;font-size:.72rem}
+.slip table{width:100%;border-collapse:collapse;font-size:.72rem}
+.slip th,.slip td{border:1px solid var(--line);padding:5px 7px;text-align:left}
+.slip th{background:var(--paper2);font-weight:700}
+.slip td.num{text-align:right}
+.slip .skew{transform:rotate(-.4deg)}
+.slip .stamp{display:inline-block;margin-top:10px;color:var(--accent);border:2px solid var(--accent);border-radius:4px;padding:2px 8px;font-size:.66rem;font-weight:700;transform:rotate(-6deg);opacity:.85}
+/* 抽出後：構造化結果 */
+.result-table{width:100%;border-collapse:collapse;font-size:.8rem}
+.result-table th,.result-table td{border:1px solid var(--line);padding:7px 9px;text-align:left}
+.result-table th{background:var(--paper2);font-weight:700;font-size:.72rem;letter-spacing:.06em}
+.result-table td.num{text-align:right;font-family:"Space Mono",monospace}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:.82rem;margin-bottom:14px}
+.kv .key{color:var(--accent);font-weight:700;font-family:"Space Mono",monospace;font-size:.7rem;letter-spacing:.08em;align-self:center}
+.badge{display:inline-block;font-family:"Space Mono",monospace;font-size:.66rem;font-weight:700;color:#fff;background:var(--accent2);padding:2px 8px;border-radius:2px}
+.links{margin:24px 0 4px;display:flex;gap:10px;flex-wrap:wrap}
+.links a{display:inline-block;text-decoration:none;border:1.5px solid var(--ink);color:var(--ink);background:#fff;padding:8px 14px;font-size:.76rem;font-weight:700;border-radius:2px}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-top:8px}
+@media(max-width:680px){.steps{grid-template-columns:1fr 1fr}}
+.steps .s{background:var(--paper);padding:16px}
+.steps .s .n{font-family:"Space Mono",monospace;font-size:.64rem;color:var(--accent);font-weight:700;letter-spacing:.12em;margin-bottom:6px}
+.steps .s h4{font-size:.88rem;font-weight:700;margin-bottom:4px}
+.steps .s p{font-size:.76rem;color:var(--muted)}
+footer{text-align:center;font-size:.68rem;letter-spacing:.2em;padding:24px;background:var(--ink);color:#7a715d;margin-top:40px}
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <div class="brand">MORI<span>.</span>KAIZEN×DX</div>
+    <a class="back" href="index.html">&larr; ポートフォリオへ戻る</a>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <div class="tag">OCR / LLM 伝票読取デモ（静的サンプル）</div>
+    <h1>紙の<em>納品伝票</em>を、<br>構造化データに読み替える。</h1>
+    <p class="lead">受入・検品の現場で発生する紙伝票を、OCR/LLMで読み取り、品名・数量・単価・伝票番号などの構造化データに変換する流れを示す静的デモです。処理前の伝票イメージ（擬似スキャン）と、抽出後の結果テーブルを対比表示します。</p>
+    <div class="note"><b>このデモについて：</b>表示内容は公開用の架空サンプルです。ライブAPIは呼び出しません（静的表示）。実在の取引先名・品番・数量・社内データは含みません。抽出後の結果は同じ階層の <span class="mono">slip-sample.csv</span> と同一のダミー値です。</div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="wrap">
+    <div class="flow">
+
+      <!-- 処理前：伝票スキャンの擬似イメージ -->
+      <div class="card">
+        <div class="card-h"><b>処理前 / 紙の納品伝票（擬似スキャン）</b><span class="k">INPUT</span></div>
+        <div class="card-b">
+          <div class="slip skew">
+            <div class="title"><span>納 品 書</span><span>No. DN-20260615-0042</span></div>
+            <div class="meta">
+              <span>取引先：サンプル建材株式会社</span>
+              <span>納品日：2026/06/15</span>
+            </div>
+            <table>
+              <thead><tr><th>品名</th><th>数量</th><th>単価</th><th>金額</th></tr></thead>
+              <tbody>
+                <tr><td>合板 12mm 3×6</td><td class="num">40</td><td class="num">1,180</td><td class="num">47,200</td></tr>
+                <tr><td>構造用集成材 105角</td><td class="num">25</td><td class="num">2,460</td><td class="num">61,500</td></tr>
+                <tr><td>木工用ビス 65mm 箱</td><td class="num">12</td><td class="num">880</td><td class="num">10,560</td></tr>
+                <tr><td>養生テープ 50mm</td><td class="num">30</td><td class="num">240</td><td class="num">7,200</td></tr>
+              </tbody>
+            </table>
+            <span class="stamp">検 収 印</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="arrow mono">&rarr;</div>
+
+      <!-- 抽出後：構造化結果 -->
+      <div class="card">
+        <div class="card-h"><b>抽出後 / 構造化データ</b><span class="k">OUTPUT</span></div>
+        <div class="card-b">
+          <div class="kv">
+            <span class="key">伝票番号</span><span>DN-20260615-0042</span>
+            <span class="key">取引先</span><span>サンプル建材株式会社</span>
+            <span class="key">納品日</span><span>2026-06-15</span>
+            <span class="key">明細件数</span><span>4 件　<span class="badge">読取信頼度 0.98</span></span>
+          </div>
+          <table class="result-table">
+            <thead><tr><th>品名</th><th>数量</th><th>単価</th><th>金額</th></tr></thead>
+            <tbody>
+              <tr><td>合板 12mm 3×6</td><td class="num">40</td><td class="num">1180</td><td class="num">47200</td></tr>
+              <tr><td>構造用集成材 105角</td><td class="num">25</td><td class="num">2460</td><td class="num">61500</td></tr>
+              <tr><td>木工用ビス 65mm 箱</td><td class="num">12</td><td class="num">880</td><td class="num">10560</td></tr>
+              <tr><td>養生テープ 50mm</td><td class="num">30</td><td class="num">240</td><td class="num">7200</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="links">
+      <a href="slip-sample.csv" target="_blank" rel="noopener">抽出結果サンプルCSVを見る</a>
+      <a href="index.html">ポートフォリオへ戻る</a>
+    </div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="wrap">
+    <h1 style="font-size:1.3rem;margin-bottom:14px" class="mincho">処理の流れ（設計イメージ）</h1>
+    <div class="steps">
+      <div class="s"><div class="n">STEP 01</div><h4>取込</h4><p>紙伝票をスキャン／撮影し、画像として取り込む。</p></div>
+      <div class="s"><div class="n">STEP 02</div><h4>OCR/LLM抽出</h4><p>文字認識とLLMで、品名・数量・単価・伝票番号を項目に割り当てる。</p></div>
+      <div class="s"><div class="n">STEP 03</div><h4>検証</h4><p>金額＝数量×単価の整合や信頼度をチェックし、要確認行を提示。</p></div>
+      <div class="s"><div class="n">STEP 04</div><h4>出力</h4><p>構造化CSVとして出力し、在庫・発注・集計の入力へ連携。</p></div>
+    </div>
+    <div class="note" style="margin-top:18px">本デモは流れの可視化が目的で、実際のOCR/LLM処理は行っていません。実装時は手動アップロードと同階層の公開用サンプルのみを用い、外部APIや社内データには接続しない方針です。</div>
+  </div>
+</section>
+
+<footer>(c) 2026 MORI — FIELD KAIZEN × 業務DX. 公開用サンプル・架空データを含みます。</footer>
+</body>
+</html>
