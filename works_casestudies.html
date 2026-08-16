@@ -74,7 +74,7 @@ footer{text-align:center;font-size:.66rem;letter-spacing:.2em;padding:26px;backg
     <h1>現場課題を、<br>動く仕組みに変える。</h1>
     <p>製造現場で実際に直面した在庫・発注・集計課題を中心に、公開用サンプルで再現した業務DXのMVP集です。要件を固めてから作るのではなく、まず動く試作を出し、現場で使いながら磨き込む——製造現場のカイゼンと同じ進め方でつくっています。</p>
     <div class="stats">
-      <div><span>4</span>自作ツール</div>
+      <div><span>5</span>自作ツール</div>
       <div><span>20+</span>1ツールあたりの試作反復</div>
       <div><span>3</span>開発環境(PQ/VBA・JS・GAS)</div>
     </div>
@@ -83,7 +83,7 @@ footer{text-align:center;font-size:.66rem;letter-spacing:.2em;padding:26px;backg
 </section>
 
 <!-- CASE 01 -->
-<section class="case">
+<section class="case" id="case-order">
   <div class="wrap">
     <div class="case-top"><span class="case-no">01</span><h2>原盤発注トリガー判定ツール</h2></div>
     <div class="badges"><span class="badge dom">製造業ドメイン</span><span class="badge live">ブラウザで試せる</span><span class="badge">在庫最適化</span></div>
@@ -100,7 +100,7 @@ footer{text-align:center;font-size:.66rem;letter-spacing:.2em;padding:26px;backg
 </section>
 
 <!-- CASE 02 -->
-<section class="case">
+<section class="case" id="case-pq">
   <div class="wrap">
     <div class="case-top"><span class="case-no">02</span><h2>Power Query × VBA 集計・帳票自動生成</h2></div>
     <div class="badges"><span class="badge dom">製造業ドメイン</span><span class="badge live">ブラウザで試せる</span><span class="badge">集計・帳票補助</span></div>
@@ -128,9 +128,35 @@ footer{text-align:center;font-size:.66rem;letter-spacing:.2em;padding:26px;backg
 </section>
 
 <!-- CASE 03 -->
-<section class="case">
+<section class="case" id="case-ocr">
   <div class="wrap">
-    <div class="case-top"><span class="case-no">03</span><h2>物件データ整形ツール</h2></div>
+    <div class="case-top"><span class="case-no">03</span><h2>OCR / LLM 伝票読取フロー</h2></div>
+    <div class="badges"><span class="badge dom">製造業ドメイン</span><span class="badge live">静的デモ</span><span class="badge">入力前処理</span></div>
+    <div class="cpa">
+      <div><div class="lbl">課題 ISSUE</div><div class="val">受入・検品で発生する紙伝票は、在庫・発注側へ転記する前に品名・数量・単価・伝票番号などを人手で確認する必要があり、入力負担と転記ミスが残りやすい。</div></div>
+      <div><div class="lbl">打ち手 ACTION</div><div class="val">OCR/LLMによる読取を想定し、伝票画像→項目抽出→整合確認→CSV出力までの処理フローを、公開用の静的デモとして再現。</div></div>
+      <div><div class="lbl">工夫 POINT</div><div class="val">数量×単価の整合や信頼度表示を確認工程として分離。AIが抽出し、人が確認してから次工程へ渡す設計イメージを明確にした。</div></div>
+      <div><div class="lbl">結果 RESULT</div><div class="val">紙伝票を構造化データへ変換する前処理を、入力→抽出→検証→出力の4段階で説明できる形に整理。公開ページでは実OCR/API処理と静的表示を明確に区別。</div></div>
+    </div>
+    <div class="stack"><span>OCR</span><span>LLM</span><span>HTML</span><span>CSV出力</span><span>項目抽出</span><span>確認工程</span></div>
+    <div class="diagram">
+[ 紙の納品伝票 ]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="ar">↓</span> <span class="n">OCR / LLM</span> を想定した項目抽出<br>
+[ 構造化データ ]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="ar">↓</span> <span class="n">整合チェック</span>（数量×単価・要確認）<br>
+[ 確認済みデータ ]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="ar">↓</span> <span class="n">CSV</span> で在庫・発注・集計の入力へ
+    </div>
+    <div class="highlight"><b>AI任せにしない設計：</b>OCR/LLMは読取候補を出し、確認工程を分離してから業務データへ渡す想定です。ポートフォリオ上のデモは処理フローの可視化を目的とした静的サンプルで、ライブAPIや社内データには接続していません。</div>
+    <a class="cta" href="ocr-slip-demo.html" target="_blank">▶ 静的デモを見る</a>
+    <a class="cta alt" href="slip-sample.csv" target="_blank">抽出結果サンプルCSV</a>
+  </div>
+</section>
+
+<!-- CASE 04 -->
+<section class="case" id="case-property">
+  <div class="wrap">
+    <div class="case-top"><span class="case-no">04</span><h2>物件データ整形ツール</h2></div>
     <div class="badges"><span class="badge dom">副業実務の横展開</span><span class="badge live">ブラウザで試せる</span><span class="badge">入力・確認補助</span></div>
     <div class="cpa">
       <div><div class="lbl">課題 ISSUE</div><div class="val">物件データの列構成がバラバラで、確認・転記・入力前チェックに手作業の負担があった。</div></div>
@@ -144,10 +170,10 @@ footer{text-align:center;font-size:.66rem;letter-spacing:.2em;padding:26px;backg
   </div>
 </section>
 
-<!-- CASE 04 -->
-<section class="case">
+<!-- CASE 05 -->
+<section class="case" id="case-gas">
   <div class="wrap">
-    <div class="case-top"><span class="case-no">04</span><h2>Google スプレッドシート 集計ツール群(GAS)</h2></div>
+    <div class="case-top"><span class="case-no">05</span><h2>Google スプレッドシート 集計ツール群(GAS)</h2></div>
     <div class="badges"><span class="badge doc">設計説明</span><span class="badge">マスター準拠</span><span class="badge">クラウド集計</span></div>
     <div class="cpa">
       <div><div class="lbl">課題 ISSUE</div><div class="val">複数人で扱うデータの集計を、クラウド上で共有しながら確認したいニーズがあった。</div></div>
