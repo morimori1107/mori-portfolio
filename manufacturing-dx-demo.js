@@ -138,11 +138,14 @@
 
   const problems = records.filter(r => r.issues.length);
   document.getElementById('summary').innerHTML = [
-    ['元INPUT', `${records.length}<small> 明細</small>`],
-    ['数量集計に進める', `${records.filter(r => r.classified).length}<small> 明細</small>`],
-    ['工数を計算できる', `${records.filter(r => r.minutes !== null).length}<small> 明細</small>`],
-    ['確認対象', `${problems.length}<small> 明細</small>`]
+    ['入力明細', `${records.length}<small> 明細</small>`],
+    ['数量集計対象', `${records.filter(r => r.classified).length}<small> 明細</small>`],
+    ['工数計算対象', `${records.filter(r => r.minutes !== null).length}<small> 明細</small>`],
+    ['要確認', `${problems.length}<small> 明細</small>`]
   ].map(([label, value]) => `<div><dt>${label}</dt><dd>${value}</dd></div>`).join('');
+  const excludedCount = problems.filter(r => !r.classified).length;
+  const missingTimeCount = problems.filter(r => r.classified && r.issues.includes('標準時間欠落')).length;
+  document.getElementById('summary-note').textContent = `要確認${problems.length}件＝数量集計除外${excludedCount}件＋標準時間未登録${missingTimeCount}件`;
   document.getElementById('issue-count').textContent = `／ ${problems.length}明細`;
   document.getElementById('issue-list').innerHTML = problems.map(r => `<li>${code(r.order.orderId)} · ${code(r.order.productId)}：<strong class="warning">${escape(r.issues.join('・'))}</strong>（入力数量：${escape(r.order.quantity)}）。${r.classified ? '数量は集計に保持し、工数は未計算。' : '数量集計・工数計算の対象外。元INPUTは保持。'}</li>`).join('');
   document.getElementById('materials-table').innerHTML = table('新規の架空品番・材料台帳（全件）', ['品番／品名', '材料ID／名称', '架空寸法：厚 × 幅 × 長（mm）', '取数（個／枚）'], data.productMaterials.map(link => {
