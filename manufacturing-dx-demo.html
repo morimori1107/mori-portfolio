@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>製造DX基盤 — 入力から予定工数まで | 公開デモ</title>
+  <style>
+    :root{--ink:#1a1d21;--paper:#f6f4ef;--line:#d8d2c4;--steel:#2b4a6f;--muted:#60666b;--amber:#94501d;--soft:#faf0e5;--green:#345e44}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--paper);color:var(--ink);font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,system-ui,sans-serif;line-height:1.7}
+    [hidden]{display:none!important}
+    .wrap{max-width:1200px;margin:auto;padding:28px 24px 48px}
+    a{color:var(--steel)}
+    button,input,select{font:inherit}
+    button,select{cursor:pointer}
+    button{border:1px solid var(--line);border-radius:3px;background:#fff;color:var(--ink);padding:9px 14px;min-height:44px}
+    button:hover{background:#eef1f4}
+    :focus-visible{outline:3px solid var(--amber);outline-offset:3px}
+    .skip{position:absolute;top:-100px;left:16px;background:#fff;padding:10px;z-index:10}
+    .skip:focus{top:12px}
+    header{border-bottom:3px solid var(--ink);padding-bottom:22px}
+    .eyebrow{color:var(--steel);font-size:12px;font-weight:700;letter-spacing:.16em}
+    h1{font-size:clamp(25px,4vw,36px);line-height:1.4;margin:12px 0}
+    h2{font-size:23px;line-height:1.5;margin:0 0 8px}
+    h3{font-size:16px;margin:22px 0 10px}
+    p{margin:8px 0}
+    .lead{max-width:800px;color:var(--muted);font-size:15px}
+    .badge{display:inline-block;background:var(--amber);color:white;padding:2px 8px;font-size:11px;letter-spacing:.05em;vertical-align:middle}
+    .note{font-size:12px;color:var(--muted)}
+    .flow{padding:16px 0;margin:0;color:var(--steel);font-size:13px;font-weight:700;overflow-wrap:anywhere}
+    .summary{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;border:1px solid var(--line);background:var(--line);margin:0 0 20px}
+    .summary div{background:#fff;padding:14px 18px}
+    .summary dt{font-size:12px;color:var(--muted)}
+    .summary dd{font-size:25px;font-weight:700;margin:4px 0 0;font-variant-numeric:tabular-nums}
+    .summary dd small{font-size:12px;font-weight:400}
+    nav ol{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;padding:0;margin:0;list-style:none}
+    nav button{width:100%;text-align:left;padding:12px;font-size:12px;font-weight:700}
+    nav button span{display:block;font-size:10px;letter-spacing:.12em;color:var(--muted)}
+    nav button[aria-current="step"]{background:var(--steel);color:#fff;border-color:var(--steel)}
+    nav button[aria-current="step"] span{color:#e0e7ee}
+    .filters{display:flex;flex-wrap:wrap;gap:12px;align-items:end;padding:16px 0}
+    .filters label{display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:700}
+    input,select{border:1px solid var(--line);border-radius:3px;padding:9px 10px;background:#fff;color:var(--ink);min-height:44px;max-width:100%}
+    #product-search{width:280px}
+    #filter-status{font-size:12px;color:var(--muted);flex-basis:100%;margin:0}
+    .panel{background:#fff;border:1px solid var(--line);padding:24px;min-width:0}
+    .panel-intro{font-size:14px;color:var(--muted);margin-bottom:18px}
+    .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:3px;margin:12px 0;max-width:100%}
+    table{border-collapse:collapse;width:100%;font-size:12px;font-variant-numeric:tabular-nums}
+    caption{text-align:left;padding:10px;font-weight:700;color:var(--steel)}
+    th,td{text-align:left;padding:10px 12px;border-bottom:1px solid #e9e5db;white-space:nowrap}
+    thead th{background:var(--steel);color:#fff;font-weight:600}
+    tbody th{font-weight:500}
+    .num{text-align:right}
+    .code{font-family:Menlo,Consolas,monospace;font-size:11px}
+    tr:last-child td,tr:last-child th{border-bottom:0}
+    .total{background:#eef1f4;font-weight:700}
+    .hot{background:var(--soft)}
+    .warning{color:#833a17;font-weight:700}
+    .pill{display:inline-block;padding:2px 7px;font-size:11px;background:#e7eee8;color:var(--green);border-radius:3px}
+    .pill.warn{background:var(--soft);color:#833a17}
+    .callout{background:var(--soft);border-left:3px solid var(--amber);padding:12px 16px;font-size:13px;margin:14px 0}
+    .equation{background:#eef1f4;padding:16px;font-size:16px;color:var(--steel);font-weight:700;overflow-wrap:anywhere}
+    .next-row{display:flex;justify-content:space-between;gap:12px;margin-top:18px}
+    .primary{background:var(--steel);color:#fff;border-color:var(--steel)}
+    .primary:hover{background:#203c5d}
+    .issues{margin-top:24px;border:1px solid var(--line);background:#fff;padding:20px}
+    .issues h2{font-size:18px}
+    .issues li{margin:10px 0;font-size:13px;overflow-wrap:anywhere}
+    .issues ul{padding-left:20px}
+    .chart{display:grid;gap:14px;margin:20px 0}
+    .bar-label{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;font-size:12px}
+    .bar-track{height:12px;background:#e9edf1;margin-top:5px;border-radius:2px;overflow:hidden}
+    .bar-fill{height:100%;background:var(--steel)}
+    details{margin-top:18px}
+    summary{cursor:pointer;font-size:13px;font-weight:700;padding:8px 0}
+    footer{margin-top:24px;border-top:1px solid var(--line);padding-top:16px;font-size:12px;color:var(--muted)}
+    @media(max-width:640px){.wrap{padding:20px 12px 36px}.summary{grid-template-columns:repeat(2,1fr)}nav ol{grid-template-columns:repeat(2,minmax(0,1fr))}nav li:last-child{grid-column:1/-1}.panel{padding:16px 12px}.filters label{width:100%}#product-search{width:100%}.issues{padding:16px 12px}h2{font-size:20px}}
+  </style>
+  <script defer src="demo-shared-data.js"></script>
+  <script defer src="manufacturing-dx-demo.js"></script>
+</head>
+<body>
+  <a class="skip" href="#demo-content">デモ本文へ移動</a>
+  <div class="wrap">
+    <header>
+      <div class="eyebrow">01 / MANUFACTURING DX <span class="badge">架空データ · v0</span></div>
+      <h1>入力情報を、現場の作業量へ。</h1>
+      <p class="lead">品番を作業区分につなぎ、日別の数量を予定工数に変える。製造DX基盤の「整える → 集計する → 作業量を見通す」を体験する公開デモです。</p>
+      <p class="note">実運用の構造を説明する簡略モデルです。実社名・実品番・実図面・実顧客・社内データは使用していません。</p>
+    </header>
+    <p class="flow">INPUT → 品番／ルール照合 → 作業区分確定 → DAY LIST / CROSS LIST → 作業区分別標準時間照合 → WORKLOAD</p>
+    <p id="load-error" class="callout" role="alert">デモを読み込んでいます。表示が進まない場合は、HTMLと2つのJSファイルを同じフォルダに置き、JavaScriptを有効にして開いてください。</p>
+    <noscript><p class="callout">このデモの集計・画面操作にはJavaScriptが必要です。</p></noscript>
+    <main id="demo-content" hidden>
+      <dl class="summary" id="summary" aria-label="サンプル全体の処理状況"></dl>
+      <nav aria-label="デモの工程">
+        <ol>
+          <li><button type="button" data-step="input" aria-controls="panel-input" aria-current="step"><span>01 / INPUT</span>元の入力を見る</button></li>
+          <li><button type="button" data-step="day" aria-controls="panel-day"><span>02 / DAY LIST</span>日別に整える</button></li>
+          <li><button type="button" data-step="cross" aria-controls="panel-cross"><span>03 / CROSS LIST</span>数量を集計する</button></li>
+          <li><button type="button" data-step="standard" aria-controls="panel-standard"><span>04 / STANDARD TIME</span>標準時間を照合</button></li>
+          <li><button type="button" data-step="workload" aria-controls="panel-workload"><span>05 / WORKLOAD</span>予定工数を見る</button></li>
+        </ol>
+      </nav>
+      <div class="filters">
+        <label for="product-search">品番・品名で絞り込み<input id="product-search" type="search" placeholder="例：DEMO-P001" autocomplete="off"></label>
+        <label for="line-filter">ライン<select id="line-filter"><option value="">すべてのライン</option></select></label>
+        <button type="button" id="reset-filters">絞り込みを解除</button>
+        <p id="filter-status" role="status" aria-live="polite"></p>
+      </div>
+      <section class="panel" id="panel-input" aria-labelledby="heading-input">
+        <h2 id="heading-input" tabindex="-1">INPUT <small>／ 元の入力</small></h2>
+        <p class="panel-intro">まず元明細を保持します。品番に一致するルールを探し、作業区分とラインを確定します。問題のある値も書き換えず、確認対象として残します。</p>
+        <div id="input-table"></div>
+        <details><summary>品番・材料の共通台帳を見る</summary><p class="note">同じ品番ID・材料IDを、今後の図面検索・原盤発注でも参照する想定です。材料と取数はこのデモの工数計算には使いません。</p><div id="materials-table"></div></details>
+      </section>
+      <section class="panel" id="panel-day" aria-labelledby="heading-day" hidden>
+        <h2 id="heading-day" tabindex="-1">DAY LIST <small>／ 日別明細</small></h2>
+        <p class="panel-intro">計画日・ライン・案件で並べ、各明細を作業区分へつなぎます。数量と作業区分が確定した明細を掲載します。標準時間が未登録の明細も数量は保持します。</p>
+        <div id="day-table"></div>
+      </section>
+      <section class="panel" id="panel-cross" aria-labelledby="heading-cross" hidden>
+        <h2 id="heading-cross" tabindex="-1">CROSS LIST <small>／ 品番 × 計画日</small></h2>
+        <p class="panel-intro">DAY LISTと同じ明細を日付ごとに集計します。点線「—」はその日の明細なし。確認対象の入力を数量0として埋めるものではありません。</p>
+        <div id="cross-table"></div>
+      </section>
+      <section class="panel" id="panel-standard" aria-labelledby="heading-standard" hidden>
+        <h2 id="heading-standard" tabindex="-1">標準時間 <small>／ 作業区分で照合</small></h2>
+        <p class="panel-intro">品番から直接時間を決めず、ルールで確定した作業区分の標準分／個を参照します。同じ作業区分の品番は、同じ標準時間を使います。</p>
+        <p class="equation">予定工数（分）＝ 数量（個）× 作業区分の標準時間（分／個）</p>
+        <div id="standard-table"></div>
+        <div id="calculation-example" class="callout"></div>
+      </section>
+      <section class="panel" id="panel-workload" aria-labelledby="heading-workload" hidden>
+        <h2 id="heading-workload" tabindex="-1">WORKLOAD <small>／ 予定工数</small></h2>
+        <p class="panel-intro">数量に作業区分別の標準時間を掛け、計画日・ラインごとの作業量を見通します。標準時間のない数量は「未計算」とし、計算できた分と分けて表示します。</p>
+        <div id="workload-summary" class="callout"></div>
+        <div id="workload-chart" class="chart" aria-label="日別・ライン別の計算可能な予定工数"></div>
+        <p class="note">棒の長さは表示中の最大値に対する相対表示です。設備能力・稼働率・能力超過を表すものではありません。</p>
+        <div id="workload-table"></div>
+      </section>
+      <div class="next-row"><button type="button" id="previous-step" hidden>前の工程へ</button><button type="button" id="next-step" class="primary">次へ：DAY LIST</button></div>
+      <aside class="issues" aria-labelledby="issues-heading">
+        <h2 id="issues-heading">確認対象 <span id="issue-count"></span></h2>
+        <p class="note">確認動作を示すため、4種類の不備を含めています。この一覧は絞り込みにかかわらず全件を表示します。</p>
+        <ul id="issue-list"></ul>
+        <p class="note">未登録品番・作業区分未解決・数量不正は日別／クロス集計に含めません。標準時間欠落は数量集計に残し、工数を未計算にします。</p>
+      </aside>
+    </main>
+    <footer>
+      <p>対象期間：2026年4月6日〜10日（架空の計画日）。名称・材料仕様・取数・数量・標準時間は、すべて公開用に新規作成した架空の設定です。</p>
+      <p>v0：品番完全一致のルールで1つの作業区分を確定。段取り時間、能力超過判定、予実比較、CSV入出力、保存、自動日程計画は対象外です。</p>
+    </footer>
+  </div>
+</body>
+</html>
