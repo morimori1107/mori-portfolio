@@ -73,8 +73,10 @@ nav a:hover{opacity:1}
 .stack span{font-family:"Space Mono",monospace;font-size:.68rem;border:1px solid var(--ink);padding:3px 9px;border-radius:2px}
 
 .proj-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
-.proj-actions a{display:inline-block;text-decoration:none;background:var(--ink);color:var(--paper);padding:9px 18px;border-radius:2px;font-size:.78rem;font-weight:700;letter-spacing:.06em;transition:transform .2s}
-.proj-actions a:hover{transform:translateY(-2px)}
+.proj-actions a,.proj-actions .demo-toggle{display:inline-block;text-decoration:none;background:var(--ink);color:var(--paper);padding:9px 18px;border-radius:2px;font-size:.78rem;font-weight:700;letter-spacing:.06em;transition:transform .2s}
+.proj-actions .demo-toggle{border:0;font-family:inherit;line-height:inherit;cursor:pointer}
+.proj-actions a:hover,.proj-actions .demo-toggle:hover{transform:translateY(-2px)}
+.proj-actions .demo-toggle:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 .proj-actions a.alt{background:transparent;color:var(--ink);border:1.5px solid var(--ink)}
 .proj-actions a.sub{background:var(--accent2);color:#fff}
 .inline-demo{margin-top:18px;border:1px solid var(--line);background:#fffdf8;border-radius:4px;overflow:hidden}
@@ -218,11 +220,11 @@ footer{text-align:center;font-size:.68rem;letter-spacing:.2em;padding:24px;backg
           - 公開用の架空CSVのみ使う
         -->
         <div class="proj-actions">
-          <a href="pq-excel-demo.html">生産管理デモを見る</a>
+          <button class="demo-toggle" type="button" aria-expanded="false" aria-controls="pq-inline-demo">デモを見る</button>
           <a class="sub" href="pq-sample-input.csv">サンプルCSVを見る</a>
           <a class="alt" href="works_casestudies.html#case-pq">設計説明を見る</a>
         </div>
-        <div class="inline-demo">
+        <div class="inline-demo" id="pq-inline-demo" hidden>
           <div class="inline-demo-head">
             <div>
               <b>生産管理デモをこのページ内で操作</b>
@@ -233,7 +235,7 @@ footer{text-align:center;font-size:.68rem;letter-spacing:.2em;padding:24px;backg
               <a href="pq-sample-input.csv" target="_blank" rel="noopener">サンプルCSV</a>
             </div>
           </div>
-          <iframe src="pq-excel-demo.html" title="Power Query × Excel 集計デモ" loading="lazy"></iframe>
+          <iframe data-src="pq-excel-demo.html" title="Power Query × Excel 集計デモ" loading="lazy"></iframe>
         </div>
       </div>
     </div>
@@ -338,6 +340,20 @@ footer{text-align:center;font-size:.68rem;letter-spacing:.2em;padding:24px;backg
 <script>
 const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in')})},{threshold:.12});
 document.querySelectorAll('.sec,.proj,.thesis,.pillars,.creed').forEach((el,i)=>{el.classList.add('rv');el.style.transitionDelay=(i%3)*0.07+'s';io.observe(el)});
+
+const pqDemoToggle=document.querySelector('.demo-toggle[aria-controls="pq-inline-demo"]');
+const pqDemo=document.getElementById('pq-inline-demo');
+const pqDemoFrame=pqDemo.querySelector('iframe');
+pqDemoToggle.addEventListener('click',()=>{
+  const opening=pqDemo.hidden;
+  // 初回展開時だけ読み込み、閉じてもデモの操作状態を保持する。
+  if(opening&&!pqDemoFrame.hasAttribute('src')){
+    pqDemoFrame.src=pqDemoFrame.dataset.src;
+  }
+  pqDemo.hidden=!opening;
+  pqDemoToggle.setAttribute('aria-expanded',String(opening));
+  pqDemoToggle.textContent=opening?'デモを閉じる':'デモを見る';
+});
 </script>
 </body>
 </html>
