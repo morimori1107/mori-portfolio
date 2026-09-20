@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="707" viewBox="0 0 1000 707" role="img" aria-labelledby="title desc">
+<title id="title">DEMO-D005 / DEMO-P004 / DEMO-B005 架空図面</title>
+<desc id="desc">新規作成した説明用の架空図。部材寸法は厚み24、幅220、長さ320ミリメートル。架空図面 / 製造使用不可。</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#233f5d"/></marker></defs>
+<rect width="1000" height="707" fill="#fff"/><rect x="20" y="20" width="960" height="667" fill="none" stroke="#bec9d3"/>
+<g font-family="sans-serif" fill="#1a1d21">
+<text x="44" y="59" font-size="27" font-weight="700">DEMO-D005</text>
+<text x="956" y="57" text-anchor="end" font-size="19" fill="#94501d">架空図面 / 製造使用不可</text>
+<line x1="44" y1="79" x2="956" y2="79" stroke="#233f5d" stroke-width="2"/>
+<text x="44" y="112" font-size="17">製品 DEMO-P004 ｜ 部材 DEMO-B005 ｜ 材料 DEMO-M003</text>
+<text x="44" y="139" font-size="14" fill="#60666b">概略正面図 / 単位 mm / 縮尺不同 / 説明用の架空形状</text>
+<rect x="315.9375" y="165" width="268.125" height="390" fill="#eaf0f5" stroke="#233f5d" stroke-width="3"/>
+<rect x="376.875" y="225.9375" width="146.25" height="268.125" fill="white" stroke="#233f5d" stroke-width="3"/><text x="450" y="360" text-anchor="middle" font-size="17">開口 120 × 220</text>
+<line x1="300.9375" y1="360" x2="599.0625" y2="360" stroke="#8a9eb1" stroke-dasharray="9 5"/>
+<line x1="450" y1="150" x2="450" y2="570" stroke="#8a9eb1" stroke-dasharray="9 5"/>
+<g fill="none" stroke="#233f5d" stroke-width="1.5">
+<path d="M315.9375 563 V602 M584.0625 563 V602"/>
+<line x1="315.9375" y1="590" x2="584.0625" y2="590" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+<path d="M592.0625 165 H651.0625 M592.0625 555 H651.0625"/>
+<line x1="636.0625" y1="165" x2="636.0625" y2="555" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+</g>
+<rect x="410" y="578" width="80" height="25" fill="white"/><text x="450" y="597" text-anchor="middle" font-size="19">220</text>
+<rect x="615.0625" y="343" width="43" height="34" fill="white"/><text x="636.0625" y="367" text-anchor="middle" font-size="19">320</text>
+<text x="795" y="205" font-size="18">厚み t = 24</text>
+<text x="795" y="235" font-size="14">構成数量 1個</text>
+<line x1="44" y1="624" x2="956" y2="624" stroke="#bec9d3"/>
+<text x="44" y="651" font-size="17">部材寸法：24 × 220 × 320 mm（厚 × 幅 × 長）</text>
+<text x="44" y="676" font-size="13" fill="#60666b">実図面の転用なし。公差・加工指示・認証は含まない。実際の製造・発注には使用しない。</text>
+</g></svg>

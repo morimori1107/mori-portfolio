@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="707" viewBox="0 0 1000 707" role="img" aria-labelledby="title desc">
+<title id="title">DEMO-D002 / DEMO-P002 / DEMO-B002 架空図面</title>
+<desc id="desc">新規作成した説明用の架空図。部材寸法は厚み12、幅200、長さ360ミリメートル。架空図面 / 製造使用不可。</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#233f5d"/></marker></defs>
+<rect width="1000" height="707" fill="#fff"/><rect x="20" y="20" width="960" height="667" fill="none" stroke="#bec9d3"/>
+<g font-family="sans-serif" fill="#1a1d21">
+<text x="44" y="59" font-size="27" font-weight="700">DEMO-D002</text>
+<text x="956" y="57" text-anchor="end" font-size="19" fill="#94501d">架空図面 / 製造使用不可</text>
+<line x1="44" y1="79" x2="956" y2="79" stroke="#233f5d" stroke-width="2"/>
+<text x="44" y="112" font-size="17">製品 DEMO-P002 ｜ 部材 DEMO-B002 ｜ 材料 DEMO-M001</text>
+<text x="44" y="139" font-size="14" fill="#60666b">概略正面図 / 単位 mm / 縮尺不同 / 説明用の架空形状</text>
+<rect x="341.6666666666667" y="165" width="216.66666666666666" height="390" fill="#eaf0f5" stroke="#233f5d" stroke-width="3"/>
+
+<line x1="326.6666666666667" y1="360" x2="573.3333333333334" y2="360" stroke="#8a9eb1" stroke-dasharray="9 5"/>
+<line x1="450" y1="150" x2="450" y2="570" stroke="#8a9eb1" stroke-dasharray="9 5"/>
+<g fill="none" stroke="#233f5d" stroke-width="1.5">
+<path d="M341.6666666666667 563 V602 M558.3333333333334 563 V602"/>
+<line x1="341.6666666666667" y1="590" x2="558.3333333333334" y2="590" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+<path d="M566.3333333333334 165 H625.3333333333334 M566.3333333333334 555 H625.3333333333334"/>
+<line x1="610.3333333333334" y1="165" x2="610.3333333333334" y2="555" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+</g>
+<rect x="410" y="578" width="80" height="25" fill="white"/><text x="450" y="597" text-anchor="middle" font-size="19">200</text>
+<rect x="589.3333333333334" y="343" width="43" height="34" fill="white"/><text x="610.3333333333334" y="367" text-anchor="middle" font-size="19">360</text>
+<text x="795" y="205" font-size="18">厚み t = 12</text>
+<text x="795" y="235" font-size="14">構成数量 1個</text>
+<line x1="44" y1="624" x2="956" y2="624" stroke="#bec9d3"/>
+<text x="44" y="651" font-size="17">部材寸法：12 × 200 × 360 mm（厚 × 幅 × 長）</text>
+<text x="44" y="676" font-size="13" fill="#60666b">実図面の転用なし。公差・加工指示・認証は含まない。実際の製造・発注には使用しない。</text>
+</g></svg>
