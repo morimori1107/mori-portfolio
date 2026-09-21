@@ -138,7 +138,7 @@ footer{text-align:center;font-size:.68rem;letter-spacing:.2em;padding:24px;backg
     <p class="lead">製造業22年。CAD・NC加工・検品・工程管理・在庫管理・品質管理を経験し、現在は工場長として現場改善とチーム運営を担っています。近年はPower Query、GAS、JavaScript、OCR等を用い、発注判断・集計・入力確認などの業務を小さなMVPとして試作しています。</p>
     <div class="meta">
       <div><span>CAREER</span>製造業 22年 / 工場長</div>
-      <div><span>NOW</span>業務DX / 原盤発注MVP / 賃貸データ整形</div>
+      <div><span>NOW</span>製造DX基盤 / 図面・品番検索 / AI監査フロー</div>
       <div><span>STYLE</span>現場課題を、動く仕組みへ</div>
     </div>
   </div>
@@ -176,23 +176,32 @@ footer{text-align:center;font-size:.68rem;letter-spacing:.2em;padding:24px;backg
 <section class="sec" id="work">
   <div class="wrap">
     <div class="sec-h"><span class="no">02</span><h2>主なプロジェクト</h2><span class="en">— SELECTED WORK</span></div>
-    <p style="color:var(--muted);font-size:.86rem;margin-bottom:10px">製造現場の改善・在庫管理を主軸に、賃貸不動産の入力・確認業務へ横展開したMVP群です。掲載しているデモ・数値・名称は公開用の架空サンプルです。実在の顧客名・品番・図面・社内データは含めていません。</p>
+    <p style="color:var(--muted);font-size:.86rem;margin-bottom:10px">製造現場の集計・検索・発注判断を主軸に、AI監査と賃貸不動産の入力・確認業務へ展開した5件です。掲載しているデモ・数値・名称は公開用の架空サンプルです。実在の顧客名・品番・図面・社内データは含めていません。</p>
 
     <div class="proj">
       <div class="pn mono">01</div>
       <div>
-        <h3>原盤発注トリガー判定ツール</h3>
-        <div class="role">製造業ドメイン / 在庫最適化 / JavaScriptデモ</div>
+        <h3>製造DX基盤｜入力から予定工数まで</h3>
+        <div class="role">製造業ドメイン / 集計・標準時間・予定工数 / 実運用構造の公開デモ</div>
         <div class="cpr">
-          <div><div class="lbl">課題 / ISSUE</div><div class="val">製品出荷の変動に対し、原盤の発注判断が経験に寄りやすく、欠品・過剰在庫リスクを事前に見づらかった。</div></div>
-          <div><div class="lbl">打ち手 / ACTION</div><div class="val">日別消費量、取り数、原盤マスター、安全在庫、リードタイムをもとに、発注候補・必要数・期限を判定するMVPを試作。</div></div>
-          <div><div class="lbl">結果 / RESULT</div><div class="val">「そろそろ足りない」を、在庫推移と発注候補として可視化。工場長としての在庫管理・工程判断をロジック化する試み。</div></div>
+          <div><div class="lbl">課題 / ISSUE</div><div class="val">入力明細・日別集計・標準時間が分かれ、数量から予定工数までの確認を一貫して追いにくかった。</div></div>
+          <div><div class="lbl">打ち手 / ACTION</div><div class="val">品番をルールで作業区分へ結び、日別・クロス集計から作業区分別標準時間を照合する流れを、架空データで再現。</div></div>
+          <div><div class="lbl">結果 / RESULT</div><div class="val">入力から日別・ライン別の予定工数までを確認可能に。不備のある明細は要確認として残し、計算可能な工数と区別して表示。</div></div>
         </div>
-        <div class="stack"><span>HTML</span><span>JavaScript</span><span>営業日計算</span><span>移動平均</span><span>安全在庫</span><span>マスター駆動</span></div>
-        <div class="result">工場長の知見が最も伝わる主力案件です。トップではこの案件を先頭に置き、「現場改善 × 業務DX」の軸を明確にします。</div>
+        <div class="stack"><span>Power Query</span><span>Excel</span><span>VBA</span><span>マスター照合</span><span>標準時間</span></div>
+        <div class="result">実運用構造を公開用HTML / JavaScriptで再現。予定工数は数量×作業区分ごとの標準分／個で計算します。</div>
         <div class="proj-actions">
-          <a href="demo-order-trigger.html">原盤発注デモを見る</a>
-          <a class="alt" href="works_casestudies.html#case-order">ケーススタディを見る</a>
+          <button class="demo-toggle" type="button" data-demo-toggle aria-expanded="false" aria-controls="manufacturing-inline-demo">デモを見る</button>
+          <a class="alt" href="manufacturing-dx-demo.html" target="_blank" rel="noopener">別タブで開く</a>
+        </div>
+        <div class="inline-demo" id="manufacturing-inline-demo" hidden>
+          <div class="inline-demo-head">
+            <div>
+              <b>入力から予定工数までを、このページ内で確認</b>
+              <p>INPUT → DAY LIST / CROSS LIST → 標準時間 → WORKLOAD。架空データによる構造説明です。</p>
+            </div>
+          </div>
+          <iframe data-src="manufacturing-dx-demo.html" title="製造DX基盤｜入力から予定工数まで 公開デモ" loading="lazy"></iframe>
         </div>
       </div>
     </div>
@@ -200,42 +209,27 @@ footer{text-align:center;font-size:.68rem;letter-spacing:.2em;padding:24px;backg
     <div class="proj">
       <div class="pn mono">02</div>
       <div>
-        <h3>Power Query × Excel 集計・帳票自動生成</h3>
-        <div class="role">製造業ドメイン / 集計・帳票・在庫判断補助 / 生産管理デモ</div>
+        <h3>図面・品番検索</h3>
+        <div class="role">製造業ドメイン / 品番・材料・図面の照合 / 公開デモ</div>
         <div class="cpr">
-          <div><div class="lbl">課題 / ISSUE</div><div class="val">CSV出力、クロス集計、日邸別明細、帳票作成が手作業に残り、確認手順や判断が属人化しやすかった。</div></div>
-          <div><div class="lbl">打ち手 / ACTION</div><div class="val">Power Queryでデータを整形し、マスター結合や集計ルールを整理。公開用デモではクロス集計・日邸別明細を確認可能に。</div></div>
-          <div><div class="lbl">結果 / RESULT</div><div class="val">手作業の集計を再現可能な処理へ置き換える設計として整理。帳票作成・在庫判断の補助MVPとして検証中。</div></div>
+          <div><div class="lbl">課題 / ISSUE</div><div class="val">品番、材料情報、部材構成、図面が分かれ、必要な情報を探して照合する手間があった。</div></div>
+          <div><div class="lbl">打ち手 / ACTION</div><div class="val">品番検索と材料・厚み・分類の絞り込みから、詳細・部材・図面拡大までを一つの画面につなぐ。</div></div>
+          <div><div class="lbl">結果 / RESULT</div><div class="val">条件に合う品番から図面へ到達でき、図面未登録や参照不整合も確認対象として把握可能に。</div></div>
         </div>
-        <div class="stack"><span>Power Query</span><span>Excel</span><span>CSV整形</span><span>マスター結合</span><span>在庫・発注管理</span></div>
-        <div class="result">作業標準化、チェックリスト、ポカヨケの考え方を、Excel・データ処理に移植した生産管理デモです。</div>
-        <!-- Power QueryデモはHTML内蔵データで動く自己完結型。CSVはサンプル確認用の補助リンク。 -->
-        <!--
-          Power Queryデモ公開ファイル:
-          - pq-excel-demo.html
-          - pq-sample-input.csv
-          - pq-sample-master.csv
-          - CSV投入 → データ整形 → マスター結合 → 発注候補・帳票イメージ表示
-          - 実Excelや社内データは公開しない
-          - 公開用の架空CSVのみ使う
-        -->
+        <div class="stack"><span>JavaScript</span><span>品番検索</span><span>共通マスター</span><span>属性絞込</span><span>SVG</span></div>
+        <div class="result">材料と厚みは、同一の関連材料が両条件を満たす場合に一致。図面はすべて架空です。</div>
         <div class="proj-actions">
-          <button class="demo-toggle" type="button" aria-expanded="false" aria-controls="pq-inline-demo">デモを見る</button>
-          <a class="sub" href="pq-sample-input.csv">サンプルCSVを見る</a>
-          <a class="alt" href="works_casestudies.html#case-pq">設計説明を見る</a>
+          <button class="demo-toggle" type="button" data-demo-toggle aria-expanded="false" aria-controls="drawing-inline-demo">デモを見る</button>
+          <a class="alt" href="drawing-search-demo.html" target="_blank" rel="noopener">別タブで開く</a>
         </div>
-        <div class="inline-demo" id="pq-inline-demo" hidden>
+        <div class="inline-demo" id="drawing-inline-demo" hidden>
           <div class="inline-demo-head">
             <div>
-              <b>生産管理デモをこのページ内で操作</b>
-              <p>クロス集計・日邸別明細を、公開用サンプルデータで確認できます。</p>
-            </div>
-            <div class="inline-demo-links">
-              <a href="pq-excel-demo.html" target="_blank" rel="noopener">別タブで開く</a>
-              <a href="pq-sample-input.csv" target="_blank" rel="noopener">サンプルCSV</a>
+              <b>品番から部材・図面を、このページ内で確認</b>
+              <p>品番検索 → 属性絞込 → 詳細 → 部材 → 図面。大きな画面で確認する場合は別タブをご利用ください。</p>
             </div>
           </div>
-          <iframe data-src="pq-excel-demo.html" title="Power Query × Excel 集計デモ" loading="lazy"></iframe>
+          <iframe data-src="drawing-search-demo.html" title="図面・品番検索 公開デモ" loading="lazy"></iframe>
         </div>
       </div>
     </div>
@@ -243,19 +237,18 @@ footer{text-align:center;font-size:.68rem;letter-spacing:.2em;padding:24px;backg
     <div class="proj">
       <div class="pn mono">03</div>
       <div>
-        <h3>OCR / LLM 伝票読取ツール</h3>
-        <div class="role">製造業ドメイン / 受入・検品の入力自動化 / OCR・LLMデモ</div>
+        <h3>原盤発注</h3>
+        <div class="role">製造業ドメイン / 在庫最適化 / JavaScriptデモ</div>
         <div class="cpr">
-          <div><div class="lbl">課題 / ISSUE</div><div class="val">受入・検品で発生する紙の納品伝票を、手作業で在庫・発注の入力へ転記しており、入力負担と転記ミスが残っていた。</div></div>
-          <div><div class="lbl">打ち手 / ACTION</div><div class="val">OCR/LLMによる読取を想定し、伝票画像→項目抽出→検証→CSV出力までの処理フローを、公開用の静的デモとして再現。</div></div>
-          <div><div class="lbl">結果 / RESULT</div><div class="val">紙伝票の転記を、抽出→検証→CSV出力の再現可能な流れとして整理。公開ページでは静的サンプルで設計意図を示し、実処理とは区別して掲載。</div></div>
+          <div><div class="lbl">課題 / ISSUE</div><div class="val">製品出荷の変動に対し、原盤の発注判断が経験に寄りやすく、欠品・過剰在庫リスクを事前に見づらかった。</div></div>
+          <div><div class="lbl">打ち手 / ACTION</div><div class="val">出荷数量、取り数、現在庫、安全在庫、リードタイムをもとに、発注候補・必要数・期限を判定するMVPを試作。</div></div>
+          <div><div class="lbl">結果 / RESULT</div><div class="val">在庫推移と発注根拠を可視化し、発注候補とその判断過程を確認可能に。</div></div>
         </div>
-        <div class="stack"><span>OCR</span><span>LLM</span><span>HTML</span><span>CSV出力</span><span>項目抽出</span><span>受入・検品</span></div>
-        <div class="result">紙伝票の入力自動化を、製造現場の在庫・発注業務に直結させる静的デモです。処理前の伝票イメージと抽出後の構造化結果を対比表示します。</div>
+        <div class="stack"><span>HTML</span><span>JavaScript</span><span>営業日計算</span><span>移動平均</span><span>安全在庫</span><span>マスター駆動</span></div>
+        <div class="result">工場長としての在庫管理・工程判断を、根拠を確認できる発注ロジックへ整理したデモです。</div>
         <div class="proj-actions">
-          <a href="ocr-slip-demo.html">伝票読取デモを見る</a>
-          <a class="sub" href="slip-sample.csv">抽出結果サンプルCSV</a>
-          <a class="alt" href="works_casestudies.html#case-ocr">設計説明を見る</a>
+          <a href="demo-order-trigger.html" target="_blank" rel="noopener">原盤発注デモを見る（別タブ）</a>
+          <a class="alt" href="works_casestudies.html#case-order">ケーススタディを見る</a>
         </div>
       </div>
     </div>
@@ -263,17 +256,45 @@ footer{text-align:center;font-size:.68rem;letter-spacing:.2em;padding:24px;backg
     <div class="proj">
       <div class="pn mono">04</div>
       <div>
-        <h3>物件データ整形ツール</h3>
+        <h3>Receipt AI</h3>
+        <div class="role">AI活用 / 項目別の人間確認 / 監査フローの公開デモ</div>
+        <div class="cpr">
+          <div><div class="lbl">課題 / ISSUE</div><div class="val">AIの判定だけでは、誤認・情報不足・資料間の関係を確定できず、人が確認する根拠と範囲を残す必要がある。</div></div>
+          <div><div class="lbl">打ち手 / ACTION</div><div class="val">SourceとAI Observationを保持し、HIGH／REVIEWから項目別の人間レビュー・Ground Truth確定へ進む監査フローを再現。</div></div>
+          <div><div class="lbl">結果 / RESULT</div><div class="val">AI候補と人間確定値の差分を確認でき、未確認・保留を残したまま全体を確認完了にしない流れを体験可能に。</div></div>
+        </div>
+        <div class="stack"><span>AI監査</span><span>Human Review</span><span>Ground Truth</span><span>relation</span><span>JavaScript</span></div>
+        <div class="result">公開用架空デモ。ファイル重複候補と取引関係は別管理。操作結果は保存されません。</div>
+        <div class="proj-actions">
+          <button class="demo-toggle" type="button" data-demo-toggle aria-expanded="false" aria-controls="receipt-inline-demo">デモを見る</button>
+          <a class="alt" href="receipt-ai-demo.html" target="_blank" rel="noopener">別タブで開く</a>
+        </div>
+        <div class="inline-demo" id="receipt-inline-demo" hidden>
+          <div class="inline-demo-head">
+            <div>
+              <b>AI候補と人間の確定値を、このページ内で比較</b>
+              <p>架空のAI Observationを人が確認します。ライブAI・OCR・V2 DB統合は使用していません。別タブにはレビュー結果を引き継ぎません。</p>
+            </div>
+          </div>
+          <iframe data-src="receipt-ai-demo.html" title="Receipt AI 公開デモ" loading="lazy"></iframe>
+        </div>
+      </div>
+    </div>
+
+    <div class="proj">
+      <div class="pn mono">05</div>
+      <div>
+        <h3>物件整形</h3>
         <div class="role">副業実務の横展開 / 入力・確認業務の補助デモ / JavaScript</div>
         <div class="cpr">
-          <div><div class="lbl">課題 / ISSUE</div><div class="val">物件データの列名・形式がバラバラで、確認、転記、入力前チェックに手作業の負担があった。</div></div>
-          <div><div class="lbl">打ち手 / ACTION</div><div class="val">ヘッダーマップ、入力除外ルール、列設定、表示・出力設定を持たせ、CSVを読み込んで整形できる補助デモを作成。</div></div>
-          <div><div class="lbl">結果 / RESULT</div><div class="val">賃貸不動産実務で学んだ確認・転記業務の粒度を、入力支援MVPとして横展開。</div></div>
+          <div><div class="lbl">課題 / ISSUE</div><div class="val">物件データの列名・形式がバラバラで、確認・転記・入力前チェックに手作業の負担があった。</div></div>
+          <div><div class="lbl">打ち手 / ACTION</div><div class="val">ヘッダーマップ、入力除外ルール、列設定、表示・出力設定を使い、読み込んだデータを整形する補助デモを作成。</div></div>
+          <div><div class="lbl">結果 / RESULT</div><div class="val">列の対応と除外理由を確認しながら整形結果を見直せるようにし、賃貸実務の入力・確認業務へ横展開。</div></div>
         </div>
         <div class="stack"><span>HTML</span><span>JavaScript</span><span>CSV</span><span>ヘッダーマップ</span><span>入力前チェック</span><span>賃貸実務</span></div>
-        <div class="result">主軸は製造ですが、副業の賃貸不動産実務を題材にした横展開・補助実績として見せる位置づけです。</div>
+        <div class="result">製造現場で培った標準化・確認手順の考え方を、賃貸不動産の入力支援へ展開しています。</div>
         <div class="proj-actions">
-          <a href="property_formatter_demo.html">物件データ整形デモを見る</a>
+          <a href="property_formatter_demo.html" target="_blank" rel="noopener">物件データ整形デモを見る（別タブ）</a>
           <a class="sub" href="property-sample-utf8.csv">サンプルCSV UTF-8</a>
           <a class="sub" href="property-sample-sjis.csv">サンプルCSV Shift-JIS</a>
         </div>
@@ -324,7 +345,7 @@ footer{text-align:center;font-size:.68rem;letter-spacing:.2em;padding:24px;backg
       <div class="item big"><div class="yr mono">2004-</div><h4>木材プレカット加工 / CAD・NC加工・工程管理</h4><p>木材加工、検品、CAD・CAMデータ作成、NC加工機の運用、製造工程進捗管理を経験。現場で発生するムダ・不良・在庫課題を改善してきました。</p></div>
       <div class="item"><div class="yr mono">2024-</div><h4>工場長 / 製造・品質・在庫・人員配置のマネジメント</h4><p>工程管理、品質管理、在庫管理、作業標準化、現場メンバーの管理を担当。端材削減、不良率低減、倉庫スペース削減などの改善を推進。</p></div>
       <div class="item"><div class="yr mono">現在</div><h4>副業：賃貸不動産実務 / 物件情報入力・解約受付・電話取次ぎ</h4><p>宅建士登録済み。賃貸不動産の現場で、物件情報の確認・入力、解約受付、契約関連の確認補助を経験し、入力・確認業務の効率化テーマを探索。</p></div>
-      <div class="item"><div class="yr mono">NOW</div><h4>現場改善 × 業務DX / 原盤発注・物件データ整形MVP</h4><p>Power Query、GAS、JavaScript、OCR、AI活用を組み合わせ、製造現場と賃貸不動産の業務課題を小さなMVPとして試作・検証しています。</p></div>
+      <div class="item"><div class="yr mono">NOW</div><h4>現場改善 × 業務DX / 製造DX基盤・図面検索・AI監査フロー</h4><p>Power Query・Excel・VBAによる製造DXの実運用構造、図面・品番検索、AIの候補を人が確認する監査フローを、公開用の架空デモで伝えています。</p></div>
     </div>
   </div>
 </section>
@@ -333,7 +354,7 @@ footer{text-align:center;font-size:.68rem;letter-spacing:.2em;padding:24px;backg
   <p>製造管理・工程改善・在庫最適化・業務DXを中心に、現場課題を整理し、小さな試作で改善することを得意としています。採用・業務相談・副業での小規模MVP作成について、必要に応じてご相談ください。</p>
   <a class="btn" href="mailto:o_morou@yahoo.co.jp">メールで連絡する</a>
   <div class="links">
-    <a href="works_casestudies.html">Works</a>・<a href="demo-order-trigger.html">原盤発注デモ</a>・<a href="ocr-slip-demo.html">伝票読取デモ</a>・<a href="property_formatter_demo.html">物件整形デモ</a>
+    <a href="works_casestudies.html">既存ケーススタディ</a>・<a href="manufacturing-dx-demo.html" target="_blank" rel="noopener">製造DX基盤</a>・<a href="drawing-search-demo.html" target="_blank" rel="noopener">図面・品番検索</a>・<a href="demo-order-trigger.html" target="_blank" rel="noopener">原盤発注</a>・<a href="receipt-ai-demo.html" target="_blank" rel="noopener">Receipt AI</a>・<a href="property_formatter_demo.html" target="_blank" rel="noopener">物件整形</a>
   </div>
 </section>
 <footer>(c) 2026 MORI — FIELD KAIZEN × 業務DX. 公開用サンプル・架空データを含みます。</footer>
@@ -341,18 +362,24 @@ footer{text-align:center;font-size:.68rem;letter-spacing:.2em;padding:24px;backg
 const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in')})},{threshold:.12});
 document.querySelectorAll('.sec,.proj,.thesis,.pillars,.creed').forEach((el,i)=>{el.classList.add('rv');el.style.transitionDelay=(i%3)*0.07+'s';io.observe(el)});
 
-const pqDemoToggle=document.querySelector('.demo-toggle[aria-controls="pq-inline-demo"]');
-const pqDemo=document.getElementById('pq-inline-demo');
-const pqDemoFrame=pqDemo.querySelector('iframe');
-pqDemoToggle.addEventListener('click',()=>{
-  const opening=pqDemo.hidden;
-  // 初回展開時だけ読み込み、閉じてもデモの操作状態を保持する。
-  if(opening&&!pqDemoFrame.hasAttribute('src')){
-    pqDemoFrame.src=pqDemoFrame.dataset.src;
-  }
-  pqDemo.hidden=!opening;
-  pqDemoToggle.setAttribute('aria-expanded',String(opening));
-  pqDemoToggle.textContent=opening?'デモを閉じる':'デモを見る';
+const inlineDemos=[...document.querySelectorAll('[data-demo-toggle]')].map(toggle=>({
+  toggle,
+  panel:document.getElementById(toggle.getAttribute('aria-controls'))
+}));
+function setDemoOpen(demo,opening){
+  const frame=demo.panel.querySelector('iframe');
+  // 初回展開時だけ読み込み、手動・自動のどちらで閉じても操作状態を保持する。
+  if(opening&&!frame.hasAttribute('src')) frame.src=frame.dataset.src;
+  demo.panel.hidden=!opening;
+  demo.toggle.setAttribute('aria-expanded',String(opening));
+  demo.toggle.textContent=opening?'デモを閉じる':'デモを見る';
+}
+inlineDemos.forEach(demo=>{
+  demo.toggle.addEventListener('click',()=>{
+    const opening=demo.panel.hidden;
+    if(opening) inlineDemos.forEach(other=>{if(other!==demo) setDemoOpen(other,false)});
+    setDemoOpen(demo,opening);
+  });
 });
 </script>
 </body>
