@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="780" viewBox="0 0 600 780" role="img" aria-labelledby="title desc">
+<title id="title">公開用架空資料 DEMO-R05</title>
+<desc id="desc">実取引のない説明用サンプル。日付・店舗・品目・金額・取引番号はすべて架空。</desc>
+<rect width="600" height="780" fill="#f6f4ef"/>
+<rect x="24" y="24" width="552" height="732" rx="3" fill="#fff" stroke="#d8d2c4"/>
+<g font-family="Hiragino Kaku Gothic ProN, Yu Gothic, Meiryo, sans-serif" fill="#1a1d21">
+<rect x="44" y="44" width="512" height="48" fill="#2b4a6f"/>
+<text x="300" y="75" text-anchor="middle" font-size="19" fill="#fff">公開用架空資料 / 実取引なし</text>
+<text x="48" y="126" font-size="15" fill="#60666b">DEMO-R05 · 静的デモ用の新規作成SVG</text>
+<text x="48" y="168" font-size="18">架空店・星砂文具</text>
+<text x="48" y="191" font-size="14" fill="#60666b">領収レシート</text>
+<text x="48" y="225" font-size="18">2031-04-12 17:45</text>
+<text x="48" y="248" font-size="14" fill="#60666b">取引番号 DEMO-T05</text>
+<text x="48" y="282" font-size="18">架空ペンセット</text>
+<text x="48" y="305" font-size="14" fill="#60666b">680 円</text>
+<text x="48" y="339" font-size="18">合計</text>
+<text x="48" y="362" font-size="14" fill="#60666b">680 円</text>
+<text x="48" y="396" font-size="18">お支払：現金</text>
+<text x="48" y="419" font-size="14" fill="#60666b">取引数 1</text>
+<text x="48" y="453" font-size="18">R01と同日・同店・同額</text>
+<text x="48" y="476" font-size="14" fill="#60666b">時刻・取引番号は別</text>
+<path d="M48 656 H552" stroke="#d8d2c4"/>
+<text x="48" y="685" font-size="14" fill="#94501d">監査フローの説明用 / 会計・証憑利用不可</text>
+<text x="48" y="713" font-size="13" fill="#60666b">実店舗・実購入履歴・個人情報は含みません。</text>
+</g>
+</svg>
