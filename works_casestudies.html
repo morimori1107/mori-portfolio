@@ -29,7 +29,7 @@ header{border-bottom:1.5px solid var(--ink);position:sticky;top:0;background:var
 .hero .stats{display:flex;gap:30px;margin-top:30px;flex-wrap:wrap}
 .hero .stats div{font-size:.8rem}
 .hero .stats span{display:block;font-family:"Space Mono",monospace;font-size:1.6rem;color:var(--accent);font-weight:700}
-.case{border-top:1.5px solid var(--line);padding:52px 0}
+.case{border-top:1.5px solid var(--line);padding:52px 0;scroll-margin-top:72px}
 .case-top{display:flex;align-items:baseline;gap:16px;margin-bottom:8px;flex-wrap:wrap}
 .case-no{font-family:"Space Mono",monospace;font-size:1.1rem;color:var(--accent);font-weight:700}
 .case h2{font-family:"Shippori Mincho",serif;font-size:1.7rem;font-weight:700}
@@ -72,120 +72,124 @@ footer{text-align:center;font-size:.66rem;letter-spacing:.2em;padding:26px;backg
   <div class="wrap">
     <div class="tag">SELECTED WORKS — CASE STUDIES</div>
     <h1>現場課題を、<br>動く仕組みに変える。</h1>
-    <p>製造現場で実際に直面した在庫・発注・集計課題を中心に、公開用サンプルで再現した業務DXのMVP集です。要件を固めてから作るのではなく、まず動く試作を出し、現場で使いながら磨き込む——製造現場のカイゼンと同じ進め方でつくっています。</p>
+    <p>製造DX・図面検索・原盤発注・AI監査の4事例について、入力から処理、設計判断、例外処理、検証、結果、実装範囲までを説明します。課題と判断条件を整理し、試作・検証・改善を重ねる考え方を、公開デモとともに紹介します。</p>
     <div class="stats">
-      <div><span>5</span>自作ツール</div>
-      <div><span>20+</span>1ツールあたりの試作反復</div>
-      <div><span>3</span>開発環境(PQ/VBA・JS・GAS)</div>
+      <div><span>4</span>設計事例</div>
+      <div><span>4</span>公開デモ</div>
+      <div><span>公開用</span>架空データで再現</div>
     </div>
-    <p class="note">※掲載のデモ・数値・名称は公開用の架空サンプルです。実在の顧客名・品番・図面・社内データは含めていません。</p>
+    <p class="note">デモ内の品番・図面・資料・数量・金額・名称は公開用の架空サンプルです。実在の顧客情報・社内データは使用していません。実運用の技術と公開デモの実装範囲を分けて説明します。件数は本ページの4事例と、それぞれの主デモを指します。</p>
   </div>
 </section>
 
-<!-- CASE 01 -->
-<section class="case" id="case-order">
-  <div class="wrap">
-    <div class="case-top"><span class="case-no">01</span><h2>原盤発注トリガー判定ツール</h2></div>
-    <div class="badges"><span class="badge dom">製造業ドメイン</span><span class="badge live">ブラウザで試せる</span><span class="badge">在庫最適化</span></div>
-    <div class="cpa">
-      <div><div class="lbl">課題 ISSUE</div><div class="val">製品出荷の変動に対し、原盤(資材)の発注判断が経験に寄りやすく、欠品・過剰在庫のリスクを事前に見づらかった。</div></div>
-      <div><div class="lbl">打ち手 ACTION</div><div class="val">日別消費量、原盤マスター、安全在庫、リードタイムをもとに、発注期限・必要数・候補を見える化するMVPを試作。</div></div>
-      <div><div class="lbl">工夫 POINT</div><div class="val">①累計到達 ②移動平均×(リードタイム+安全在庫) ③在庫枯渇予測を切替可能にし、原盤マスターを基準に判断条件を整理。</div></div>
-      <div><div class="lbl">結果 RESULT</div><div class="val">属人判断を減らす設計として、発注候補と根拠を画面上で確認できる形に可視化。</div></div>
-      <div><div class="lbl">やらないこと OUT OF SCOPE</div><div class="val">リンクが無ければ予測が不可能。</div></div>
-    </div>
-    <div class="stack"><span>HTML</span><span>JavaScript</span><span>営業日計算</span><span>移動平均/安全在庫</span><span>マスター駆動設計</span></div>
-    <div class="highlight"><b>工場長の知見が設計に：</b>「在庫を切らさず、かつ持ちすぎない」発注点の考え方は、製造現場の生産管理そのもの。現場判断をロジック化し、確認できる形にする試みです。</div>
-    <a class="cta" href="demo-order-trigger.html" target="_blank">▶ デモを触ってみる</a>
-  </div>
-</section>
-
-<!-- CASE 02 -->
+<!-- CASE 01：旧アンカー互換のため既存IDを継承 -->
 <section class="case" id="case-pq">
   <div class="wrap">
-    <div class="case-top"><span class="case-no">02</span><h2>Power Query × VBA 集計・帳票自動生成</h2></div>
-    <div class="badges"><span class="badge dom">製造業ドメイン</span><span class="badge live">ブラウザで試せる</span><span class="badge">集計・帳票補助</span></div>
+    <div class="case-top"><span class="case-no">01</span><h2>製造DX基盤</h2></div>
+    <div class="badges"><span class="badge dom">製造業ドメイン</span><span class="badge live">公開デモ</span><span class="badge">入力から予定工数まで</span></div>
+    <p>旧Power Query × VBAケースの、整形・マスター結合・設定を外出しする考え方を継承。集計表を作るだけでなく、数量を作業量へつなぐ構造を説明します。</p>
+    <p class="note"><strong>入力 INPUT：</strong>計画日・品番・数量を持つ元明細、品番と作業区分のルール、ライン、作業区分別の標準時間。元明細と共通マスターは読み取り専用で保持します。</p>
+    <div class="diagram" aria-label="製造DX基盤の処理フロー">
+      <span class="n">処理フロー FLOW</span><br>
+[ INPUT：元明細を保持 ]<br>
+↓ 品番とルールを照合し、作業区分・ラインを確定<br>
+[ DAY LIST：日別明細 ] → [ CROSS LIST：品番×計画日 ]<br>
+↓ 作業区分ごとの標準分／個を照合<br>
+[ WORKLOAD：数量×標準分／個 → 日別・ライン別の予定工数 ]
+    </div>
     <div class="cpa">
-      <div><div class="lbl">課題 ISSUE</div><div class="val">基幹システムから出力されるCSVの集計、クロス集計、日邸別明細、帳票作成が手作業に残りやすかった。</div></div>
-      <div><div class="lbl">打ち手 ACTION</div><div class="val">Power Queryでデータを取り込み・整形し、マスター結合や集計ルールを整理。公開デモでは集計画面をHTMLで再現。</div></div>
-      <div><div class="lbl">工夫 POINT</div><div class="val">抽出ルール・レイアウト・システム設定をテーブルで外出しし、処理手順を再現しやすい形に整理。</div></div>
-      <div><div class="lbl">結果 RESULT</div><div class="val">手作業を再現可能な処理へ置き換える設計として、帳票作成・在庫判断の補助MVPを検証中。</div></div>
+      <div><div class="lbl">設計判断 DESIGN</div><div class="val">標準時間を品番へ直接結び付けず、作業区分を中間キーにする。同じ作業区分の品番は共通の標準時間を参照し、数量集計の可否と工数計算の可否を分ける。</div></div>
+      <div><div class="lbl">例外処理 EXCEPTIONS</div><div class="val">未登録品番・作業区分未解決・数量不正は数量集計から除外。標準時間欠落は数量を集計に残し、工数を未計算とする。いずれも0へ置き換えず、要確認として表示する。</div></div>
+      <div><div class="lbl">検証 CHECK</div><div class="val">元明細から日別・クロス集計の対象をたどり、計算例の数量×標準分／個を照合する。架空の不備例で、数量集計除外と標準時間未登録が別の判定になることを確認する。</div></div>
+      <div><div class="lbl">結果 RESULT</div><div class="val">日別・クロス集計から予定工数までを同じ明細に基づいて説明できる。未計算の数量も残るため、計算できた工数だけを全作業量と取り違えない構成にした。</div></div>
     </div>
-    <div class="stack"><span>Power Query(M言語)</span><span>VBA</span><span>Excel</span><span>マスター駆動(ルールテーブル)</span></div>
-    <div class="diagram">
-[ 基幹システム出力 ]<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="ar">↓</span> <span class="n">Power Query</span> で取込・整形・結合<br>
-[ 統合データ ]<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="ar">↓</span> <span class="n">ルールテーブル</span>(抽出/レイアウト/設定)で制御<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="ar">↓</span> <span class="n">VBA</span> でリスト・帳票を生成<br>
-[ 日次リスト ] [ クロス集計 A/B/C ] [ 印刷用シート ]
-    </div>
-    <div class="shot">スクリーンショット掲載予定<span class="ph">※マスタ実データが写り込まないよう加工して掲載</span></div>
-    <div class="highlight"><b>「設定で動く」設計思想：</b>処理をコードに埋め込みすぎず、ルールをテーブルに外出しする。製造現場の作業標準化と同じ発想で、属人判断を減らす設計です。</div>
-    <a class="cta" href="pq-excel-demo.html" target="_blank">▶ 生産管理デモを見る</a>
-    <a class="cta alt" href="pq-sample-input.csv" target="_blank">サンプルCSVを見る</a>
-    <p class="note">公開デモは架空サンプルのみで再現しています。実Excel、社内業務マスター、図面、会社固有の品番は公開していません。</p>
+    <div class="stack"><span>Power Query</span><span>Excel</span><span>VBA</span><span>マスター照合</span><span>標準時間</span></div>
+    <div class="highlight"><b>実装範囲 SCOPE：</b>実運用の技術はPower Query / Excel / VBA。実運用構造を公開用HTML / JavaScriptで再現しています。公開v0の予定工数は数量×作業区分の標準分／個。段取り時間、能力超過判定、予実比較、CSV入出力、保存、自動日程計画は対象外です。</div>
+    <a class="cta" href="manufacturing-dx-demo.html" target="_blank" rel="noopener">▶ 製造DX基盤デモを開く（別タブ）</a>
+    <p class="note">旧版資料：<a href="pq-excel-demo.html" target="_blank" rel="noopener">旧PQ集計デモ</a>・<a href="pq-sample-input.csv" target="_blank" rel="noopener">旧PQサンプルCSV</a>。旧版固有の帳票・CSV導線と、現行デモの機能は区別しています。</p>
   </div>
 </section>
 
-<!-- CASE 03 -->
+<!-- CASE 02：図面・品番検索を新規掲載 -->
+<section class="case" id="case-drawing">
+  <div class="wrap">
+    <div class="case-top"><span class="case-no">02</span><h2>図面・品番検索</h2></div>
+    <div class="badges"><span class="badge dom">製造業ドメイン</span><span class="badge live">公開デモ</span><span class="badge">品番・部材・図面の照合</span></div>
+    <p>検索結果の名称だけで判断せず、関連材料・部材構成・図面まで確認できる導線を設計。製造DXと共通の品番・材料台帳を参照する公開デモです。</p>
+    <p class="note"><strong>入力 INPUT：</strong>検索する品番、材料・厚み・分類の条件。共通台帳のproductId・materialIdを使い、図面検索用データは製品寸法・部材・図面との対応を追加します。品名・材料名・分類名は重複保持しません。</p>
+    <div class="diagram" aria-label="図面・品番検索の処理フロー">
+      <span class="n">処理フロー FLOW</span><br>
+[ 品番検索：全角・半角／大小文字を正規化 ]<br>
+↓ 材料・厚み・分類で属性を絞り込み<br>
+[ 結果一覧 ] → [ 詳細・寸法 ] → [ 部材・関連材料 ]<br>
+↓ 登録されている図面を参照<br>
+[ 架空SVG ] → [ 拡大して確認 ]
+    </div>
+    <div class="cpa">
+      <div><div class="lbl">設計判断 DESIGN</div><div class="val">材料と厚みは、同一の関連材料が両方の条件を満たす場合だけ一致とする。分類は製品属性としてANDする。共通台帳のIDを参照し、デモごとの名称のずれを防ぐ。</div></div>
+      <div><div class="lbl">例外処理 EXCEPTIONS</div><div class="val">図面未登録、画像読込失敗、部材情報なし、寸法未登録、参照不整合、該当なしを区別して表示。欠落した寸法や部材を0・推測値で埋めず、確認できる情報の範囲を明示する。</div></div>
+      <div><div class="lbl">検証 CHECK</div><div class="val">材料条件と厚み条件を別々の材料だけが満たす製品を除外できるか確認する。検索→詳細→図面をたどり、例外表示と拡大の閉じる操作・Escape・元ボタンへのフォーカス復帰も確認する。</div></div>
+      <div><div class="lbl">結果 RESULT</div><div class="val">品番を手がかりに、関連材料・部材・図面を順に照合できる。検索に一致したことと、図面や寸法が登録済みであることを別に表示し、情報不足を見落としにくくした。</div></div>
+    </div>
+    <div class="stack"><span>JavaScript</span><span>品番検索</span><span>共通マスター</span><span>属性絞込</span><span>SVG</span></div>
+    <div class="highlight"><b>実装範囲 SCOPE：</b>公開v0は品番・属性検索から図面拡大まで。架空図面 / 製造使用不可。画像内容検索、OCR、印刷、保存、編集、CSV、Python処理、認証、改訂履歴は対象外です。原盤発注デモまで共通台帳に統合した構成ではありません。</div>
+    <a class="cta" href="drawing-search-demo.html" target="_blank" rel="noopener">▶ 図面・品番検索デモを開く（別タブ）</a>
+  </div>
+</section>
+
+<!-- CASE 03：旧アンカー互換のため既存IDを継承 -->
+<section class="case" id="case-order">
+  <div class="wrap">
+    <div class="case-top"><span class="case-no">03</span><h2>原盤発注</h2></div>
+    <div class="badges"><span class="badge dom">製造業ドメイン</span><span class="badge live">公開デモ</span><span class="badge">発注根拠をたどる</span></div>
+    <p>工場長としての「在庫を切らさず、持ちすぎない」という判断を、確認できる条件に分解。単一の発注結果だけでなく、元の出荷明細と計算根拠へ戻れることを重視しています。</p>
+    <p class="note"><strong>入力 INPUT：</strong>日別の製品出荷、品番と原盤の対応、取り数、原盤・製品の現在庫、発注単位、安全在庫、リードタイム、営業日条件。公開用の内蔵サンプルとCSV読込を用意しています。</p>
+    <div class="diagram" aria-label="原盤発注の処理フロー">
+      <span class="n">処理フロー FLOW</span><br>
+[ 出荷明細 ] → [ 品番・原盤マスター・取り数を照合 ]<br>
+↓ 発注方式に応じて必要原盤数・在庫推移を計算<br>
+[ 累計山到達 / 移動平均 / 在庫枯渇 ]<br>
+↓ 安全在庫・リードタイム・営業日条件を反映<br>
+[ 発注候補・必要数・期限 ] → [ 元明細と発注根拠を確認 ]
+    </div>
+    <div class="cpa">
+      <div><div class="lbl">設計判断 DESIGN</div><div class="val">発注方式と条件をマスターで選べるようにし、方式ごとの根拠を表示する。在庫枯渇型では製品在庫を先に使い、不足分だけ取り数に応じて原盤を消費。原盤単位と品番別の在庫管理も区別する。</div></div>
+      <div><div class="lbl">例外処理 EXCEPTIONS</div><div class="val">カット品マスター未登録、内製の原盤マスター未登録、取数未設定、別管理品は確認対象へ分ける。現在庫が未設定の場合は0として扱う既存仕様があるため、在庫設定と警告を確認して判断する。</div></div>
+      <div><div class="lbl">検証 CHECK</div><div class="val">同じ出荷明細に対して、在庫・取り数・安全在庫・リードタイムを変え、候補と根拠の変化を照合する。未登録品番を確認対象で確認し、デモCSVの読込結果から元明細までたどる。</div></div>
+      <div><div class="lbl">結果 RESULT</div><div class="val">発注候補から日別出荷・取り数・在庫推移へ戻り、候補が出た理由を確認できる。経験に基づく判断条件を共有する補助MVPであり、欠品防止や在庫削減の実測成果を示すものではない。</div></div>
+    </div>
+    <div class="stack"><span>HTML</span><span>JavaScript</span><span>営業日計算</span><span>移動平均 / 安全在庫</span><span>マスター駆動設計</span></div>
+    <div class="highlight"><b>実装範囲 SCOPE：</b>公開版は在庫設定、方式切替、発注候補・根拠表示、CSV入出力、設定保存を備えた既存デモです。発注先への自動送信や本番システム連携は行いません。入力とマスターの対応・在庫の正しさが判断の前提です。</div>
+    <a class="cta" href="demo-order-trigger.html" target="_blank" rel="noopener">▶ 原盤発注デモを開く（別タブ）</a>
+  </div>
+</section>
+
+<!-- CASE 04：旧アンカー互換のため既存IDを継承 -->
 <section class="case" id="case-ocr">
   <div class="wrap">
-    <div class="case-top"><span class="case-no">03</span><h2>OCR / LLM 伝票読取フロー</h2></div>
-    <div class="badges"><span class="badge dom">製造業ドメイン</span><span class="badge live">静的デモ</span><span class="badge">入力前処理</span></div>
+    <div class="case-top"><span class="case-no">04</span><h2>Receipt AI</h2></div>
+    <div class="badges"><span class="badge dom">AI監査</span><span class="badge live">公開デモ</span><span class="badge">人間確定値を守る</span></div>
+    <p>旧OCRケースから「候補と確認工程を分離する」という考え方を引き継ぎ、主題を項目別の監査へ更新。V1では資料分類・人間監査・Ground Truth固定を運用し、公開版はその考え方を新規の架空資料で再現しています。</p>
+    <p class="note"><strong>入力 INPUT：</strong>7件の架空Sourceと、あらかじめ用意したAI Observation。元資料・AI候補は読み取り専用です。人間の入力はReviewへ、確定値は項目別Ground Truthへ分けて保持します。</p>
+    <div class="diagram" aria-label="Receipt AIの処理フロー">
+      <span class="n">処理フロー FLOW</span><br>
+[ Source：元資料 ] → [ AI Observation：元の候補 ]<br>
+↓ HIGH / REVIEWはAI候補の判定。人間の確定とは別<br>
+[ Human Review：項目ごとの採用・修正・保留と根拠 ]<br>
+↓ 確定した項目だけ反映<br>
+[ Ground Truth：人間確定値 ] ← AI候補との差分を表示
+    </div>
     <div class="cpa">
-      <div><div class="lbl">課題 ISSUE</div><div class="val">受入・検品で発生する紙伝票は、在庫・発注側へ転記する前に品名・数量・単価・伝票番号などを人手で確認する必要があり、入力負担と転記ミスが残りやすい。</div></div>
-      <div><div class="lbl">打ち手 ACTION</div><div class="val">OCR/LLMによる読取を想定し、伝票画像→項目抽出→整合確認→CSV出力までの処理フローを、公開用の静的デモとして再現。</div></div>
-      <div><div class="lbl">工夫 POINT</div><div class="val">数量×単価の整合や信頼度表示を確認工程として分離。AIが抽出し、人が確認してから次工程へ渡す設計イメージを明確にした。</div></div>
-      <div><div class="lbl">結果 RESULT</div><div class="val">紙伝票を構造化データへ変換する前処理を、入力→抽出→検証→出力の4段階で説明できる形に整理。公開ページでは実OCR/API処理と静的表示を明確に区別。</div></div>
+      <div><div class="lbl">設計判断 DESIGN</div><div class="val">HIGHでも自動確定しない。元資料とAI候補はレビューで書き換えず、確定後も差分を残す。ファイル重複候補は資料のコピー可能性、transaction relationは別資料の同一取引・関連証憑の可能性として分ける。</div></div>
+      <div><div class="lbl">例外処理 EXCEPTIONS</div><div class="val">未取得値や不正な取引数は確定を拒否し、情報不足は根拠付きで保留。未確認・保留が残れば資料を確認完了にしない。画像読込失敗は確定を止め、参照不整合は操作を停止する。</div></div>
+      <div><div class="lbl">検証 CHECK</div><div class="val">1項目だけ確定しても未完了のままか、保留項目に確定値が生じないかを照合する。relation判定後もファイル重複候補と他資料のGround Truthが変わらず、AI候補も保持されることを確認する。</div></div>
+      <div><div class="lbl">結果 RESULT</div><div class="val">何をAIが候補とし、何を人が確定・保留したかを項目単位で追える。同日・同店・同額だけで取引を確定せず、根拠不足を判断不能として残せる。公開サンプルの件数はV1の処理・監査実績とは別である。</div></div>
     </div>
-    <div class="stack"><span>OCR</span><span>LLM</span><span>HTML</span><span>CSV出力</span><span>項目抽出</span><span>確認工程</span></div>
-    <div class="diagram">
-[ 紙の納品伝票 ]<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="ar">↓</span> <span class="n">OCR / LLM</span> を想定した項目抽出<br>
-[ 構造化データ ]<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="ar">↓</span> <span class="n">整合チェック</span>（数量×単価・要確認）<br>
-[ 確認済みデータ ]<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="ar">↓</span> <span class="n">CSV</span> で在庫・発注・集計の入力へ
-    </div>
-    <div class="highlight"><b>AI任せにしない設計：</b>OCR/LLMは読取候補を出し、確認工程を分離してから業務データへ渡す想定です。ポートフォリオ上のデモは処理フローの可視化を目的とした静的サンプルで、ライブAPIや社内データには接続していません。</div>
-    <a class="cta" href="ocr-slip-demo.html" target="_blank">▶ 静的デモを見る</a>
-    <a class="cta alt" href="slip-sample.csv" target="_blank">抽出結果サンプルCSV</a>
-  </div>
-</section>
-
-<!-- CASE 04 -->
-<section class="case" id="case-property">
-  <div class="wrap">
-    <div class="case-top"><span class="case-no">04</span><h2>物件データ整形ツール</h2></div>
-    <div class="badges"><span class="badge dom">副業実務の横展開</span><span class="badge live">ブラウザで試せる</span><span class="badge">入力・確認補助</span></div>
-    <div class="cpa">
-      <div><div class="lbl">課題 ISSUE</div><div class="val">物件データの列構成がバラバラで、確認・転記・入力前チェックに手作業の負担があった。</div></div>
-      <div><div class="lbl">打ち手 ACTION</div><div class="val">列マッピング・除外ルール・印刷レイアウトを設定駆動で定義し、CSVを読み込んで整形できる補助デモを試作。</div></div>
-      <div><div class="lbl">工夫 POINT</div><div class="val">除外条件をAND/OR・優先度付きで定義可能に。A4印刷の用紙幅自動縮小など、現場の実務要件を反映。</div></div>
-      <div><div class="lbl">結果 RESULT</div><div class="val">賃貸不動産実務で学んだ確認・転記業務を、入力支援MVPとして横展開。</div></div>
-      <div><div class="lbl">やらないこと OUT OF SCOPE</div><div class="val">PDFの読み取りはしない。</div></div>
-    </div>
-    <div class="stack"><span>HTML</span><span>JavaScript</span><span>SheetJS(xlsx)</span><span>設定駆動UI</span><span>印刷レイアウト制御</span></div>
-    <div class="highlight"><b>別ドメインへの横展開：</b>副業で触れている賃貸不動産実務を題材に、確認・転記・入力前チェックを設定として整理した補助デモです。</div>
-    <a class="cta" href="property_formatter_demo.html" target="_blank">▶ デモを触ってみる</a>
-  </div>
-</section>
-
-<!-- CASE 05 -->
-<section class="case" id="case-gas">
-  <div class="wrap">
-    <div class="case-top"><span class="case-no">05</span><h2>Google スプレッドシート 集計ツール群(GAS)</h2></div>
-    <div class="badges"><span class="badge doc">設計説明</span><span class="badge">マスター準拠</span><span class="badge">クラウド集計</span></div>
-    <div class="cpa">
-      <div><div class="lbl">課題 ISSUE</div><div class="val">複数人で扱うデータの集計を、クラウド上で共有しながら確認したいニーズがあった。</div></div>
-      <div><div class="lbl">打ち手 ACTION</div><div class="val">マスター準拠型で、日次別・終別・集計の各処理をGAS(Google Apps Script)で試作。</div></div>
-      <div><div class="lbl">工夫 POINT</div><div class="val">マスターを基準にデータの整合性を保ちつつ、複数の集計ビューを作れる構成を検討。</div></div>
-      <div><div class="lbl">結果 RESULT</div><div class="val">クラウド上での集計確認と共有の補助MVPとして検証中。</div></div>
-    </div>
-    <div class="stack"><span>Google Apps Script</span><span>スプレッドシート</span><span>マスター準拠設計</span><span>クラウド共同編集</span></div>
-    <div class="shot">スクリーンショット掲載予定<span class="ph">※実データを架空サンプルに置き換えて掲載</span></div>
-    <div class="highlight"><b>同じ発想を別環境でも：</b>Power Query/VBA(オンプレ)、JavaScript(ブラウザ)、GAS(クラウド)。環境が変わっても「現場課題を動く仕組みにする」という軸は一貫しています。</div>
+    <p class="note">取引relationの人間判定は candidate（候補）、confirmed_same（同一取引・関連証憑と確認）、confirmed_separate（別取引と確認）、cannot_determine（判断不能・保留）。確定した同一／別取引の判定は固定し、判断不能は再検討できます。SHA完全一致やファイル重複だけで同一取引とは扱いません。</p>
+    <div class="stack"><span>AI監査</span><span>Human Review</span><span>Ground Truth</span><span>relation</span><span>JavaScript</span></div>
+    <div class="highlight"><b>実装範囲 SCOPE：</b>公開用架空デモ。操作結果は保存されず、再読み込みで初期化されます。ライブAI、OCR、SQLite、JSON保存、実SHA計算、外部API、モデル自動ルーティングは実装していません。V2 DB統合は使用していません。V1の運用実績とV2の将来設計を混同しない構成です。</div>
+    <a class="cta" href="receipt-ai-demo.html" target="_blank" rel="noopener">▶ Receipt AIデモを開く（別タブ）</a>
+    <p class="note">旧版資料：<a href="ocr-slip-demo.html" target="_blank" rel="noopener">旧OCR伝票読取デモ</a>・<a href="slip-sample.csv" target="_blank" rel="noopener">旧抽出結果サンプルCSV</a>。旧版の読取・CSV出力フローは、Receipt AI公開v0の機能ではありません。</p>
   </div>
 </section>
 
